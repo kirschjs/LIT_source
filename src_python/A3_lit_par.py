@@ -48,27 +48,23 @@ if 'construe_fresh_helion' in cal:
     os.system('cp INQUA_V18%s INQUA_N' % siffux)
     repl_line('INQUA_N', 1, potnn + '\n')
 
-    subprocess.run([
-        'mpirun', '-np',
-        '%d' % anzproc,
-        home + '/kette_repo/ComptonLIT/src_nucl/V18_PAR/mpi_quaf_v6'
-    ])
-    subprocess.run([home + '/kette_repo/ComptonLIT/src_nucl/V18_PAR/sammel'])
+    subprocess.run(
+        ['mpirun', '-np',
+         '%d' % anzproc, BINBDGpath + 'V18_PAR/mpi_quaf_v6'])
+    subprocess.run([BINBDGpath + 'V18_PAR/sammel'])
     #os.system(BINBDGpath + 'QUAFL_N.exe')
 
     os.system('cp INQUA_UIX%s INQUA_N' % siffux)
 
     subprocess.run([
         'mpirun', '-np',
-        '%d' % anzproc,
-        home + '/kette_repo/ComptonLIT/src_nucl/UIX_PAR/mpi_drqua_uix'
+        '%d' % anzproc, BINBDGpath + 'UIX_PAR/mpi_drqua_uix'
     ])
-    subprocess.run(
-        [home + '/kette_repo/ComptonLIT/src_nucl/UIX_PAR/SAMMEL-uix'])
+    subprocess.run([BINBDGpath + 'UIX_PAR/SAMMEL-uix'])
     #os.system(BINBDGpath + 'DRQUA_AK_N.exe')
 
     os.system('cp INEN%s INEN' % siffux)
-    subprocess.run([home + '/kette_repo/ComptonLIT/src_nucl/TDR2END_AK.exe'])
+    subprocess.run([BINBDGpath + 'TDR2END_AK.exe'])
     #os.system(BINBDGpath + 'DR2END_AK.exe')
 
     EBDG = get_h_ev()[0]
@@ -497,10 +493,10 @@ if 'lhs' in cal:
 
             subprocess.run([
                 'mpirun', '-np',
-                '%d' % anzproc, pathbase + '/src_nucl/V18_PAR/mpi_quaf_v6'
+                '%d' % anzproc, BINBDGpath + 'V18_PAR/mpi_quaf_v6'
             ])
 
-            subprocess.run([pathbase + '/src_nucl/V18_PAR/sammel'])
+            subprocess.run([BINBDGpath + 'V18_PAR/sammel'])
 
             he3inqua(intwi=intwLIT, relwi=relwLIT, potf=potnnn)
 
@@ -509,10 +505,10 @@ if 'lhs' in cal:
 
             subprocess.run([
                 'mpirun', '-np',
-                '%d' % anzproc, pathbase + '/src_nucl/UIX_PAR/mpi_drqua_uix'
+                '%d' % anzproc, BINBDGpath + 'UIX_PAR/mpi_drqua_uix'
             ])
 
-            subprocess.run([pathbase + '/src_nucl/UIX_PAR/SAMMEL-uix'])
+            subprocess.run([BINBDGpath + 'UIX_PAR/SAMMEL-uix'])
 
         litbas = np.loadtxt(
             litpath3He + 'basis_struct/LITbas_full_J%s_%s.dat' %
@@ -554,7 +550,7 @@ if 'lhs' in cal:
                 nzop=31,
                 tni=11,
                 anzb=anzbtmp)
-            subprocess.run([pathbase + '/src_nucl/TDR2END_AK.exe'])
+            subprocess.run([BINBDGpath + 'TDR2END_AK.exe'])
             os.system('cp INEN ' + mypath + 'inen-lit-%s_1-%d' % (streukanal,
                                                                   anzbtmp))
             os.system('cp %s/MATOUT ' % (litpath3He + 'lit_bas_lhs/') + respath

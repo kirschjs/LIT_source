@@ -29,7 +29,7 @@ home = os.getenv("HOME")
 
 pathbase = home + '/kette_repo/ComptonLIT'
 
-litpath3He = pathbase + '/mul_helion_' + suffix + '/'
+litpath3He = pathbase + '/systems/mul_helion_' + suffix + '/'
 if os.path.isdir(litpath3He) == False:
     os.mkdir(litpath3He)
 
@@ -41,8 +41,8 @@ respath = litpath3He + 'results/'
 if os.path.isdir(respath) == False:
     os.mkdir(respath)
 
-BINBDGpath = pathbase + '/src_nucl/'
-BINLITpath = pathbase + '/src_elma/'
+BINBDGpath = pathbase + '/source/src_nucl/'
+BINLITpath = pathbase + '/source/src_elma/'
 
 mpii = '137'
 potnn = pathbase + '/data/AV18'
@@ -73,19 +73,19 @@ channels = {
         ['202', ['he_no2']],
         ['022', ['he_no2']],
         ['222', ['he_no2']],
-        ['221', ['he_no1', 'he_no6', 'he_no2']],
-        ['220', ['he_no1', 'he_no6']],
+        ['221', ['he_no1']],  #, 'he_no6', 'he_no2']],
+        ['220', ['he_no1']],  #, 'he_no6']],
         #['111', ['he_no3']],  #, 'he_no5'
         #['112', ['he_no5']],
     ],
     #          [l1l2L,[compatible (iso)spin configurations]]
     '0.5^-': [
         ['011', ['he_no1', 'he_no2', 'he_no6']],
-        ['211', ['he_no1', 'he_no2', 'he_no6']],
-        #['212', ['he_no2']],
-        #['101', ['he_no3']],  #, 'he_no4i', 'he_no5']],
-        #['121', ['he_no3']],  #, 'he_no4i', 'he_no5']],
-        #['122', ['he_no5']],
+        ['212', ['he_no2']],
+        ['211', ['he_no2']],
+        ['101', ['he_no2']],  #, 'he_no4i', 'he_no5']],
+        ['121', ['he_no2']],  #, 'he_no4i', 'he_no5']],
+        ['122', ['he_no2']],
     ],
     '1.5^-': [
         ['011', ['he_no1', 'he_no2', 'he_no6']],

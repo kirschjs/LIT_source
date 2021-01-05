@@ -11,8 +11,8 @@ from sklearn.datasets import make_blobs
 from sklearn.neighbors import BallTree
 from diversipy import *
 
-bastypes = [boundstatekanal]
 bastypes = streukas
+bastypes = [boundstatekanal]
 bastypes = streukas + [boundstatekanal]
 
 for bastype in bastypes:
@@ -52,19 +52,20 @@ for bastype in bastypes:
 
         inv_scale_i = 2.0
         inv_scale_r = 15.0
-        nwinv = 3
+        nwinv = 4
 
         rel_scale = 0.01
 
-        nwint = 4
+        nwint = 8
         nwrel = 8
         siffux = '_uix'
         he_iw, he_rw, he_frgs = retrieve_he3_widths(
-            pathbase + '/he3/dim70/INQUA_N%s' % siffux)
-        ob_stru = read_inob(pathbase + '/he3/dim70/INOB%s' % siffux)
-        lu_stru = read_inlu(pathbase + '/he3/dim70/INLU%s' % siffux)
+            pathbase + '/systems/he3/dim70/INQUA_N%s' % siffux)
+        ob_stru = read_inob(pathbase + '/systems/he3/dim70/INOB%s' % siffux)
+        lu_stru = read_inlu(pathbase + '/systems/he3/dim70/INLU%s' % siffux)
 
-        sbas = get_bsv_rw_idx(inen=pathbase + '/he3/dim70/INEN%s' % siffux)
+        sbas = get_bsv_rw_idx(
+            inen=pathbase + '/systems/he3/dim70/INEN%s' % siffux)
         if len(lu_stru) != len(ob_stru):
             print('reference he3 input inconsistent.')
             exit()
@@ -85,16 +86,16 @@ for bastype in bastypes:
 
         inv_scale_i = 2.0
         inv_scale_r = 15.0
-        nwinv = 3
+        nwinv = 4
 
         rel_scale = 0.01
 
-        nwint = 4
+        nwint = 8
         nwrel = 8
 
         he_iw = he_rw = he_frgs = ob_stru = lu_stru = sbas = []
 
-        wi, wf, nw = 0.01, 1.006, [
+        wi, wf, nw = 0.01, 0.5, [
             np.max([2, int(nwint - np.max([1, int(n[0]) + int(n[1])]))])
             for n in lfrags
         ]  # for lit-state continuum
@@ -345,10 +346,7 @@ for bastype in bastypes:
     n3_inob(sfrags2, 15, fn='INOB', indep=-1)
     os.system(BINBDGpath + 'DROBER.exe')
 
-    he3inqua(
-        intwi=widi,
-        relwi=widr,
-        potf=home + '/kette_repo/sim_par/potentials/NN_pheno/AV18')
+    he3inqua(intwi=widi, relwi=widr, potf=potnn)
 
     parallel_mod_of_3inqua(
         lfrags2,
@@ -370,17 +368,12 @@ for bastype in bastypes:
         os.system('cp INEN ' + helionpath + 'INEN_ref')
         os.system('cp INSAM ' + helionpath)
 
-    subprocess.run([
-        'mpirun', '-np',
-        '%d' % anzproc,
-        home + '/kette_repo/ComptonLIT/src_nucl/V18_PAR/mpi_quaf_v6'
-    ])
-    subprocess.run([home + '/kette_repo/ComptonLIT/src_nucl/V18_PAR/sammel'])
+    subprocess.run(
+        ['mpirun', '-np',
+         '%d' % anzproc, BINBDGpath + 'V18_PAR/mpi_quaf_v6'])
+    subprocess.run([BINBDGpath + 'V18_PAR/sammel'])
 
-    he3inqua(
-        intwi=widi,
-        relwi=widr,
-        potf=home + '/kette_repo/sim_par/potentials/NNN_pheno/urbana9_AK_neu')
+    he3inqua(intwi=widi, relwi=widr, potf=potnnn)
 
     parallel_mod_of_3inqua(
         lfrags2,
@@ -392,12 +385,10 @@ for bastype in bastypes:
 
     subprocess.run([
         'mpirun', '-np',
-        '%d' % anzproc,
-        home + '/kette_repo/ComptonLIT/src_nucl/UIX_PAR/mpi_drqua_uix'
+        '%d' % anzproc, BINBDGpath + 'UIX_PAR/mpi_drqua_uix'
     ])
-    subprocess.run(
-        [home + '/kette_repo/ComptonLIT/src_nucl/UIX_PAR/SAMMEL-uix'])
-    subprocess.run([home + '/kette_repo/ComptonLIT/src_nucl/TDR2END_AK.exe'])
+    subprocess.run([BINBDGpath + 'UIX_PAR/SAMMEL-uix'])
+    subprocess.run([BINBDGpath + 'TDR2END_AK.exe'])
 
     suche_fehler()
 
