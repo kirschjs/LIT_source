@@ -2,12 +2,11 @@ F77     =       mpif77
 FFLAGS  =       -Ofast -ffpe-summary=none  -mcmodel=large
 #-ffpe-trap=denormal -pg -funroll-loops -g -fdefault-real-8 -fconvert=native -frecord-marker=4
 
-## orig settings
-#F77     =        ifort
-#FFLAGS  =       -O1 -g -traceback -i8 -mcmodel=medium
-#FFLAGS  =       -g -O2 -mcmodel=medium #-ffpe-trap=denormal 
-LIBS    = -L. -llapack -lblas
-#LIBS    = -L${MKLROOT} -lmkl_scalapack_lp64 -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5# -lpthread -lm -ldl
+# hexpresso
+LIBS    = -L${MKLROOT} -llapack -lblas
+#theogate
+#LIBS    = -L${MKLROOT} -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5
+
 # ohne -g und -traceback erzeugt spoleinv runtime error in smatest,rrandb subroutinen wenn auf die variable nbess zugegriffen wird;
 # mit den optionen tritt der fehler nicht auf;
 #FFLAGS  =       -C -Wall
