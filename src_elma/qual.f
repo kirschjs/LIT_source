@@ -327,7 +327,7 @@ C
 c        write(nout,*) K,'/',NZF
 C      NZPAR: ANZAHL DER SAETZTE INNERER WEITEN
 C      MZPAR: ANZAHL DER RADIALWEITEN
-C
+C canonically, NZRHO is equal to the number of internal widths NZPAR
        LM = NZPAR(K)
        KM=MZPAR(K)
        IF(LM.LE.NZPARM) GOTO 390
@@ -500,7 +500,7 @@ C
 C     LOOP ZERLEGUNGEN RECHTS
 C
       JZLW=NZLW(MFR)
-       JZPW=NZPO(MFR)
+      JZPW=NZPO(MFR)
       JRHO=NZRHO(MFR)
       JK1=MZPAR(MFR)
       WRITE (NOUT,3009) MFL, MFR
@@ -528,7 +528,8 @@ C
       KWIED=0
       NZAVZU=0
 C             1   2   3   4   5   6   7   8   9 SiP SiN      
-      GOTO (401,402,403,404,405,406,407,408,409,410,411,412,413,414),MKC
+      GOTO (401,402,403,404,405,406,407,408,409,410,411,
+     1      412,413,414),MKC
 401   IF (LREG(MKC).EQ.1) WRITE(NOUT,1011)
       GOTO 420
 402   IF (LREG(MKC).EQ.1) WRITE(NOUT,1012) MUL
@@ -625,7 +626,8 @@ C
 440   KH=INT(MKC/2)+1
       IF (IENT(KH).LE.0) GOTO 42
 C            1   2           5   6             SiP SiN
-      GOTO(450,450,460,450,460,450,460,450,460,450,460,450,460,445),MKC
+      GOTO(450,450,460,450,460,450,460,450,460,450,460,
+     1     450,460,445),MKC
 445   STOP 8
 450   CALL LURE (MKC,ITV2)
 C     EINLESEN DER ELEMENTE AUS LUISE
@@ -639,7 +641,7 @@ C
   490 LC1(M)=0
       IF (NBAND5 .NE. 0) READ(NBAND5)
       WRITE(NBAND1) NTE,NC,ND,ITV2
-      WRITE(nout,'(A15,4I2)') 'NTE,NC,ND,ITV2:',NTE,NC,ND,ITV2      
+c      WRITE(nout,'(A15,4I2)') 'NTE,NC,ND,ITV2:',NTE,NC,ND,ITV2
       IF (NTE*ITV2.LE.0) GOTO 900
 C
 C
@@ -739,9 +741,13 @@ C
      *                                            MM=1,IRHO)
       IZRS=((IRHO-1)/(NDIM/IK1))+1
       JZRS=((JRHO-1)/(NDIM/JK1))+1
+
       DO 880, KZRS=1,IZRS
 C     LOOP BASISVEKTOREN*RADIALPARAMETER LINKS
-C
+C IK1 = MZPAR(K) = ANZ rad par links
+C NDIM = dim of the full matrix for all zerl
+C I/JRS are set large enough to fit the respective zerl if NDIM was chosen
+C appropriately (this is cumbersome and F77 array gymnastic)        
       MKANA=(KZRS-1)*(NDIM/IK1)+1
       MKANE=MIN0(KZRS*(NDIM/IK1),IRHO)
       MKANZ=MKANE-MKANA+1
@@ -811,6 +817,7 @@ C
 C      JPR=(KPR-1)*NDIM3+KLR
       JPR=KPR*NDIM3+KLR      
       NUMR = NUM(3,NN,MFR)
+C
       IF (NUML.LT.NUMR) GOTO 105
       IF(WERTL(JPL,JPR).NE.1.) GOTO 105
       A = TS * U(KSL,KSR)*COF(LPAR,NN,MFR)
@@ -831,7 +838,7 @@ C     ENDE LOOP BASISVEKTOREN RECHTS
 C
 C     ENDE LOOP BASISVEKTOREN LINKS
  101  CONTINUE
-C
+C     
       NSH = I
       IF (NSH.EQ.0) GOTO 80
       DO 72   M = 1,NZV
@@ -886,26 +893,26 @@ C      write(6,*)'LL1:',LL1
       M2=M*IK1
       N1=(N-1)*JK1+1
       N2=N*JK1
+      II1 = 1
       A = 0.
       DO 510 K=M1,M2
       DO 510 L=N1,N2
       DO 510 J=1,LL1
-      
-      IF(NAUS.LT.7) GOTO 511
-      WRITE(NOUT,516) DM(K,L,J)
-  516 FORMAT(1X,' QUADI: DM = ',E16.8/)
-  511 A = A + ABS(DM(K,L,J))
-  510 CONTINUE
-      IF (A.NE.0.) IND(MM,NN)=1
+  510 A = A + ABS(DM(K,L,J))
+      IF (A.NE.0) IND(MM,NN)=1
+c      IF (A.eq.0) IND(MM,NN)=-1
       IF(NAUS.GT.4) WRITE(NOUT,1002)NUML,NUMR,IK1,JK1,LL1,IND(MM,NN)
       IF(IND(MM,NN).EQ.0) GOTO 481
       WRITE (NBAND7) NUML, NUMR, IK1, JK1, LL1,
      *               ((F(K,L),(DM(K,L,J),J=1,LL1),L=N1,N2)
      *                           ,K=M1,M2)
       IF(NAUS.LT.5) GOTO 481
-      DO 520 K=M1,M2
-      DO 520 L=N1,N2
-520   WRITE(NOUT,1051) F(K,L),(J-1,DM(K,L,J),J=1,LL1)
+      WRITE (nout,*) NUML, NUMR, IK1, JK1, LL1,
+     *               ((F(K,L),(DM(K,L,J),J=1,LL1),L=N1,N2)
+     *                           ,K=M1,M2)        
+c      DO 520 K=M1,M2
+c      DO 520 L=N1,N2
+c520   WRITE(NOUT,1051) F(K,L),(J-1,DM(K,L,J),J=1,LL1)
 C
 C     ENDE LOOP BASISVEKTOREN RECHTS
   481 CONTINUE
@@ -930,19 +937,24 @@ C
 C     LOOP BASISVEKTOREN LINKS
 C
       DO 910, NN=1, JRHO
-C     LOOP BASISVEKTOREN RECHTS
-C
-      IF (IND(MM,NN).EQ.0) GOTO 910
+C     LOOP BASISVEKTOREN RECHTS 
+      II1 = 1
+      IF (IND(MM,NN).EQ.0) THEN
+      WRITE (NBAND1) NUML, NUMR, II1, II1, LL1,
+     *               ((F(K,L),(J-1,DM(K,L,J),J=1,LL1),L=1,II1),
+     *                                                K=1,II1)
+      ELSE
       READ (NBAND7) NUML, NUMR, IK1H, JK1H, LL1,
      *              ((F(K,L),(DM(K,L,J),J=1,LL1),L=1,JK1),
      *                                                K=1,IK1)
       WRITE (NBAND1) NUML, NUMR, IK1H, JK1H, LL1,
      *               ((F(K,L),(J-1,DM(K,L,J),J=1,LL1),L=1,JK1),
      *                                                K=1,IK1)
-c      WRITE (noutb,'(5I3)') NUML, NUMR, IK1H, JK1H, LL1
-c      WRITE (noutb,'(8E12.4)') ((F(K,L),L=1,JK1),K=1,IK1)
-c      WRITE (noutb,'(8E12.4)') 
-c     * (((real(J-1),DM(K,L,J),J=1,LL1),L=1,JK1),K=1,IK1)
+      ENDIF
+      WRITE (nout,'(5I3)') NUML, NUMR, IK1H, JK1H, LL1
+      WRITE (nout,'(8E12.4)') ((F(K,L),L=1,JK1),K=1,IK1)
+      WRITE (nout,'(8E12.4)') 
+     * (((real(J-1),DM(K,L,J),J=1,LL1),L=1,JK1),K=1,IK1)
 C
 C     ENDE LOOP BASISVEKTOREN RECHTS
 910   CONTINUE
@@ -1123,7 +1135,7 @@ C     BEGRI BESTIMMT DIE SIGMAFAKTOREN, DIE ALPHAS UND DIE VORFAKTOREN DER
 C     ORTSRAUMATRIXELEMENTE, SUMMIERT UEBER ALLE RECORDS AUS LUISE EINES
 C     OPERATORS AUS UND SPEICHERT DAS ERGEBNIS DES RED. ORTSRAUMMATRIXELEMENTS
 C     IN DIE FELDER DMM UND DEN EXPONENTIALVORFAKTOR IN FG AB
-C
+C 
       INCLUDE 'par/QUAL'
 
       PARAMETER (NZAVMA=2*(NZCMAX-1), NZVMAX=NZTMAX-1,
@@ -1392,8 +1404,8 @@ C
 210   CONTINUE
 C     ALLE OPERATOREN
 C
-C     BERECHNUNG DER SIGMAFAKTOREN UND AUFSUMMATION DER ZUSAMMENGEHOERIGEN
-C     ORTSRAUMMATRIXELEMENTE IN MAT
+C BERECHNUNG DER SIGMAFAKTOREN UND AUFSUMMATION DER ZUSAMMENGEHOERIGEN
+C ORTSRAUMMATRIXELEMENTE IN MAT
       NQ=IZLURE
       CALL MAT(H,SS,NQ,ALPHAS)
 C
@@ -1407,15 +1419,14 @@ C       write(6,*)'LL1:',LL1
        LAHI(MHI) = LL1
        DO 100 K = 1,LL1
         C = SH(M) * WERTT(I2,K)
-c        write(6,53)MKC,SH(M) , WERTT(I2,K)
         IF (C.EQ.0.) GOTO 100
         I1 = NSH1(M) + I0
         FGG(I1) = FG
         DMM(I1,K) = SH(M) * WERTT(I2,K)
         IF(NBAUS.EQ.0) GOTO 100
-        write(6,50) M,NSH,K,LL1,SH(M),WERTT(I2,K),DMM(I1,K),FG
+        write(6,50) I1,NSH,K,LL1,SH(M),WERTT(I2,K),DMM(I1,K),FG
 c        PRINT 50,M,NSH,K,LL1,SH(M),WERTT(I2,K),DMM(I1,K),FG
-   50 FORMAT(' BEGRI: M, NSH, K, LL1, SH(M), WERTT, DMM, FG:',
+   50 FORMAT(' BEGRI: I1, NSH, K, LL1, SH(M), WERTT, DMM, FG:',
      $ 4I4,4E16.8/)
    53 FORMAT(' BEGRI: MKC, SH(M), WERTT:',
      $ 1I4,2E16.8/)   

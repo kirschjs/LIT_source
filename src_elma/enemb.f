@@ -122,9 +122,11 @@ c      OPEN(UNIT=6,FILE='outi')
 c      OPEN(UNIT=15,FILE='fouti',STATUS='UNKNOWN',FORM='FORMATTED')
 
       OPEN(UNIT=19,FILE='MATOUT',STATUS='UNKNOWN',FORM='FORMATTED')
+      OPEN(UNIT=18,FILE='INDOUT',STATUS='UNKNOWN',FORM='FORMATTED')
       OPEN(UNIT=10,FILE='QUAOUT',STATUS='OLD',FORM='UNFORMATTED')
 C
       MATOU=19
+      INDOU=18
 C
       NBAND2=15
       NBAND3=20
@@ -553,7 +555,7 @@ c nte is of order 1-30
       DO 60 KKK = 1,NTE
 C     LOOP OBEM
 C
-C
+C currently, NZPOT is not written in qual.f and hence =1, here
       DO 63, IPOT=1, NZPOT
 C     LOOP POTENTIALE
 C
@@ -580,43 +582,51 @@ C
          KONTR=1
       ENDIF
       READ (NBAND) ((IND(MM,NN), NN=1, JRHO), MM=1, IRHO)
-      IF (MREGH.GT.0.AND.IQUAK.GT.1) WRITE (6,1023)
-     *            ((IND(MM,NN), NN=1, JRHO), MM=1, IRHO)
+c      IF (MREGH.GT.0.AND.IQUAK.GT.1) WRITE (6,1023)
+c     *            ((IND(MM,NN), NN=1, JRHO), MM=1, IRHO)
+c      WRITE(INDOU,'(I4)') ((IND(MM,NN), NN=1, JRHO), MM=1, IRHO)
 C
       DO 40 NLES=1,MLES
+c        write(nout,*)'MLES = Zbvl*Zbvr = ',MLES
 C     LOOP BASISVEKTOR-MATRIZEN
 C
       MM=1+INT((NLES-1)/JRHO)
       NN=NLES-INT((NLES-1)/JRHO)*JRHO
-      IF (IND(MM,NN).EQ.0) GOTO 40
+c     quaf passes only non-zero me's but the output of the complete
+c     matrix must write 0's too, and hence the jump is to <288> and
+c     not 40  
+      II1 = 1
       IF (MKC.LT.12) THEN
+        IF (IND(MM,NN).EQ.0) THEN
          READ (NBAND) NUML,NUMR,IK1,JK1,LL1,
      *              ((FG(1,K,L),(IDUMMY,DN(J,1,K,L),J=1,LL1),L=1,JK1),
      *                K=1,IK1)
+        ELSE
+         READ (NBAND) NUML,NUMR,IK1,JK1,LL1,
+     *              ((FG(1,K,L),(IDUMMY,DN(J,1,K,L),J=1,LL1),L=1,JK1),
+     *                K=1,IK1)
+        ENDIF
       ELSE
          READ (NBAND) NUML,NUMR,LL1,
      *                ((((DN(J,NT,K,L),NT=1,NTI),J=1,LL1),L=1,JK1),
      *                K=1,IK1)
       ENDIF
+c     if operator not wanted, goto 40      
       IF (MREGH.EQ.0) GOTO 40
 C
       IF (MKC.EQ.1 .OR. MKC.EQ.12) THEN
-C      DO 287, K=1, IK1
-C       DO 287, L=1, JK1
-C        DO 287, NT=1, NTI
-C         FG(NT,K,L)=0.
       FG = 0.
-287   CONTINUE
       ENDIF
 C     BEI NORM GIBT ES KEINE EXPONENTIALVORFAKTOREN
-C
+
       IF (IQUAK.GT.1) WRITE (6,1019) NUML, NUMR, IK1, JK1,
      *                               LL1, KKK, LLL, JJJ
       IF(IQUAK.LE.2) GOTO 300
+c      WRITE(MATOU,*)'MKC = ',MKC
+c      WRITE(MATOU,'(I4)') NUML, NUMR, IK1, JK1,LL1, KKK, LLL, JJJ
       DO 290 K=1,IK1
       DO 290 L=1,JK1
       DO 290, NT=1, NTI
-      WRITE(MATOU,'(I4)') NUML, NUMR, IK1, JK1,LL1, KKK, LLL, JJJ
       WRITE(MATOU,'(E20.14)') (DN(J,NT,K,L),J=1,LL1)
 290   WRITE(6,1021) FG(NT,K,L),((J-1), DN(J,NT,K,L),J=1,LL1)
 
@@ -764,7 +774,8 @@ C                 = hbarc/mn for siegert proton
 C
 c      write(6,*) 'F,FK1new,GEFAK(MKC),F2:',F,FK1new,GEFAK(MKC),F2
       IF(F1.EQ.0.AND.F2.EQ.0.) THEN
-        GOTO 40
+         write(6,*) 'ECCE: prefactors = 0'
+c        GOTO 40
       ENDIF
       NZKL1=NZKL+1
 C
@@ -806,7 +817,8 @@ C
       KL=NZQ(KANL)+L2
       IF(K1*L1.LE.0) GOTO 44
       IF (FA.EQ.0.) GOTO 44
-c NTI and LL1 are of order 1
+c NTI = 1 in LAUF=1
+c LL1 is of order 1
       DO 147, NT=1, NTI
       DO 47 JJ = 1,LL1
 C                     
@@ -856,8 +868,9 @@ C     AUSDRUCK DER OP-WERTE  UND DER K-POTENZ LAMBDA
        DO 520 I2 = 1,MMM
         DO 520, JJ=1, LL1MAX(MKC)
          DO 520, NT=1, NTI
-          IF (OP(JJ,NT,I1,I2).NE.0.) WRITE(6,1202) I1,I2,JJ,NT,
-     *                            EFG(NT,I1,I2),OP(JJ,NT,I1,I2)
+c          IF (OP(JJ,NT,I1,I2).NE.0.) WRITE(6,1202) I1,I2,JJ,NT,
+c     *                            EFG(NT,I1,I2),OP(JJ,NT,I1,I2)
+          WRITE(6,1202) I1,I2,JJ,NT,EFG(NT,I1,I2),OP(JJ,NT,I1,I2)
 520   CONTINUE
 C
 C
@@ -1295,7 +1308,7 @@ C
 1091  FORMAT(1X,'VERGLEICHSFEHLER ZWISCHEN QUAOUT UND QUALMOUT')
 1200  FORMAT(1X,'BEI OPERATOR',I2,'  SL.NE.SR ',2I5)
 1201  FORMAT(////,1X,'OPERATOR',I3,/,1X,'===========',/,'0')
-1202  FORMAT(1X,4I3, (6E12.4))
+1202  FORMAT('-+- ',1X,4I3, (6E12.4))
 1203  FORMAT(1X,'BEI OPERATOR',I3,' FALSCHE PARITAET')
 1204  FORMAT(1X,'(',4F6.1,'  / ',2F6.1,' ) = ',F6.2)
 1300  FORMAT(I10,' ELEMENTE FUER WEITE RECHTS,LINKS,DC,OPERATOR',

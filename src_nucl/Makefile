@@ -1,6 +1,6 @@
 F77     =       mpif77
 FFLAGS  =       -Ofast -ffpe-summary=none  -mcmodel=large
-#-ffpe-trap=denormal -pg -funroll-loops -g 
+#-ffpe-trap=denormal -pg -funroll-loops -g -fdefault-real-8 -fconvert=native -frecord-marker=4
 
 ## orig settings
 #F77     =        ifort
@@ -34,11 +34,17 @@ best: best.o
 QUAFL_N: QUAFL_N.o par/QUAF
 	$(F77) $(FFLAGS) -o QUAFL_N.exe QUAFL_N.o 
 
+QUAFL_M: QUAFL_M.o par/QUAF
+	$(F77) $(FFLAGS) -o QUAFL_M.exe QUAFL_M.o 
+
 LUDW_CN: LUDW_CN.o par/LUCN
 	$(F77) $(FFLAGS) -o LUDW_CN.exe LUDW_CN.o $(LIBS)
 
 DRQUA_AK_N: DRQUA_AK_N.o par/DRQUA_AK
 	$(F77) $(FFLAGS) -o DRQUA_AK_N.exe DRQUA_AK_N.o $(LIBS)
+
+DRQUA_AK_M: DRQUA_AK_M.o par/DRQUA_AK
+	$(F77) $(FFLAGS) -o DRQUA_AK_M.exe DRQUA_AK_M.o $(LIBS)
 
 DRQUA_I: DRQUA_I.o par/DRQUA_I
 	$(F77) $(FFLAGS) -o DRQUA_I.exe DRQUA_I.o $(LIBS)
@@ -52,6 +58,9 @@ TDR2ENDM_AK_N: TDR2ENDM_AK_N.o par/DR2END_AK
 TDR2END_AK: TDR2END_AK.o par/DR2END_AK
 	$(F77) $(FFLAGS) -o TDR2END_AK.exe TDR2END_AK.o $(LIBS)
 
+TDR2END_NORMAL: TDR2END_NORMAL.o par/DR2END_AK
+	$(F77) $(FFLAGS) -o TDR2END_NORMAL.exe TDR2END_NORMAL.o $(LIBS)
+
 TDR2END_I_2: TDR2END_I_2.o par/DR2END_AK_I_2
 	$(F77) $(FFLAGS) -o TDR2END_I_2.exe TDR2END_I_2.o $(LIBS)
 
@@ -60,6 +69,9 @@ DR2END_AK_exp: DR2END_AK_exp.o par/DR2END_AK
 
 DR2END_AK: DR2END_AK.o par/DR2END_AK
 	$(F77) $(FFLAGS) -o DR2END_AK.exe DR2END_AK.o $(LIBS)
+
+DR2END_NORMAL: DR2END_NORMAL.o par/DR2END_AK
+	$(F77) $(FFLAGS) -o DR2END_NORMAL.exe DR2END_NORMAL.o $(LIBS)
 
 DR2END_AK_I: DR2END_AK_I.o par/DR2END_AK_I
 	$(F77) $(FFLAGS) -o DR2END_AK_I.exe DR2END_AK_I.o $(LIBS)

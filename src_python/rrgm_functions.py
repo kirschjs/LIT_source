@@ -335,7 +335,7 @@ def prep_pot_file_3N(lam3, ps3='', d10=0.0):
     return
 
 
-def parse_ev_coeffs(mult=0, infil='OUTPUT', outf='COEFF'):
+def parse_ev_coeffs(mult=0, infil='OUTPUT', outf='COEFF', plti=''):
     os.system('cp ' + infil + ' tmp')
     out = [line2 for line2 in open(infil)]
     #for n in range(1,len(out)):
@@ -349,7 +349,8 @@ def parse_ev_coeffs(mult=0, infil='OUTPUT', outf='COEFF'):
         if re.search('ENTWICKLUNG DES  1 TEN EIGENVEKTORS', out[line]):
             for bvl in range(line + 2, len(out)):
                 if ((out[bvl][:3] == ' KO') | (out[bvl][:3] == '\n')):
-                    bvc = out[bvl - 1].strip().split('/')[-1].split(')')[0]
+                    bvc = int(
+                        out[bvl - 1].strip().split('/')[-1].split(')')[0])
                     break
                 coeffp += [
                     float(coo.split('/')[0])
@@ -375,10 +376,31 @@ def parse_ev_coeffs(mult=0, infil='OUTPUT', outf='COEFF'):
         print("No coefficients found in %s" % infil)
     with open(outf, 'w') as outfile:
         outfile.write(ss)
+
+    if 'plti' != '':
+        fig = plt.figure(figsize=(12, 6))
+
+        ax1 = fig.add_subplot(1, 1, 1)
+        ax1.set_title(
+            r'expansion coefficients -- %s (for not-normalized basis vectors)'
+            % plti)
+        ax1.set_xlabel('basis-vector index')
+        #ax1.set_title(r'$J^\pi=%d^%s$' % (Jstreu, streukas[i][-1]))
+
+        ax1.plot(range(bvc), coeffp)
+
+        fig.savefig('He3_coeff_unnormiert.pdf')
+        print('He3 COEFFS plotted <He3_coeff_unnormiert.pdf>')
+
+    return
+
     return
 
 
-def parse_ev_coeffs_normiert(mult=0, infil='OUTPUT', outf='COEFF_NORMAL'):
+def parse_ev_coeffs_normiert(mult=0,
+                             infil='OUTPUT',
+                             outf='COEFF_NORMAL',
+                             plti=''):
     os.system('cp ' + infil + ' tmp')
     out = [line2 for line2 in open(infil)]
 
@@ -397,6 +419,7 @@ def parse_ev_coeffs_normiert(mult=0, infil='OUTPUT', outf='COEFF_NORMAL'):
                         for coo in out[bvl].strip().split(')')[-1].split()
                     ]
             break
+    coeffp = np.where(np.abs(coeffp) > 10**3, 10, coeffp)
     s = ''
     bvc = len(coeffp)
     for n in range(len(coeffp)):
@@ -407,6 +430,22 @@ def parse_ev_coeffs_normiert(mult=0, infil='OUTPUT', outf='COEFF_NORMAL'):
         print("No coefficients found in %s" % infil)
     with open(outf, 'w') as outfile:
         outfile.write(ss)
+
+    if 'plti' != '':
+        fig = plt.figure(figsize=(12, 6))
+
+        ax1 = fig.add_subplot(1, 1, 1)
+        ax1.set_title(
+            r'expansion coefficients -- %s (for \bf{normalized} basis vectors)'
+            % plti)
+        ax1.set_xlabel('basis-vector index')
+        #ax1.set_title(r'$J^\pi=%d^%s$' % (Jstreu, streukas[i][-1]))
+
+        ax1.plot(range(bvc), coeffp)
+
+        fig.savefig('He3_coeff_normiert.pdf')
+        print('He3 COEFFS plotted <He3_coeff_normiert.pdf>')
+
     return
 
 

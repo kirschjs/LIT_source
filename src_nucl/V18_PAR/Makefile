@@ -1,7 +1,7 @@
 CC          = mpicc
 F77         = mpif77
 
-FOPTS  =       -Ofast
+FOPTS  =       -Ofast -ffpe-summary=none  -mcmodel=large
 
 #COPTS       = -O2 -Wall -ggdb3
 #COPTS       = -O2
@@ -24,11 +24,15 @@ CFLAGS      = -o $@ $? $(PRECFLAGS)
 	$(F77) $(FOPTS) $(MAKRO) -c -o $*.o $< 
 
 mpi_quaf_v6.o: mpi_quaf_v6.F par.h Makefile
+mpi_quaf_v7.o: mpi_quaf_v6.F par.h Makefile	
 mpi_quaf_eft_v1.o: mpi_quaf_eft_v1.F par-eft.h Makefile
 
 
 mpi_quaf_v6: mpi_quaf_v6.o 
 	$(F77) $(FOPTS) $(MAKRO) -o $@ mpi_quaf_v6.o   $(LIBS) $(MPI) 
+
+mpi_quaf_v7: mpi_quaf_v7.o 
+	$(F77) $(FOPTS) $(MAKRO) -o $@ mpi_quaf_v7.o   $(LIBS) $(MPI) 
 
 mpi_quaf_eft_v1: mpi_quaf_eft_v1.o 
 	$(F77) $(FOPTS) $(MAKRO) -o $@ mpi_quaf_eft_v1.o   $(LIBS) $(MPI) 

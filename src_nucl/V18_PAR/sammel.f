@@ -4,13 +4,13 @@
       include "par.h"
       
 C       NZOPER: ANZAHL DER OPERATOREN IN QUAF
-C     NZFMAX:     "      "     "  ZERLEGUNGEN
-C     NZRHOM:     "      "     "  BASISVEKTOREN PRO ZERLEGUNG
-C      MZPARM:     "      "     "  RADIALPARAMETER
+C       NZFMAX:     "      "     "  ZERLEGUNGEN
+C       NZRHOM:     "      "     "  BASISVEKTOREN PRO ZERLEGUNG
+C       MZPARM:     "      "     "  RADIALPARAMETER
 C
       parameter (lind=(nzfmax*(nzfmax+1))/2*nzoper)
       integer nteil
-C
+C 
 C
       dimension index(lind),mop(lind),mmfr(lind)
       DIMENSION   NUM(NZRHOM,NZFMAX),kmax(nzfmax),

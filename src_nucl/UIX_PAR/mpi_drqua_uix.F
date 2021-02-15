@@ -1,5 +1,5 @@
       PROGRAM DRQUA_ANTI_KOM_P
-C----- MPI VERSION VON DRQUA_AK_N -----------------------------------    
+C ----- MPI VERSION VON DRQUA_AK_N -----------------------------------    
 C     FUER SMIN STATTDESSEN
 CC    SUBROUTINE QUAF
       IMPLICIT REAL*8 (A-H,O-Z)
@@ -952,7 +952,7 @@ c     hier muss die Schleife zum Aufsammeln der restlichen Ergebnisse hin
      *        0,MPI_COMM_WORLD,ierr)
          write(NOUT,*)  'Rueckmeldung VON ', ngerechnet
       enddo
-c
+c 
       istop=666
 
       write (NOUT,*) 'Aufsammeln'
@@ -1175,7 +1175,7 @@ C     Integer Arrays
       DIMENSION ilupi(llupi)
       EQUIVALENCE( ilupi(1), kvk )
 
-C     Double Arrays
+C      Double Arrays
       COMMON /DOPPELA/
      $     VW(NZTMAX,NZCMAX-1),       SVEC(NZTMAX,NZVMAX),
      $     RVEC(NZVMAX,NZTMAX),       WECPOT(NZPOTM,3,NZOPER),

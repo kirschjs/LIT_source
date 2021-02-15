@@ -4,14 +4,11 @@ from numpy import linalg as LA
 
 def smart_ev(matout, threshold=10**-7):
 
-    dim = int(matout[0])
+    dim = int(np.sqrt(len(matout) * 0.5))
 
     # read Norm and Hamilton matrices
-    normat = np.reshape(
-        np.array(matout[1:(1 + dim**2)]).astype(float), (dim, dim))
-    hammat = np.reshape(
-        np.array(matout[(1 + dim**2):(1 + 2 * dim**2)]).astype(float),
-        (dim, dim))
+    normat = np.reshape(np.array(matout[:dim**2]).astype(float), (dim, dim))
+    hammat = np.reshape(np.array(matout[dim**2:]).astype(float), (dim, dim))
 
     # normalize the matrices with the Norm's diagonal
     normdiag = [normat[n, n] for n in range(dim)]

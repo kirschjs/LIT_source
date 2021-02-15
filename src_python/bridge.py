@@ -22,7 +22,7 @@ def cartesian_coord(*arrays):
     #print(cartesian_coord(*3 * [a]))
 
 
-suffix = 'miwchan'
+suffix = 'miwchan_M'
 anzproc = 6  #int(len(os.sched_getaffinity(0)) / 1)
 
 home = os.getenv("HOME")
@@ -30,6 +30,7 @@ home = os.getenv("HOME")
 pathbase = home + '/kette_repo/ComptonLIT'
 
 litpath3He = pathbase + '/systems/mul_helion_' + suffix + '/'
+
 if os.path.isdir(litpath3He) == False:
     os.mkdir(litpath3He)
 
@@ -42,7 +43,7 @@ if os.path.isdir(respath) == False:
     os.mkdir(respath)
 
 BINBDGpath = pathbase + '/source/src_nucl/'
-BINLITpath = pathbase + '/source/src_elma/'
+BINLITpath = pathbase + '/source/src_elma_new/'
 
 mpii = '137'
 potnn = pathbase + '/data/AV18'
@@ -56,13 +57,15 @@ cal = [
     'dbg',
     'einzel',
     'construe_fresh_helion',
+    #'reduce',
+    #'coeff',
     'rhs',
     'rhs_lu-ob-qua',
+    'rhs-qual',
     'rhs-end',
     'lhs',
     'lhs_lu-ob-qua',
-    'couple',
-    'rhs-qual',
+    #'couple',
 ]
 new_helion = True
 # convention: bound-state-expanding BVs: (1-8), i.e., 8 states per rw set => nzf0*8
@@ -72,20 +75,20 @@ channels = {
         ['000', ['he_no1', 'he_no6']],
         ['202', ['he_no2']],
         ['022', ['he_no2']],
-        ['222', ['he_no2']],
-        ['221', ['he_no1']],  #, 'he_no6', 'he_no2']],
-        ['220', ['he_no1']],  #, 'he_no6']],
+        #['222', ['he_no2']],
+        #['221', ['he_no1']],  #, 'he_no6', 'he_no2']],
+        #['220', ['he_no1']],  #, 'he_no6']],
         #['111', ['he_no3']],  #, 'he_no5'
         #['112', ['he_no5']],
     ],
     #          [l1l2L,[compatible (iso)spin configurations]]
     '0.5^-': [
-        ['011', ['he_no1', 'he_no2', 'he_no6']],
+        ['011', ['he_no1', 'he_no6']],
         ['212', ['he_no2']],
         ['211', ['he_no2']],
-        ['101', ['he_no2']],  #, 'he_no4i', 'he_no5']],
-        ['121', ['he_no2']],  #, 'he_no4i', 'he_no5']],
-        ['122', ['he_no2']],
+        #['101', ['he_no2']],  #, 'he_no4i', 'he_no5']],
+        #['121', ['he_no2']],  #, 'he_no4i', 'he_no5']],
+        #['122', ['he_no2']],
     ],
     '1.5^-': [
         ['011', ['he_no1', 'he_no2', 'he_no6']],
@@ -107,7 +110,7 @@ J0 = float(boundstatekanal.split('^')[0][-3:])
 
 multipolarity = 1
 
-anz_phot_e = 4
+anz_phot_e = 1
 phot_e_0 = 0.001  #  enems_e converts to fm^-1, but HERE the value is in MeV
 phot_e_d = 100.0  #  delta E
 
@@ -185,7 +188,7 @@ if wli == 'lap':
 
 # -- here, I allowed for an enhancement of certain operators, to bind an S-wave triton with v18/uix
 costr = ''
-for nn in range(1, 30):
+for nn in range(1, 31):
     cf = 1.0 if (nn < 28) else 0.0
     cf = 1.0 if (nn == 2) else cf
     costr += '%12.7f' % cf if (nn % 7 != 0) else '%12.7f\n' % cf

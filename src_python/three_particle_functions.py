@@ -82,7 +82,6 @@ def red_mod_3(typ='',
                         i = 8
                         tmp = lines_output[llnr][1:-1]
                         if len(tmp) != 0:
-                            #cofs = [int(tmp[n:n + i]) for n in range(len(tmp), i)]
                             bv_ent.append(tmp)
 
         # identify the vectors with insignificant contribution;
@@ -98,19 +97,18 @@ def red_mod_3(typ='',
         for bv in range(1, len(bv_ent) + 1):
             relw_to_del = []
             relw_to_del0 = []
-            tmpt = bv_ent[bv - 1]
-            ueco = [
-                tmpt[8 * n:8 * (n + 1)]
-                for n in range(0, int((len(tmpt.rstrip())) / 8))
-            ]
-            ueco = [tmp for tmp in ueco if (tmp != '') & (tmp != '\n')]
-            for coeff in range(0, len(ueco)):
+
+            ueco = [int(tmpt) for tmpt in bv_ent[bv - 1].split()]
+
+            for coeff in range(len(ueco)):
                 try:
-                    if (abs(int(ueco[coeff])) > max_coeff) | (
-                        (abs(int(ueco[coeff])) < min_coeff) &
-                        (abs(int(ueco[coeff])) != 0)):
+                    if (abs(ueco[coeff]) > max_coeff) | (
+                        (abs(ueco[coeff]) < min_coeff) &
+                        (abs(ueco[coeff]) != 0)):
                         relw_to_del.append(coeff)
-                    if (abs(int(ueco[coeff])) == 0):
+
+                    # nil contributors are collected separately to remove them all
+                    if (abs(ueco[coeff]) == 0):
                         relw_to_del0.append(coeff)
                 except:
                     relw_to_del.append(coeff)
@@ -119,8 +117,10 @@ def red_mod_3(typ='',
                 bv_to_del0.append([bv, relw_to_del0])
             except:
                 print('bv %d is relevant!' % bv)
+
         bv_to_del = [bv for bv in bv_to_del if bv[1] != []]
         bv_to_del0 = [bv for bv in bv_to_del0 if bv[1] != []]
+
         rednr = sum([len(tmp[1]) for tmp in bv_to_del]) + sum(
             [len(tmp[1]) for tmp in bv_to_del0])
         if ((rednr == 0)):  #|(len(bv_ent[0])/8==target_size)):
@@ -150,6 +150,7 @@ def red_mod_3(typ='',
             # 2. calc line number in INEN where this vector is included
             offs = 9 if tniii == 31 else 5
             repl_ind = offs + 2 * (rem[0] - 1)
+            print(repl_ind)
             repl_line = lines_inen[repl_ind]
             repl_ine = []
 
@@ -236,7 +237,8 @@ def reduce_3n(ch='612-05m',
               maxc3=6000,
               ord=0,
               tnii=10,
-              delpredd=3):
+              delpredd=3,
+              exe=''):
 
     print('reducing widths in %s channel...' % ch)
 
@@ -253,10 +255,11 @@ def reduce_3n(ch='612-05m',
             ord=0,
             tniii=tnii,
             delpred=delpredd,
-            dr2executable=BINpath + 'DR2END_' + mpii + '.exe')
+            dr2executable=exe)
 
         cons_red = (size3 <= tmp[1])
-        minc3 += 20
+        #minc3 += 2
+        maxc3 -= 100
         print(minc3, tmp[1])
 
     os.system('cp ' + 'INEN ' + 'INEN_' + ch)
@@ -724,19 +727,18 @@ def lit_3inen(BUECO,
               bnd='',
               outfile='INEN'):
     s = ''
-
-    # NBAND1,ISTEU,IGAK,KEIND,IQUAK,IMETH
-    s += ' 10  2  0  1  0  1\n'
+    # NBAND1,IGAK,KEIND,IQUAK
+    s += ' 10  0  0  0\n'
     # 1-11 Einteilchen, if any MREG>=12 # 0 => MODUS=1 => lese QUALMOUT
     # 10,11: el. siegert limes fuer p,n
     if MREG == '':
-        for n in range(anzo):
-            s += '  1'
+        for n in range(anzo - 2):
+            s += '  0'
+        s += '  1  1'
     else:
         s += MREG
+
     s += '\n'
-    # KMETH(1,...,4) 3,4 square the me, representing transition strengths
-    s += '  1  1  0  0\n'
     # g faktoren (6)
     s += '5.586       -3.826      1.          0.          1.          0.\n'
     s += '%11.4f%11.4f\n%11.4f\n' % (ANORML, ANORMR, EB)
@@ -746,7 +748,7 @@ def lit_3inen(BUECO,
     s += '%3d%3d%3d%3d%3d%3d\n' % (2 * JWSL, 2 * JWSR, NPARL, NPARR, 2 * JWSLM,
                                    2 * MULM2)
     # NZKL,NZKR,NZKPL,NZKPR
-    s += '%3d%3d  0  0\n' % (1, len(BUECO))
+    s += '%3d%3d  0  0\n' % (1, 1)
 
     # uecof
     s += '%3d\n' % (len(BUECO) + 1)
@@ -760,18 +762,23 @@ def lit_3inen(BUECO,
     s += '%s  1\n' % (' ' * int(3 * (KSTREU[1] - 1)))
 
     nueco = 1
-    bdginen = [line for line in open(bnd)]  #[8:]
+    if bnd != '':
+        print('reading %s' % bnd)
+        bdginen = [line for line in open(bnd)]  #[8:]
 
-    for n in range(int(bdginen[7][4:8])):
+        for n in range(int(bdginen[7][4:8])):
 
-        tr = np.nonzero(np.array(bdginen[9 + 2 * n].split()).astype(int))[0]
+            tr = np.nonzero(np.array(
+                bdginen[9 + 2 * n].split()).astype(int))[0]
 
-        for m in range(len(tr)):
-            s += '  1%3d\n' % int(bdginen[8 + 2 * n][4:8])
-            s += '%3d\n' % nueco
-            nueco += 1
-            s += '  0' * tr[m]
-            s += '  1\n'
+            for m in range(len(tr)):
+                s += '  1%3d\n' % int(bdginen[8 + 2 * n][4:8])
+                s += '%3d\n' % nueco
+                nueco += 1
+                s += '  0' * tr[m]
+                s += '  1\n'
+    #else:
+    #    print('INEN w/o 3He structure.')
 
     with open(outfile, 'w') as outfi:
         outfi.write(s)
@@ -801,23 +808,106 @@ def he3inqua(intwi=[], relwi=[], potf=''):
             if ((rw != (len(relwi[n]) - 1)) & ((rw + 1) % 6 == 0)):
                 s += '\n'
         s += '\n'
+        tmpln = np.ceil(len(intwi[n]) / 6.)
         for bb in range(0, len(intwi[n])):
             s += '  1  1\n'
-            if len(intwi[n]) < 7:
-                s += '1.'.rjust(12 * (bb + 1))
+            for i in range(int(bb / 6)):
                 s += '\n'
-            else:
-                if bb < 6:
-                    s += '1.'.rjust(12 * (bb + 1))
-                    s += '\n\n'
-                else:
-                    s += '\n'
-                    s += '1.'.rjust(12 * (bb % 6 + 1))
-                    s += '\n'
+            s += '1.'.rjust(12 * (bb % 6 + 1))
+
+            for ii in range(int(tmpln - int(bb / 6))):
+                s += '\n'
 
     with open('INQUA_N', 'w') as outfile:
         outfile.write(s)
+
     return
+
+
+def he3inquaBS(intwi=[], relwi=[], potf=''):
+    s = ''
+    # NBAND1,NBAND2,NBAND3,NBAND4,NBAND5,NAUS,MOBAUS,LUPAUS,NBAUS
+    s += ' 10  8  9  3 00  0  0  0  0\n%s\n' % potf
+
+    zerl_counter = 0
+    bv_counter = 1
+    for n in range(len(intwi)):
+        zerl_counter += 1
+        nrel = min([len(re) for re in relwi[n]])
+        s += '%3d%60s%s\n%3d%3d\n' % (len(intwi[n]), '', 'Z%d  BVs %d - %d' %
+                                      (zerl_counter, bv_counter,
+                                       bv_counter - 1 + len(intwi[n])),
+                                      len(intwi[n]), nrel)
+
+        bv_counter += len(intwi[n])
+        for bv in range(len(intwi[n])):
+            s += '%36s%-12.6f\n' % ('', float(intwi[n][bv]))
+            for rw in range(0, len(relwi[n][bv])):
+                s += '%12.8f' % float(relwi[n][bv][rw])
+            s += '\n'
+
+        tmpln = np.ceil(len(intwi[n]) / 6.)
+        for bb in range(0, len(intwi[n])):
+            s += '  1  1\n'
+            for i in range(int(bb / 6)):
+                s += '\n'
+            s += '1.'.rjust(12 * (bb % 6 + 1))
+
+            for ii in range(int(tmpln - int(bb / 6))):
+                s += '\n'
+
+    with open('INQUA_M', 'w') as outfile:
+        outfile.write(s)
+
+    return
+
+
+def lit_3inqua_M(intwi=[], relwi=[], LREG='', anzo=13, outfile='INQUA'):
+    s = ''
+
+    # NBAND1,NBAND2,NBAND3,NBAND4,NBAND5,NAUS,MOBAUS,LUPAUS,NBAUS
+    s += ' 10  8  9  3 00  0  0  0  0\n'
+    if (LREG == ''):
+        for n in range(anzo):
+            s += '  1'
+    else:
+        s += LREG
+    s += '\n'
+
+    zerl_counter = 0
+    bv_counter = 1
+    for n in range(len(intwi)):
+        zerl_counter += 1
+        nrel = min([len(re) for re in relwi[n]])
+        s += '%3d%60s%s\n%3d%3d\n' % (len(intwi[n]), '', 'Z%d  BVs %d - %d' %
+                                      (zerl_counter, bv_counter,
+                                       bv_counter - 1 + len(intwi[n])),
+                                      len(intwi[n]), nrel)
+
+        bv_counter += len(intwi[n])
+        for bv in range(len(intwi[n])):
+            s += '%36s%-12.6f\n' % ('', float(intwi[n][bv]))
+            for rw in range(0, len(relwi[n][bv])):
+                s += '%12.8f' % float(relwi[n][bv][rw])
+            s += '\n'
+
+        tmpln = np.ceil(len(intwi[n]) / 6.)
+        for bb in range(0, len(intwi[n])):
+            s += '  1  1\n'
+            for i in range(int(bb / 6)):
+                s += '\n'
+            s += '1.'.rjust(12 * (bb % 6 + 1))
+
+            for ii in range(int(tmpln - int(bb / 6))):
+                s += '\n'
+
+    appe = 'w'
+    with open(outfile, appe) as outfi:
+        outfi.write(s)
+    return
+    # r7 c2:   S  L           S_c
+    #  1   :   0  0  1S0         0
+    #  2   :   1  0  3S1         2
 
 
 def lit_3inqua_seq(intwi=[], relwi=[], LREG='', anzo=13, outfile='INQUA'):
@@ -887,3 +977,58 @@ def read_inlu(infile='INLU'):
         lu_stru.append(fi[n].split()[0].strip() + fi[n].split()[1].strip() +
                        fi[n + 1].split()[0].strip())
     return lu_stru
+
+
+def retrieve_he3_M(inqua):
+
+    relw = []
+    intw = []
+    frgm = []
+    inq = [line for line in open(inqua)]
+
+    lineNR = 0
+    while lineNR < len(inq):
+        if ((re.search('Z', inq[lineNR]) != None) |
+            (re.search('z', inq[lineNR]) != None)):
+            break
+        lineNR += 1
+    if lineNR == len(inq):
+        print('no <Z> qualifier found in <INQUA>!')
+        exit()
+
+    while ((lineNR < len(inq)) & (inq[lineNR][0] != '/')):
+        try:
+            anziw = int(inq[lineNR].split()[0])
+        except:
+            break
+
+        anzbvLN = int(1 + np.ceil(anziw / 6)) * anziw
+        anzrw = int(inq[lineNR + 1].split()[1])
+
+        frgm.append([anziw, anzrw])
+        intwtmp = []
+        relwtmp = []
+        for iws in range(0, 2 * anziw, 2):
+            intwtmp += [float(inq[lineNR + 2 + iws].strip())]
+
+            relwtmp.append(
+                [float(rrw) for rrw in inq[lineNR + 3 + iws].split()])
+        intw += [intwtmp]
+        relw += [relwtmp]
+
+        lineNR += 2 * anziw + anzbvLN + 2
+
+    iw = intw
+    rw = relw
+
+    with open('intw3he.dat', 'wb') as f:
+        for ws in iw:
+            np.savetxt(f, [ws], fmt='%12.4f', delimiter=' ; ')
+    f.close()
+    with open('relw3he.dat', 'wb') as f:
+        for wss in rw:
+            for ws in wss:
+                np.savetxt(f, [ws], fmt='%12.4f', delimiter=' ; ')
+    f.close()
+
+    return iw, rw, frgm

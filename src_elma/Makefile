@@ -26,6 +26,9 @@ clean:
 qual: qual.o
 	$(F77) $(FFLAGS) -o qual.exe qual.o $(LIBS)
 
+qual_M: qual_M.o
+	$(F77) $(FFLAGS) -o qual_M.exe qual_M.o $(LIBS)
+
 luise: luise.o
 	$(F77) $(FFLAGS) -o luise.exe luise.o $(LIBS)
 

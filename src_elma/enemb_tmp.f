@@ -1,7 +1,7 @@
       PROGRAM ENEMB
 C     ENPON FUER QUAL
-C
-C     ELEKTROMAGNETISCHE UEBERGAENGE ZWISCHEN BOUND STATES OHNE
+C 
+C      ELEKTROMAGNETISCHE UEBERGAENGE ZWISCHEN BOUND STATES OHNE
 C     LANGWELLE (MIT SIEGERTOPERATOR)
 C
 C
@@ -19,7 +19,7 @@ C     ISTEU=1
 C     PROGRAMM BERECHNET PHOTOABSORBTION
 C     < FINAL STATE / OPERATOR / INITIAL STATE >
 C
-C     ISTEU=2
+C     ISTEU=2 
 C     PROGRAMM BERECHNET ELEKTRONENSTREUUNG AN BOUND STATES
 C     < FINAL STATE / OPERATOR / INITIAL STATE >
 C
@@ -80,7 +80,7 @@ C     NDIM1 : MAXIMALE ANZAHL VERSCHIEDENER EXPONENTIALVORFAKTOREN
 C     NDIM2 :    "       "          "       K-POTENZEN
 C     NZFMAX:    "       "    DER ZERLEGUNGEN
 C     NZEKMA:    "       "    DER VERSCHIEDNEN K-VETOREN DES PHOTONS
-C
+C 
       COMMON /COMY/ D(100)
 C
       COMMON /CSOR/ MMM, NTI, OP(NDIM2,2,NDIM,NDIM),EFG(2,NDIM,NDIM),
@@ -111,14 +111,22 @@ C
       
       call getarg(1,INFILE)
       OPEN(UNIT=5,FILE=INFILE,STATUS='OLD')
+c      OPEN(UNIT=5,FILE='INEN',STATUS='OLD')      
       
       call getarg(2,OUTPUTout)
       OPEN(UNIT=6,FILE=OUTPUTout)
+c      OPEN(UNIT=6,FILE='outi')      
       
       call getarg(3,FORMFAout)
       OPEN(UNIT=15,FILE=FORMFAout,STATUS='UNKNOWN',FORM='FORMATTED')
+c      OPEN(UNIT=15,FILE='fouti',STATUS='UNKNOWN',FORM='FORMATTED')
 
+      OPEN(UNIT=19,FILE='MATOUT',STATUS='UNKNOWN',FORM='FORMATTED')
+      OPEN(UNIT=18,FILE='INDOUT',STATUS='UNKNOWN',FORM='FORMATTED')
       OPEN(UNIT=10,FILE='QUAOUT',STATUS='OLD',FORM='UNFORMATTED')
+C
+      MATOU=19
+      INDOU=18
 C
       NBAND2=15
       NBAND3=20
@@ -362,6 +370,7 @@ C
       WRITE(6,1036) ENER
       IF (ISTEU.EQ.1.OR.ISTEU.EQ.3) WRITE (6,1041) EK(1)
       READ(5,1002) NZKL,NZKR
+C KEIND = 1  : UECOFF are read     
       IF (KEIND.EQ.0) GOTO 198
       READ (5,1002) KK
       IF (KK.LE.NZUMAX) GOTO 55
@@ -378,7 +387,7 @@ C
       IF(NZPAQ(N).GT.MAXPAR) MAXPAR=NZPAQ(N)
 5     CONTINUE
       IF (MAXPAR.LE.NZPARM) GOTO 58
-      WRITE (6,1008) MAXPAR, NZPARM
+      WRITE (6,1008) MAXPAR, NZPARM 
       STOP 8
 58    DO 2 M=1,MAXPAR
       DO 2 N=1,NZKA
@@ -399,6 +408,7 @@ C   MUMK = UECOEFF number for the BV
        L = NUMK(J)
        IF (KEIND.EQ.0) GOTO 193
        MUM = MUMK(J)
+C coeff of bv set with UECO= UNK & no recoupling ls->jj => NCOF = 1       
        UMK(L) = UNK(MUM)
  193   NCOF(L,N) = 1
        DO 27   M = 1,NZBASV
@@ -426,6 +436,7 @@ C   MUMK = UECOEFF number for the BV
        MS(3,N)=MMS(3,J)
        LWERT(5,N)=MLWERT(5,J)
        MM=NZPAQ(J)
+C rel-width index
        READ(5,1002) (LUM(M,N),M=1,MM)
        WRITE(6,1011)    (LUM(M,N),M=1,MM)
        J1=0
@@ -486,6 +497,13 @@ C !!  ACHTUNG: NUR DIE SEAGULL TERME WERDEN BERUECKSICHTIGT !!
          NBAND=NBAND3
       ENDIF
 C
+      DO 37 M = 1,MMM
+      DO 37 N = 1,MMM
+      DO 37 NT=1,NTI
+      EFG(NT,M,N)=1.
+      DO 37 L=1, NDIM2
+   37 OP(L,NT,M,N) = 0.0
+
 C
       DO 140 MFL=1,NZF
 C     LOOP ZERLEGUNGEN LINKS
@@ -533,10 +551,11 @@ C
       ENDIF
 C
 C
+c nte is of order 1-30
       DO 60 KKK = 1,NTE
 C     LOOP OBEM
 C
-C
+C currently, NZPOT is not written in qual.f and hence =1, here
       DO 63, IPOT=1, NZPOT
 C     LOOP POTENTIALE
 C
@@ -549,14 +568,8 @@ C
 C     LOOP INNERE WEITEN RECHTS
 C
       KONTRO=0
-C     KONTRO=1 FUER NICHT VERSCHWINDENDE KOPPLUNG
+C      KONTRO=1 FUER NICHT VERSCHWINDENDE KOPPLUNG
       KONTR=0
-      DO 37 M = 1,MMM
-      DO 37 N = 1,MMM
-      DO 37 NT=1,NTI
-      EFG(NT,M,N)=1.
-      DO 37 L=1, NDIM2
-   37 OP(L,NT,M,N) = .0
 C
 C
       DO 64, JWIED=1, KWIED
@@ -569,14 +582,18 @@ C
          KONTR=1
       ENDIF
       READ (NBAND) ((IND(MM,NN), NN=1, JRHO), MM=1, IRHO)
-      IF (MREGH.GT.0.AND.IQUAK.GT.1) WRITE (6,1023)
-     *            ((IND(MM,NN), NN=1, JRHO), MM=1, IRHO)
+c      IF (MREGH.GT.0.AND.IQUAK.GT.1) WRITE (6,1023)
+c     *            ((IND(MM,NN), NN=1, JRHO), MM=1, IRHO)
+c      WRITE(INDOU,'(I4)') ((IND(MM,NN), NN=1, JRHO), MM=1, IRHO)
 C
       DO 40 NLES=1,MLES
 C     LOOP BASISVEKTOR-MATRIZEN
 C
       MM=1+INT((NLES-1)/JRHO)
       NN=NLES-INT((NLES-1)/JRHO)*JRHO
+c     quaf passes only non-zero me's but the output of the complete
+c     matrix must write 0's too, and hence the jump is to <288> and
+c     not 40  
       IF (IND(MM,NN).EQ.0) GOTO 40
       IF (MKC.LT.12) THEN
          READ (NBAND) NUML,NUMR,IK1,JK1,LL1,
@@ -590,27 +607,38 @@ C
       IF (MREGH.EQ.0) GOTO 40
 C
       IF (MKC.EQ.1 .OR. MKC.EQ.12) THEN
-      DO 287, K=1, IK1
-       DO 287, L=1, JK1
-        DO 287, NT=1, NTI
-         FG(NT,K,L)=0.
-287   CONTINUE
+C      DO 287, K=1, IK1
+C       DO 287, L=1, JK1
+C        DO 287, NT=1, NTI
+C         FG(NT,K,L)=0.
+      FG = 0.
+C 287   CONTINUE
       ENDIF
 C     BEI NORM GIBT ES KEINE EXPONENTIALVORFAKTOREN
-C
+
       IF (IQUAK.GT.1) WRITE (6,1019) NUML, NUMR, IK1, JK1,
      *                               LL1, KKK, LLL, JJJ
       IF(IQUAK.LE.2) GOTO 300
+c      WRITE(MATOU,*)'MKC = ',MKC
+c      WRITE(MATOU,'(I4)') NUML, NUMR, IK1, JK1,LL1, KKK, LLL, JJJ
       DO 290 K=1,IK1
       DO 290 L=1,JK1
       DO 290, NT=1, NTI
+      WRITE(MATOU,'(E20.14)') (DN(J,NT,K,L),J=1,LL1)
 290   WRITE(6,1021) FG(NT,K,L),((J-1), DN(J,NT,K,L),J=1,LL1)
+
+
+
 300   CONTINUE
+c      nzero = 0
       DO 651 N=1,NZKA
+c      if(UMKOF(N,NUML).ne.0) nzero=1
 651   UMKOFL(N)=UMKOF(N,NUML)
       DO 656 N=1,NZKA
+c      if(UMKOF(N,NUMR).ne.0) nzero=2
 656   UMKOFR(N)=UMKOF(N,NUMR)
 c      write(6,*)'UMKOF,NUML:',NUML,(UMKOF(N,NN),N=1,NZKA)
+c      if(nzero.ne.2) goto 142
       LBL=MLWERT(5,NUML)
       LBL2=2*LBL
       LBR=MLWERT(5,NUMR)
@@ -639,21 +667,26 @@ C       LB-R/L = total orbital angular momenta
 C       M-R/L  = 2 * total Spin
 C       SP-R/L =     total Spin
 C       2(SR+1)  <SL||id||SR> = 1/Sqrt[2S+1]
-      FK1=(-1)**((MUL2+LBL2+ML+JWSR)/2)
-      FK1=FK1*SQRT(AJRD/(2.*SPR+1.))
-      FK1=FK1*F6J(LBL2,LBR2,MUL2,JWSR,JWSL,MR)
-      FK2=(-1)**((MUL2+LBR2+MR+JWSR)/2)
-      FK2=FK2*SQRT(AJRD/(2.*SPL+1.))
-      FK2=FK2*F6J(LBR2,LBL2,MUL2,JWSR,JWSL,ML)
-      FK2=FK2*FLOAT((-1)**( LBR-LBL))
-C    PHASE FUER VERTAUSCHEN DER BASISVEKTOREN LINKS UND RECHTS
-      IF(MKC.EQ.6.OR.MKC.EQ.7) FK2=-FK2
-      IF(MKC.EQ.12.OR.MKC.EQ.13) FK2=-FK2
+
+c use only FKnew with 9J
+c      FK1=(-1)**((MUL2+LBL2+ML+JWSR)/2)
+c      FK1=FK1*SQRT(AJRD/(2.*SPR+1.))
+c      FK1=FK1*F6J(LBL2,LBR2,MUL2,JWSR,JWSL,MR)
+c      FK2=(-1)**((MUL2+LBR2+MR+JWSR)/2)
+c      FK2=FK2*SQRT(AJRD/(2.*SPL+1.))
+c      FK2=FK2*F6J(LBR2,LBL2,MUL2,JWSR,JWSL,ML)
+c      FK2=FK2*FLOAT((-1)**( LBR-LBL))
+c
+cC    PHASE FUER VERTAUSCHEN DER BASISVEKTOREN LINKS UND RECHTS
+c      IF(MKC.EQ.6.OR.MKC.EQ.7) FK2=-FK2
+c      IF(MKC.EQ.12.OR.MKC.EQ.13) FK2=-FK2
+
 C    PHASE FUER VERTAUSCHEN DER BASISVEKTOREN LINKS UND RECHTS
       ISRANK2  = INT(0)
       IORANK2  = INT(MUL2)
       FK1new = (-1)**(AK-GJR+GJL)*SQRT(JWSR+1.)*SQRT(MUL2+1.)
      1        *F9J(LBL2,LBR2,IORANK2,ML,MR,ISRANK2,JWSL,JWSR,MUL2)
+
 C      write(6,*)'F9J(',LBL2,LBR2,IORANK2,ML,MR,
 C     * ISRANK2,JWSL,JWSR,MUL2,') = ', FK1new
 
@@ -715,7 +748,7 @@ C     NORM
       IF (ML.NE.MR) THEN
         WRITE (6,1200) MKC, ML, MR
         STOP 13
-      ENDIF
+      ENDIF 
       FK1=(-1)**((LBL2+ML+JWSR)/2)
       FK1=FK1*SQRT(AJRD/(2.*SPR+1))
       FK1=FK1*F6J(LBL2,LBR2,0,JWSL,JWSR,ML)
@@ -730,7 +763,7 @@ C  LIT source: F2 = 0
       FK2 = 0
 C      IF (LAUF.EQ.2) FK2=0.
       F=CL
-C     HIER WIRD DER FUER DIE NORM FALSCHE CLEBSCH-GORDAN-KOEFFIZIENT
+C     HIER WIRD  DER FUER DIE NORM FALSCHE CLEBSCH-GORDAN-KOEFFIZIENT
 C     DES RED. MATR.-ELEMENTS HERAUSGEKUERZT.
 C     ALLE OPERATOREN
 C                 = hbarc/mn for siegert proton      
@@ -738,7 +771,8 @@ C                 = hbarc/mn for siegert proton
 C
 c      write(6,*) 'F,FK1new,GEFAK(MKC),F2:',F,FK1new,GEFAK(MKC),F2
       IF(F1.EQ.0.AND.F2.EQ.0.) THEN
-        GOTO 40
+         write(nout,*) 'ECCE: prefactors = 0'
+c        GOTO 40
       ENDIF
       NZKL1=NZKL+1
 C
@@ -780,6 +814,8 @@ C
       KL=NZQ(KANL)+L2
       IF(K1*L1.LE.0) GOTO 44
       IF (FA.EQ.0.) GOTO 44
+c NTI = 1 in LAUF=1
+c LL1 is of order 1
       DO 147, NT=1, NTI
       DO 47 JJ = 1,LL1
 C                     
@@ -789,6 +825,8 @@ C
       IF(IGAK.GT.4) WRITE(6,1037) KANL,KANR,K1,L1,KK,LL,EFG(NT,KK,LL),
      *                            FA,(OP(JJ,NT,KK,LL),JJ=1,LL1)
 147   CONTINUE
+c FB should always be zero for lit and boundstate having different parity
+      GOTO 45
 44    IF(K2*L2.LE.0) GOTO 45
       IF(FB.EQ.0.) GOTO 45
       DO 148, NT=1, NTI
@@ -821,14 +859,15 @@ C
       IF (MREGH.EQ.0) GOTO 64
       IF (KONTRO.EQ.0) GOTO 64
 C
-C     AUSDRUCK DER OP-WERTE UND DER K-POTENZ LAMBDA
+C     AUSDRUCK DER OP-WERTE  UND DER K-POTENZ LAMBDA
       IF(IGAK.LT.2) GOTO 64
       DO 520 I1 = 1,MMM
        DO 520 I2 = 1,MMM
         DO 520, JJ=1, LL1MAX(MKC)
          DO 520, NT=1, NTI
-          IF (OP(JJ,NT,I1,I2).NE.0.) WRITE(6,1202) I1,I2,JJ,NT,
-     *                            EFG(NT,I1,I2),OP(JJ,NT,I1,I2)
+c          IF (OP(JJ,NT,I1,I2).NE.0.) WRITE(6,1202) I1,I2,JJ,NT,
+c     *                            EFG(NT,I1,I2),OP(JJ,NT,I1,I2)
+          WRITE(6,1202) I1,I2,JJ,NT,EFG(NT,I1,I2),OP(JJ,NT,I1,I2)
 520   CONTINUE
 C
 C
@@ -1017,7 +1056,7 @@ C
       IF (ISTEU.EQ.1.OR.ISTEU.EQ.3) GOTO 940
 C     AUSDRUCK FUER ELEKTRONENSTREUUNG
 
-      write(6,1077)
+      write(6,1077) 
 1077  FORMAT(1X,' EK2         EK(NEK)     JWSL   MUL  JWSR JWSLM', 
      * 2X,'MULM  OP          MET   ')
 
@@ -1266,7 +1305,7 @@ C
 1091  FORMAT(1X,'VERGLEICHSFEHLER ZWISCHEN QUAOUT UND QUALMOUT')
 1200  FORMAT(1X,'BEI OPERATOR',I2,'  SL.NE.SR ',2I5)
 1201  FORMAT(////,1X,'OPERATOR',I3,/,1X,'===========',/,'0')
-1202  FORMAT(1X,4I3, (6E12.4))
+1202  FORMAT('-+- ',1X,4I3, (6E12.4))
 1203  FORMAT(1X,'BEI OPERATOR',I3,' FALSCHE PARITAET')
 1204  FORMAT(1X,'(',4F6.1,'  / ',2F6.1,' ) = ',F6.2)
 1300  FORMAT(I10,' ELEMENTE FUER WEITE RECHTS,LINKS,DC,OPERATOR',
@@ -1291,6 +1330,7 @@ C                 SUCHE, OB EXPONENTIALVORFAKTOR SCHON VORHANDEN
                   IF (ABS(EN-ECFG(JT,MKC)).GT.1.E-8) GOTO 170
                   DO 150 L=1,LL1MAX(MKC)
                      OCP(L,JT,MKC)=OCP(L,JT,MKC)+OP(L,NT,I1,I2)
+                     OP(L,NT,I1,I2)=0
 150               CONTINUE
                   GOTO 185
 170            CONTINUE
@@ -1300,7 +1340,10 @@ C              NEUER EXPONENTIALVORFAKTOR
                ECFG(IH,MKC)=EFG(NT,I1,I2)
                DO 180 L=1,LL1MAX(MKC)
                   OCP(L,IH,MKC)=OP(L,NT,I1,I2)
+                  OP(L,NT,I1,I2)=0
 180            CONTINUE
+c reset modified values to  avoid time-consuming resetting in lines 564     
+         EFG(NT,I1,I2) = 1.0
 185         CONTINUE
 190      CONTINUE
 200   CONTINUE
@@ -1325,7 +1368,7 @@ C
       WRITE (NBAND2,1000) EK2, EK(NEK), MUL, INR, ISRB, IP,
      *                   JWSL, JWSR, 0, OP, 0., MTD
       RETURN         
-1000  FORMAT (2E12.4,7I3,' ',2E12.6,I3)
+1000  FORMAT (E12.4,' ',E12.4,' ',7I3,' ',E12.6,' ',E12.6,I3)
 1001  FORMAT (2E12.4,5I6,' ',1E12.6,I4)
       END
 

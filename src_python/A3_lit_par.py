@@ -16,6 +16,8 @@ from readLITsource_3body import *
 from BasisVisualization import visbas
 from plot_spectrum import plotHspec
 
+import PSI_parallel
+
 RHSofBV = {}
 RHSofmJ = {}
 
@@ -64,22 +66,26 @@ if 'construe_fresh_helion' in cal:
     #os.system(BINBDGpath + 'DRQUA_AK_N.exe')
 
     os.system('cp INEN%s INEN' % siffux)
-    subprocess.run([BINBDGpath + 'TDR2END_AK.exe'])
+    subprocess.run([BINBDGpath + 'TDR2END_NORMAL.exe'])
     #os.system(BINBDGpath + 'DR2END_AK.exe')
 
-    EBDG = get_h_ev()[0]
+    if 'coeff' in cal:
+        EBDG = get_h_ev()[0]
 
-    np.savetxt('E0.dat', np.array([EBDG]), fmt='%12.4f')
+        np.savetxt('E0.dat', np.array([EBDG]), fmt='%12.4f')
 
-    os.system('cp OUTPUT end_out_b && cp INEN inen_b')
-    os.system('cat E0.dat')
+        os.system('cp OUTPUT end_out_b && cp INEN inen_b')
+        os.system('cat E0.dat')
+        os.system('cp E0.dat ' + respath)
 
-    #rrgm_functions.parse_ev_coeffs(infil='end_out_b')
-    rrgm_functions.parse_ev_coeffs_normiert(infil='end_out_b')
+        rrgm_functions.parse_ev_coeffs(infil='end_out_b', plti='3-helium')
+        rrgm_functions.parse_ev_coeffs_normiert(
+            infil='end_out_b', plti='3-helium')
+
+        os.system('cp COEFF* ' + respath)
+        print('helion ground state calculated with B = %4.4f MeV' % EBDG)
 
     subprocess.call('rm *QUAOUT*', shell=True)
-
-    print('helion ground state calculated with B = %4.4f MeV' % EBDG)
 
     os.chdir(litpath3He)
     os.system('find . -name \"T*OUT.*\" -print0 | xargs -0 rm')
@@ -106,17 +112,20 @@ if 'rhs' in cal:
         #    mult=0, infil=helionpath + 'OUTPUT', outf=helionpath + 'COEFF')
         #parse_ev_coeffs_normiert(infil=helionpath + 'OUTPUT', )
 
-        #BUECO = np.array(
-        #    [float(cof.strip()) for cof in open(helionpath + 'COEFF')])
+        try:
+            BUECO = np.array(
+                [float(cof.strip()) for cof in open(helionpath + 'COEFF')])
+            EBDG = get_h_ev(ifi=helionpath + 'end_out_b')[0]
+            EVSPECT = get_h_ev(n=4, ifi=helionpath + 'end_out_b')
+        except:
+            BUECO = [1.0]
+            EBDG = -7.718058
+            EVSPECT = [0., 0., 0., 0.]
+        #BUECO = (10**-4) * np.array(
+        #    [float(cof.strip()) for cof in open(helionpath + 'COEFF_NORMAL')])
 
-        BUECO = (10**-4) * np.array(
-            [float(cof.strip()) for cof in open(helionpath + 'COEFF_NORMAL')])
-
-        EBDG = get_h_ev(ifi=helionpath + 'end_out_b')[0]
-
-        print('(iv)    LS-scheme: B(2,%s) = %4.4f MeV [' % (boundstatekanal,
-                                                            EBDG),
-              get_h_ev(n=4, ifi=helionpath + 'end_out_b'), ']')
+        print('(iv)    LS-scheme: B(2,%s) = %4.4f MeV [' %
+              (boundstatekanal, EBDG), EVSPECT, ']')
         print('        dim(B_0)   = %d' % len(BUECO))
 
         if 'rhs_lu-ob-qua' in cal:
@@ -197,7 +206,7 @@ if 'rhs' in cal:
                     intwi=he_iw + [intwLIT[lit_zerl]],
                     relwi=he_rw + [relwLIT[lit_zerl]],
                     anzo=11,
-                    LREG='  1  0  0  0  0  0  0  0  0  1  1',
+                    LREG='  0  0  0  0  0  0  0  0  0  1  1',
                     outfile=litpath3He + 'tmp_%d/INQUA' % (lit_zerl))
                 lit_3inlu(
                     mul=multipolarity,
@@ -259,7 +268,8 @@ if 'rhs' in cal:
                 para[0][1],
                 para[0][0],
             )
-            outfsbare = 'inhomo%d-%d_J%3.1f_mJ%3.1f-mL%d.log' % (
+            outfsbare = '%d_inhomo%d-%d_J%3.1f_mJ%3.1f-mL%d.log' % (
+                para[3],
                 para[1],
                 para[2],
                 Jstreu,
@@ -268,7 +278,7 @@ if 'rhs' in cal:
             )
 
             lit_3inen(
-                MREG='  1  0  0  0  0  0  0  0  0  1  1',
+                MREG='  0  0  0  0  0  0  0  0  0  1  1',
                 #                   (shifted) QBV                     nr.rw
                 KSTREU=[para[1], para[2]],
                 JWSL=Jstreu,
@@ -282,7 +292,8 @@ if 'rhs' in cal:
                 NZE=anz_phot_e,
                 EK0=phot_e_0,
                 EKDIFF=phot_e_d,
-                bnd=helionpath + 'INEN',
+                #bnd=helionpath + 'INEN',
+                bnd='',
                 outfile=slave_pit + inenf)
 
             cmdend = BINLITpath + 'enemb.exe %s %s %s' % (inenf, outfseli,
@@ -304,7 +315,7 @@ if 'rhs' in cal:
             Jstreustring, streukanal)
 
         print('[...] reading BV-rw tupel from %s' % wfn)
-        litbas = np.loadtxt(wfn).astype(int)
+        litbas = [np.loadtxt(wfn).astype(int)[0]]
 
         for lit_zerl in range(len(lfrags2)):
             bsbv = sum([len(b) for b in he_iw])
@@ -324,11 +335,12 @@ if 'rhs' in cal:
             f.close()
 
             for mM in mLmJl:
-                for bv in filter(lambda x: (x[0] in bvrange), litbas):
-                    parameter_set.append([
-                        mM,
-                        int(bv[0] - (bvrange[0] - 1) + bsbv), bv[1], lit_zerl
-                    ])
+                parameter_set.append([mM, 1, 1, lit_zerl])
+                #for bv in filter(lambda x: (x[0] in bvrange), litbas):
+                #    parameter_set.append([
+                #        mM,
+                #        int(bv[0] - (bvrange[0] - 1) + bsbv), bv[1], lit_zerl
+                #    ])
 
             parameter_set_end.append(parameter_set)
 
@@ -354,7 +366,6 @@ if 'rhs' in cal:
         if 'rhs-end' in cal:
             for lit_zerl in range(len(lfrags2)):
                 print('(J=%s)  werkle in %d' % (Jstreu, lit_zerl))
-
                 try:
                     os.system('cp ' + litpath3He + 'tmp_%d/QUAOUT_J%3.1f ' % (
                         lit_zerl,
@@ -366,6 +377,7 @@ if 'rhs' in cal:
                 results = []
                 pool = ThreadPool(anzproc)
                 parameter_set = parameter_set_end[lit_zerl]
+
                 for procnbr in range(len(parameter_set)):
 
                     pars = parameter_set[procnbr]
@@ -550,11 +562,14 @@ if 'lhs' in cal:
                 nzop=31,
                 tni=11,
                 anzb=anzbtmp)
-            subprocess.run([BINBDGpath + 'TDR2END_AK.exe'])
             os.system('cp INEN ' + mypath + 'inen-lit-%s_1-%d' % (streukanal,
                                                                   anzbtmp))
-            os.system('cp %s/MATOUT ' % (litpath3He + 'lit_bas_lhs/') + respath
-                      + 'norm-ham-litME-%s_1-%d' % (streukanal, anzbtmp))
+            #if anzbtmp==anzbs[-1]:
+            #    subprocess.run([BINBDGpath + 'TDR2END_NORMAL.exe'])
+            #    os.system('cp %s/MATOUT ' % (litpath3He + 'lit_bas_lhs/') + respath
+            #          + 'norm-ham-litME-%s_1-%d' % (streukanal, anzbtmp))
+            #os.system('cp ' + v18uixpath + 'mat_* ' + respath)
+            os.system('cp ' + litpath3He + 'tmp_*/*_inhomo* ' + respath)
 
         #plotHspec(Jstreustring)
 
@@ -655,107 +670,7 @@ if 'couple' in cal:
 
             bv_offset += len(zerl_bas)
 
-            if 'plt' in cal:
-                fig = plt.figure(figsize=(12, 6))
-
-                #fig.subplots_adjust(hspace=1.4, wspace=0.4)
-                #for i in range(len(streukas)):
-                i = 0
-
-                ax1 = fig.add_subplot(1, 2, 1)
-                ax1.set_title(r'$J^\pi=%s^%s$' % (Jstreustring,
-                                                  streukanal[-1]))
-                ax1.set_xlabel('photon momentum [MeV]')
-                #ax1.set_title(r'$J^\pi=%d^%s$' % (Jstreu, streukas[i][-1]))
-
-                mLmJl, mLrange, mJlrange = non_zero_couplings(
-                    multipolarity, J0, Jstreu)
-                mM = mLmJl[0]
-                #    for bv in litbas:
-                #        print(photEn)
-                #        print(RHSofmJ[streukas[i]][('%d-%d' % (bv[0], bv[1]),
-                #                                    '%d' % (2 * Jstreu), '%d' % (2 * mM[1]),
-                #                                    '%d' % (2 * multipolarity),
-                #                                    '%d' % (2 * mM[0]))].astype(float), bv[0],
-                #              bv[1], Jstreu, mM)
-                #        exit()
-
-                [
-                    ax1.plot(
-                        photEn,
-                        RHSofBV[streukanal][('%d-%d' % (bv[0], bv[1]), '%d' %
-                                             (2 * Jstreu), '%d' % (2 * mM[1]),
-                                             '%d' % (2 * multipolarity), '%d' %
-                                             (2 * mM[0]))].astype(float))
-                    for bv in litbas
-                ]
-
-                ax2 = fig.add_subplot(1, 2, 2)
-                ax2.set_xlabel('photon momentum [MeV]')
-                ax2.set_ylabel(
-                    r'$\left\langle\,Jm\,\vert\,Jm\,\right\rangle$ [-]')
-                ax2.set_title(r'$J$-coupled RHS')
-
-                [
-                    ax2.plot(
-                        photEn,
-                        np.array(RHSofmJ[streukanal][(
-                            '%d-%d' % (bv[0], bv[1]), '%d' % (2 * Jstreu),
-                            '%d' % (2 * mM[1]),
-                            '%d' % (2 * multipolarity))].astype(float)),
-                        label=r'$BV_{%d}W^{%d}$' % (int(bv[0]), int(bv[1])))
-                    for bv in litbas
-                ]
-
-                box1 = ax1.get_position()
-                ax1.set_position([box1.x0, box1.y0, box1.width, box1.height])
-                box2 = ax2.get_position()
-                ax2.set_position([box2.x0, box2.y0, box2.width, box2.height])
-
-                axins = inset_axes(
-                    ax2,
-                    width="60%",
-                    height="75%",
-                    bbox_to_anchor=(.3, .1, .95, .35),
-                    bbox_transform=ax2.transAxes,
-                    loc=3)
-
-                [
-                    axins.plot(
-                        photEn,
-                        np.array(RHSofmJ[streukanal][(
-                            '%d-%d' % (bv[0], bv[1]), '%d' % (2 * Jstreu),
-                            '%d' % (2 * mM[1]),
-                            '%d' % (2 * multipolarity))].astype(float)),
-                        label=r'$BV_{%d}W^{%d}$' % (int(bv[0]), int(bv[1])))
-                    for bv in litbas
-                ]
-
-                # sub region of the original image
-                x1, x2, y1, y2 = photEn[0], photEn[-1], -0.1, 0.1
-                axins.set_xlim(x1, x2)
-                axins.set_ylim(y1, y2)
-                #axins.set_xticklabels('')
-                #axins.set_yticklabels('')
-
-                #ax2.indicate_inset_zoom(axins)
-
-                fig.savefig('LITrhs_J%s.pdf' % (Jstreustring))
-
-                fig_leg = plt.figure(figsize=(10, 8), dpi=95)
-                ax_leg = fig_leg.add_subplot(111)
-                # add the legend from the previous axes
-                ax_leg.legend(
-                    *ax2.get_legend_handles_labels(),
-                    fontsize=10,
-                    ncol=8,
-                    loc='center')
-                # hide the axes frame and the x/y labels
-                ax_leg.axis('off')
-                ax_leg.set_title(r'coupled-source legend')
-                fig_leg.savefig('LITrhs_legend_J%s.pdf' % (Jstreustring))
-
-                print('RHS vector visualized in <LITrhs_Jxx.pdf>')
+        os.system('rm -rf ' + litpath3He + '/tmp*')
 
 os.chdir(litpath3He)
 

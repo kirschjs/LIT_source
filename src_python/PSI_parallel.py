@@ -12,8 +12,8 @@ from sklearn.neighbors import BallTree
 from diversipy import *
 
 bastypes = streukas
+bastypes = [boundstatekanal] + streukas
 bastypes = [boundstatekanal]
-bastypes = streukas + [boundstatekanal]
 
 for bastype in bastypes:
     angu = channels[bastype]
@@ -45,19 +45,21 @@ for bastype in bastypes:
 
     wli = 'lin'
 
-    bvma = 8
+    bvma = 80
     rvma = 20
+    relPerBV = 5
 
-    if bastype == boundstatekanal:
+    #if bastype == boundstatekanal:
+    if 1 == 1:
 
-        inv_scale_i = 2.0
-        inv_scale_r = 15.0
-        nwinv = 4
+        inv_scale_i = 1.2
+        inv_scale_r = 10.0
+        nwadd = 0
 
         rel_scale = 0.01
 
-        nwint = 8
-        nwrel = 8
+        nwint = 2
+        nwrel = 2
         siffux = '_uix'
         he_iw, he_rw, he_frgs = retrieve_he3_widths(
             pathbase + '/systems/he3/dim70/INQUA_N%s' % siffux)
@@ -72,11 +74,9 @@ for bastype in bastypes:
 
         he_iw = he_rw = he_frgs = ob_stru = lu_stru = sbas = []
 
-        wi, wf, nw = 0.012, 1.02, [
-            np.max([2, int(nwint - np.max([1, int(n[0]) + int(n[1])]))])
-            for n in lfrags
-        ]  # for lit-state continuum
-        mindist_int = 0.01
+        wi, wf, nw = 0.001, 0.85, [nwint
+                                   for n in lfrags]  # for lit-state continuum
+        mindist_int = 0.021
         #mindist_rel = 0.04
         #print('#iw / Z = ', nw, '\n#rw     =  ', nwrel, lfrags)
         #print('3-helium reference structure:\n', he_frgs, '\n', ob_stru, '\n',
@@ -84,22 +84,20 @@ for bastype in bastypes:
 
     else:
 
-        inv_scale_i = 2.0
-        inv_scale_r = 15.0
-        nwinv = 4
+        inv_scale_i = 1.2
+        inv_scale_r = 10.0
+        nwadd = 0
 
         rel_scale = 0.01
 
-        nwint = 8
-        nwrel = 8
+        nwint = 2
+        nwrel = 2
 
         he_iw = he_rw = he_frgs = ob_stru = lu_stru = sbas = []
 
-        wi, wf, nw = 0.01, 0.5, [
-            np.max([2, int(nwint - np.max([1, int(n[0]) + int(n[1])]))])
-            for n in lfrags
-        ]  # for lit-state continuum
-        mindist_int = 0.01
+        wi, wf, nw = 0.001, 0.85, [nwint
+                                   for n in lfrags]  # for lit-state continuum
+        mindist_int = 0.021
         #mindist_rel = 0.1
 
     # to include all reference basis states in the augmented basis
@@ -125,14 +123,14 @@ for bastype in bastypes:
                 np.geomspace(
                     start=wf + offset,
                     stop=inv_scale_i * (2 * wf - wi) + offset,
-                    num=nwinv,
+                    num=nwadd,
                     endpoint=True,
                     dtype=None))
 
             lit_w[frg] = [
                 float(x) for x in np.sort(
                     np.concatenate((lit_w_tmp, lit_w_tmp_add), axis=0))
-            ] if nwinv != 0 else lit_w_tmp
+            ] if nwadd != 0 else lit_w_tmp
 
             lit_w[frg] = sparse(lit_w[frg], mindist=mindist_int)
             #  -- relative widths --------------------------------------------------
@@ -150,14 +148,14 @@ for bastype in bastypes:
             lit_w_add = np.geomspace(
                 start=wfr + offset,
                 stop=inv_scale_r * (2 * wfr - wir) + offset,
-                num=nwinv,
+                num=nwadd,
                 endpoint=True,
                 dtype=None)
 
             lit_w_tmp = [
                 float(x) for x in np.sort(
                     np.concatenate((lit_w_tmp, lit_w_add), axis=0))
-            ] if nwinv != 0 else lit_w_tmp
+            ] if nwadd != 0 else lit_w_tmp
 
             lit_rw[frg] = np.abs(
                 np.sort(np.array(lit_w_tmp).flatten())[::-1].tolist())
@@ -232,14 +230,25 @@ for bastype in bastypes:
             rwind = nearest(widi[n], widr[n])
 
             for m in range(len(widi[n])):
-                if 43 == 43:
+                if 42 == 43:
                     #sbas += [[
                     #    bv,
                     #    [x * ((x + m % 2) % 2) for x in range(len(widr[n]))]
                     #]]
-                    sbas += [[bv, [x for x in range(1, 1 + len(widr[n]))]]]
+                    #sbas += [[bv, [x for x in range(1, 1 + len(widr[n]), 2)]]]
+                    decider = np.random.randint(0, 2)
+                    sbas += [[
+                        bv,
+                        np.sort(
+                            np.unique(
+                                np.random.choice([
+                                    g for g in range(1, len(widr[n]))
+                                    if ((g % 2) == decider)
+                                ], min(relPerBV, len(widr[n])))))
+                    ]]
                 else:
-                    sbas += [[bv, rwind[1][m][::-1][:-7]]]
+                    #sbas += [[bv, rwind[1][m][::-1][:-2]]]
+                    sbas += [[bv, [x for x in range(1, 1 + len(widr[n]), 1)]]]
                 bv += 1
     else:
         sfrags2 = ob_stru
@@ -348,6 +357,8 @@ for bastype in bastypes:
 
     he3inqua(intwi=widi, relwi=widr, potf=potnn)
 
+    #exit()
+
     parallel_mod_of_3inqua(
         lfrags2,
         sfrags2,
@@ -388,16 +399,19 @@ for bastype in bastypes:
         '%d' % anzproc, BINBDGpath + 'UIX_PAR/mpi_drqua_uix'
     ])
     subprocess.run([BINBDGpath + 'UIX_PAR/SAMMEL-uix'])
-    subprocess.run([BINBDGpath + 'TDR2END_AK.exe'])
+    subprocess.run([BINBDGpath + 'TDR2END_NORMAL.exe'])
+    subprocess.call('cp OUTPUT out_normal', shell=True)
+    #rrgm_functions.parse_ev_coeffs_normiert(infil='OUTPUT', plti=bastype)
+    #rrgm_functions.parse_ev_coeffs(infil='OUTPUT', plti=bastype)
 
     suche_fehler()
 
     if bastype == boundstatekanal:
         os.system('cp INQUA_N ' + helionpath + 'INQUA_UIX_ref')
 
-    ew_threshold = 10**(-9)
+    ew_threshold = 10**(-10)
 
-    subprocess.call('cp MATOUT mat_%s' % bastype, shell=True)
+    subprocess.call('cp MATOUT %smat_%s' % (respath, bastype), shell=True)
     matout = [line for line in open('MATOUT')]
 
     goodEVs = smart_ev(matout, ew_threshold)
@@ -405,7 +419,21 @@ for bastype in bastypes:
     print('the good guys: ', np.real(goodEVs[:4]), ' ... ',
           np.real(goodEVs[-4:]))
 
-    subprocess.call('rm ' + v18uixpath + 'TQUAOUT.*', shell=True)
-    subprocess.call('rm ' + v18uixpath + 'TDQUAOUT.*', shell=True)
-    subprocess.call('rm ' + v18uixpath + 'DMOUT.*', shell=True)
-    subprocess.call('rm ' + v18uixpath + 'DRDMOUT.*', shell=True)
+    if (('reduce' in cal) & (bastype == boundstatekanal)):
+
+        reduce_3n(
+            ch=boundstatekanal,
+            size3=290,
+            ncycl=50,
+            maxd=0.005,
+            minc3=50,
+            maxc3=10000,
+            ord=0,
+            tnii=31,
+            delpredd=3,
+            exe=BINBDGpath + 'TDR2END_NORMAL.exe')
+
+    #subprocess.call('rm ' + v18uixpath + 'TQUAOUT.*', shell=True)
+    #subprocess.call('rm ' + v18uixpath + 'TDQUAOUT.*', shell=True)
+    #subprocess.call('rm ' + v18uixpath + 'DMOUT.*', shell=True)
+    #subprocess.call('rm ' + v18uixpath + 'DRDMOUT.*', shell=True)

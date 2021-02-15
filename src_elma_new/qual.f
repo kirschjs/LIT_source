@@ -1,7 +1,5 @@
       PROGRAM QUAL
-      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
-cC
-C
+C  
 C     FUER ELEKTROMAGNETISCHE OPERATOREN OHNE LANGWELLE
 C
 C                KEINE POLYNOME
@@ -52,13 +50,13 @@ C             NDIM .LE. NZBMAX * MZPARM
 C
 C
       PARAMETER (NZAVMA=2*(NZCMAX-1), NZVMAX=NZTMAX-1,
-     *           NDIM4=NZPOMA*NZLWMA,NZMAT=MZGMAX*MZGMAX)
+     *           NDIM4=NZPOMA*NZLWMA)
 C
 C
-      COMMON /LUP/ WERTL(NDIM4,NDIM4), EPO(NDIM1),
-     *             KVK(NDIM1), JQ(NDIM1), INDPO(NDIM1),
-     *             MVK(NZIQMA,NDIM1), NDIM3,
-     *             IZ, JZ, KZHV(2,2*NZAVMA), LUPAUS, IQM
+      COMMON /LUP/ KVK(NDIM1), JQ(NDIM1), INDPO(NDIM1),
+     *             MVK(NZIQMA,NDIM1), EPO(NDIM1), NDIM3,
+     *             IZ, JZ, KZHV(2,2*NZAVMA), LUPAUS, IQM,
+     *             WERTL(NDIM4,NDIM4)
 C
       COMMON /LUP2/ NDIM4H, MUL, INDEX(NDIM1), LINT(NZAVMA,NDIM1),
      *              LSUM(NDIM1), NDIM2H
@@ -70,8 +68,8 @@ C
 C
       COMMON /BEG/ IZLURE, NBAUS, JWIED, NZAVZU
 C
-      COMMON /CSH/ NSH1(NDIM5), NSH2(NDIM5),
-     *             SH(NDIM5), NSH, NDIMH
+      COMMON /CSH/ NDIMH, NSH1(NDIM5), NSH2(NDIM5),
+     *             SH(NDIM5), NSH
 C
       COMMON /HPT/ VZ(NZVMAX,NZVMAX),QO(NZVMAX,NZVMAX),
      *                 QOR(NZVMAX,NZVMAX)
@@ -105,21 +103,23 @@ C
      *          KP(NZCMAX-1,NZPOMA,NZFMAX)
       DIMENSION LREG1(NZOPER), NZRHO1(NZFMAX), ITPO(NZFMAX),
      *          LC1(NZTMAX), IND(NZRHOM,NZRHOM)
-
-      DIMENSION UM(MZGMAX*MZGMAX),IMV(NZMAT)
 C
-      OPEN(UNIT=3,STATUS='SCRATCH',FORM='UNFORMATTED')
-      OPEN(UNIT=4,STATUS='SCRATCH',FORM='UNFORMATTED')
+      OPEN(UNIT=3,STATUS='SCRATCH',FORM='UNFORMATTED',
+     *     RECL=(1+NZTMAX+MZGMAX*MZGMAX)*8)
+      OPEN(UNIT=4,STATUS='SCRATCH',FORM='UNFORMATTED',
+     *     RECL=(5+(1+NDIM2)*MZPARM*MZPARM)*8)
       OPEN(UNIT=5,FILE='INQUA',STATUS='OLD')
       OPEN(UNIT=6,FILE='OUTPUT')
+c      OPEN(UNIT=17,FILE='OUTBAND')
       OPEN(UNIT=8,FILE='OBOUT',STATUS='OLD',FORM='UNFORMATTED')
       OPEN(UNIT=9,FILE='LUOUT',STATUS='OLD',FORM='UNFORMATTED')
-      OPEN(UNIT=10,FILE='QUAOUT',STATUS='UNKNOWN',FORM='UNFORMATTED')
-      OPEN(UNIT=12,FILE='QUAALT',STATUS='UNKNOWN',FORM='UNFORMATTED')
-      OPEN(UNIT=17 ,FILE='OUTBAND',
-     $        STATUS='REPLACE', FORM='FORMATTED')
+      OPEN(UNIT=10,FILE='QUAOUT',STATUS='UNKNOWN',FORM='UNFORMATTED',
+     *     RECL=(5+(1+NDIM2)*MZPARM*MZPARM)*8)
+      OPEN(UNIT=12,FILE='QUAALT',STATUS='UNKNOWN',FORM='UNFORMATTED',
+     *     RECL=(5+(1+NDIM2)*MZPARM*MZPARM)*8)
 C
 C  
+
       NDIMH=NDIM
       NDIM1H=NDIM1
       NDIM2H=NDIM2
@@ -127,6 +127,7 @@ C
       NDIM4H=NDIM4
       INPUT=5
       NOUT=6
+c      NOUTB=17
       PHI=3.1415926536
       PHI2 =  SQRT(PHI)
       NQ = NZBMAX * NZBMAX
@@ -326,7 +327,7 @@ C
 c        write(nout,*) K,'/',NZF
 C      NZPAR: ANZAHL DER SAETZTE INNERER WEITEN
 C      MZPAR: ANZAHL DER RADIALWEITEN
-C
+C canonically, NZRHO is equal to the number of internal widths NZPAR
        LM = NZPAR(K)
        KM=MZPAR(K)
        IF(LM.LE.NZPARM) GOTO 390
@@ -352,6 +353,8 @@ C
 C
        DO 240 N=1,KK
         READ(INPUT,1002) NUM(1,N,K),NUM(2,N,K),NUM(4,N,K)
+C        
+        NUM(4,N,K)=MAX(1,NUM(4,N,K))
         NUM(3,N,K)=I+N
 C       NUM(3,.,.)  NUMMER DES BASISVEKTORS
 C       NUM(1,.,.)    "    DER SPINFUNKTION DES BASISVEKTORS
@@ -447,6 +450,8 @@ C
 C
 C     AUSSCHREIBEN DER BISHERIGEN WERTE AUS NBAND1
       WRITE(NBAND1) NZF,MUL,(LREG(K),K=1,NZOPER),I,(NZRHO(K),K=1,NZF)
+c      write(6,*) '(nband1): ',
+c     *  NZF,MUL,(LREG(K),K=1,NZOPER),I,(NZRHO(K),K=1,NZF)
       DO 950  K = 1,NZF
       M=MZG(K)
       N3=MZPAR(K)
@@ -460,8 +465,12 @@ C     AUSSCHREIBEN DER BISHERIGEN WERTE AUS NBAND1
       WRITE(NBAND1) N3,MMASSE(1,N1,K),MMASSE(2,N1,K),MLAD(1,N1,K),
      1 MLAD(2,N1,K),MSS(1,N1,K),MSS(2,N1,K),MS(N1,K),
      2 (LZWERT(L,N2,K),L=1,5),(RPAR(L,K),L=1,N3),KP(MC1,N4,K)
+c      WRITE(6,*) '(nband1): ',
+c     *  N3,MMASSE(1,N1,K),MMASSE(2,N1,K),MLAD(1,N1,K),
+c     1 MLAD(2,N1,K),MSS(1,N1,K),MSS(2,N1,K),MS(N1,K),
+c     2 (LZWERT(L,N2,K),L=1,5),(RPAR(L,K),L=1,N3),KP(MC1,N4,K)     
  4536 CONTINUE
-      IF(NBAND5.LE.0) GOTO810
+      IF(NBAND5.LE.0) GOTO 810
        IF(K.GT.NZF1)GOTO 810
        KK1=NZRHO1(K)
       DO 813 N=1,KK1
@@ -499,7 +508,7 @@ C
 C     LOOP ZERLEGUNGEN RECHTS
 C
       JZLW=NZLW(MFR)
-       JZPW=NZPO(MFR)
+      JZPW=NZPO(MFR)
       JRHO=NZRHO(MFR)
       JK1=MZPAR(MFR)
       WRITE (NOUT,3009) MFL, MFR
@@ -527,7 +536,8 @@ C
       KWIED=0
       NZAVZU=0
 C             1   2   3   4   5   6   7   8   9 SiP SiN      
-      GOTO (401,402,403,404,405,406,407,408,409,410,411,412,413,414),MKC
+      GOTO (401,402,403,404,405,406,407,408,409,410,411,
+     1      412,413,414),MKC
 401   IF (LREG(MKC).EQ.1) WRITE(NOUT,1011)
       GOTO 420
 402   IF (LREG(MKC).EQ.1) WRITE(NOUT,1012) MUL
@@ -580,7 +590,7 @@ C     EINLESEN DER SPIN-ISOSPINMATRIXELEMENTE AUS OBER
       NR = MZG(MFR)
       IF(NREG(MKC).LE.0) GOTO 440
       READ(NBAND2) NTE,NTE,NTE
-      write(nout,*) 'NTE,NTE,NTE',NTE,NTE,NTE
+c      write(nout,*) '<> NTE,NTE,NTE',NTE,NTE,NTE
       NTEH=NTE
       IF (LREG(MKC).EQ.0) GOTO 425
       IF (KOM(MKC,MFL,MFR)) 421,422,423
@@ -592,28 +602,16 @@ C     EINLESEN DER SPIN-ISOSPINMATRIXELEMENTE AUS OBER
   425 CONTINUE
       IF(NTE.LE.0) GOTO 440
       DO 430   MTE = 1,NTE
-C       READ(NBAND2)    NT1,(LC(K),K=1,NZT),
-C     1   ((U(NFL,NFR),NFL=  1,NL),NFR=1,NR)
-       READ(NBAND2)    NT1,IMQ,(LC(K),K=1,NZT),
-     1   (IMV(I10),UM(I10),I10=1,IMQ)
-
-      DO 11 J=1,NR
-      DO 11 I=1,NL
-      U(J,M)= 0.
-11    CONTINUE
-      DO 12 IK=1,IMQ
-      I= IMV(IK)/NR
-      IM=MOD(IMV(IK),NR)
-      J=IM
-12    U(I+1,J+1)=UM(IK)
-
+       READ(NBAND2)    NT1,(LC(K),K=1,NZT),
+     1   ((U(NFL,NFR),NFL=  1,NL),NFR=1,NR)
+c      write(nout,*) '<>  ',NT1,(LC(K),K=1,NZT),
+c     1   ((U(NFL,NFR),NFL=  1,NL),NFR=1,NR)     
        IF(MOBAUS.EQ.0) GOTO 426
        IF(LREG(MKC).EQ.0) GOTO 426
        WRITE (NOUT,838) NT1,(LC(K),K=1,NZT)
  838   FORMAT (/,1X,'VON OBEM',20I3)
        IF(MOBAUS.LT.2) GOTO 426
-       WRITE (NOUT,839) (UM(I10),I10=1,IMQ)
-       WRITE (NOUT,839) ((U(NFL,NFR),NFL=1,NL),NFR=1,NR)       
+       WRITE (NOUT,839) ((U(NFL,NFR),NFL=1,NL),NFR=1,NR)
  839   FORMAT (1P10E12.4)
 C
 426    CONTINUE
@@ -636,7 +634,8 @@ C
 440   KH=INT(MKC/2)+1
       IF (IENT(KH).LE.0) GOTO 42
 C            1   2           5   6             SiP SiN
-      GOTO(450,450,460,450,460,450,460,450,460,450,460,450,460,445),MKC
+      GOTO(450,450,460,450,460,450,460,450,460,450,460,
+     1     450,460,445),MKC
 445   STOP 8
 450   CALL LURE (MKC,ITV2)
 C     EINLESEN DER ELEMENTE AUS LUISE
@@ -649,12 +648,11 @@ C
       DO 490 M=1,NZT
   490 LC1(M)=0
       IF (NBAND5 .NE. 0) READ(NBAND5)
-
-
-      WRITE(NBAND1) NTE,NC,ND,ITV2
+c      WRITE(NBAND1) NTE,NC,ND,ITV2
+c      WRITE(6,*) '(nband1): ',NTE,NC,ND,ITV2
+      DM = 0.
       IF (NTE*ITV2.LE.0) GOTO 900
 C
-c      stop 8472 
 C
       DO 44 MTE=1,NTE
 C     LOOP DC'S
@@ -712,7 +710,7 @@ C
 C
 C
   700 DO 60   KPAR = 1,NC
-C     LOOP INNERE WEITEN LINKS
+C     LOOP INNERE WEITEN LINS
 C
       DO 62   M = 1,NZV
       DO 62   N = 1,M
@@ -722,6 +720,7 @@ C
       DO 63   K = 1,MC3
 63    POL (M,M)=POL (M,M) + CPAR(K,KPAR,MFL)*QFCL(M,K)
    64 CONTINUE
+C
 C
       DO 70 LPAR=1,ND
 C     LOOP INNERE WEITEN RECHTS
@@ -742,94 +741,87 @@ C
 C
 710   CONTINUE
       REWIND NBAND7
-      DO 730, MM=1, IRHO
-       DO 720, NN=1, JRHO
-        IND(MM,NN)=0
-720    CONTINUE
-730   CONTINUE
-      IF (NBAND5.NE.0) READ (NBAND5) ((IND(MM,NN),NN=1,JRHO),
-     *                                            MM=1,IRHO)
-      IZRS=((IRHO-1)/(NDIM/IK1))+1
-      JZRS=((JRHO-1)/(NDIM/JK1))+1
-      write(nout,*)'IZRS,IRHO,NDIM,IK1: ',IZRS,IRHO,NDIM,IK1
-      write(nout,*)'JZRS,JRHO,NDIM,JK1: ',JZRS,JRHO,NDIM,JK1
-      stop 666
-      DO 880, KZRS=1,IZRS
-C     LOOP BASISVEKTOREN*RADIALPARAMETER LINKS -- this and the 870 loop
-c are most likely artefacts because if I/JZRS must always be 1 otherwise
-c a runtime error should occur        
-C
-      MKANA=(KZRS-1)*(NDIM/IK1)+1
-      MKANE=MIN0(KZRS*(NDIM/IK1),IRHO)
-      MKANZ=MKANE-MKANA+1
+c      IF (NBAND5.NE.0) READ (NBAND5) ((IND(MM,NN),NN=1,JRHO),
+c     *                                            MM=1,IRHO)
+c      IZRS=((IRHO-1)/(NDIM/IK1))+1
+c      JZRS=((JRHO-1)/(NDIM/JK1))+1
+
+c      DO 880, KZRS=1,IZRS
+C     LOOP BASISVEKTOREN*RADIALPARAMETER LINKS
+C IK1 = MZPAR(K) = ANZ rad par links
+C NDIM = dim of the full matrix for all zerl
+C I/JRS are set large enough to fit the respective zerl if NDIM was chosen
+C appropriately (this is cumbersome and F77 array gymnastic)        
+c      MKANA=(KZRS-1)*(NDIM/IK1)+1
+c      MKANE=MIN0(KZRS*(NDIM/IK1),IRHO)
+c      MKANZ=MKANE-MKANA+1
 C
 C
-      DO 870, LZRS=1,JZRS
+c      DO 870, LZRS=1,JZRS
 C     LOOP BASISVEKTOREN*RADIALPARAMETER RECHTS
 C
-      NKANA=(LZRS-1)*(NDIM/JK1)+1
-      NKANE=MIN0(LZRS*(NDIM/JK1),JRHO)
-      NKANZ=NKANE-NKANA+1
-      IF (MFR.EQ.MFL.AND.MKANE.LT.NKANA) GOTO 870
+c      NKANA=(LZRS-1)*(NDIM/JK1)+1
+c      NKANE=MIN0(LZRS*(NDIM/JK1),JRHO)
+c      NKANZ=NKANE-NKANA+1
+c      IF (MFR.EQ.MFL.AND.MKANE.LT.NKANA) GOTO 870
 C
 C     FOLGENDER PROGRAMMTEIL DIENT NUR ZUM KOPIEREN BEI NBAND5#0
-      IF(KOM(MKC,MFL,MFR).EQ.0) GOTO 95
-      DO 540, M=1, MKANZ
-      MM=M-1+MKANA
+c      IF(KOM(MKC,MFL,MFR).EQ.0) GOTO 95
+c      DO 540, M=1, MKANZ
+c      MM=M-1+MKANA
+cC
+c      DO 530, N=1, NKANZ
+c      NN=N-1+NKANA
+cC
+c      IF (IND(MM,NN).EQ.0) GOTO 530
+c      READ (NBAND5) NUML,NUMR,IK1H,JK2H,LL1,
+c     *              ((F(K,L),(JHI,DM(K,L,J),J=1,LL1),L=1,JK1),
+c     *                                               K=1,IK1)
+c      IF(KOM(MKC,MFL,MFR).LE.0) GOTO 530
+c      WRITE (NBAND7) NUML,NUMR,IK1H,JK2H,LL1,
+c     *               ((F(K,L),(DM(K,L,J),J=1,LL1),L=1,JK1),
+c     *                                            K=1,IK1)
+c 530   CONTINUE
+c  540 CONTINUE
+c      IF(KOM(MKC,MFL,MFR).GT.0) GOTO 870
+c 95    CONTINUE
 C
-      DO 530, N=1, NKANZ
-      NN=N-1+NKANA
 C
-      IF (IND(MM,NN).EQ.0) GOTO 530
-      READ (NBAND5) NUML,NUMR,IK1H,JK2H,LL1,
-     *              ((F(K,L),(JHI,DM(K,L,J),J=1,LL1),L=1,JK1),
-     *                                               K=1,IK1)
-      IF(KOM(MKC,MFL,MFR).LE.0) GOTO 530
-      WRITE (NBAND7) NUML,NUMR,IK1H,JK2H,LL1,
-     *               ((F(K,L),(DM(K,L,J),J=1,LL1),L=1,JK1),
-     *                                            K=1,IK1)
-530   CONTINUE
-  540 CONTINUE
-      IF(KOM(MKC,MFL,MFR).GT.0) GOTO 870
-95    CONTINUE
+c      DO 150 K1 = 1,NDIM
+c      DO 150 K2 = 1,NDIM
+c      DO 150 K3 = 1,NDIM2
+c      DM(K1,K2,K3) = .0
+c  150 CONTINUE
 C
 C
-      DO 150 K1 = 1,NDIM
-      DO 150 K2 = 1,NDIM
-      DO 150 K3 = 1,NDIM2
-      DM(K1,K2,K3) = .0
-  150 CONTINUE
       I=0
-C
-C
-      DO 101 M=1,MKANZ
+      DO 101 M=1,IRHO
 C     LOOP BASISVEKTOREN LINKS
 C
-      MM = M-1+MKANA
-      KSL = NUM(1,MM,MFL)
-      KLL = NUM(2,MM,MFL)
-      KPL=NUM(4,MM,MFL)
-C      JPL=(KPL-1)*NDIM3+KLL
-      JPL=KPL*NDIM3+KLL      
-      NUML = NUM(3,MM,MFL)
-      TS = COF(KPAR,MM,MFL)
+c      MM = M-1+MKANA
+      KSL = NUM(1,M,MFL)
+      KLL = NUM(2,M,MFL)
+      KPL=NUM(4,M,MFL)
+      JPL=(KPL-1)*NDIM3+KLL
+c      JPL=KPL*NDIM3+KLL      
+      NUML = NUM(3,M,MFL)
+      TS = COF(KPAR,M,MFL)
       IF (ABS(TS).LT.1.E-10) GOTO 101
       MADL = (M-1) * IK1
 C
 C
-      DO 105 N=1,NKANZ
+      DO 105 N=1,JRHO
 C     LOOP BASISVEKTOREN RECHTS
 C
-      NN = N-1+NKANA
-      KSR = NUM(1,NN,MFR)
-      KLR = NUM(2,NN,MFR)
-      KPR=NUM(4,NN,MFR)
-C      JPR=(KPR-1)*NDIM3+KLR
-      JPR=KPR*NDIM3+KLR      
-      NUMR = NUM(3,NN,MFR)
+c      NN = N-1+NKANA
+      KSR = NUM(1,N,MFR)
+      KLR = NUM(2,N,MFR)
+      KPR = NUM(4,N,MFR)
+      JPR = (KPR-1)*NDIM3+KLR
+      NUMR = NUM(3,N,MFR)
       IF (NUML.LT.NUMR) GOTO 105
       IF(WERTL(JPL,JPR).NE.1.) GOTO 105
-      A = TS * U(KSL,KSR)*COF(LPAR,NN,MFR)
+      A = TS * U(KSL,KSR)*COF(LPAR,N,MFR)
       IF(ABS(A).LT.1.E-20) GOTO 105
       MADR = (N-1) * JK1
       IF (I.LT.NDIM5) GOTO 110
@@ -849,7 +841,7 @@ C     ENDE LOOP BASISVEKTOREN LINKS
  101  CONTINUE
 C
       NSH = I
-      IF (NSH.EQ.0) GOTO 80
+      IF (NSH.EQ.0) GOTO 70
       DO 72   M = 1,NZV
       DO 72   N = 1,NZV
    72 POR(M,N) = .0
@@ -881,90 +873,6 @@ C
 C     ENDE LOOP RADIALWEITEN RECHTS
    76 CONTINUE
 C
-C >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-   80 DO 480 M=1,MKANZ
-C     LOOP BASISVEKTOREN LINKS      1...NZRHO(L)
-C
-      MM=M-1+MKANA
-      NUML=NUM(3,MM,MFL)
-C
-C
-      DO 481 N=1,NKANZ
-C     LOOP BASISVEKTOREN RECHTS     1...NZRHO(R)
-C
-      NN=N-1+NKANA
-      NUMR=NUM(3,NN,MFR)
-      IF(NUML.LT.NUMR) GOTO 481
-      NUHILF = NZBMAX*(NUML-1) + NUMR
-      LL1 = LAHI(NUHILF)
-      M1=(M-1)*IK1+1
-      M2=M*IK1
-      N1=(N-1)*JK1+1
-      N2=N*JK1
-      A = 0.
-C this loop is always M1,N1=1...M2,N2=#relwR,L      
-      DO 510 K=M1,M2
-      DO 510 L=N1,N2
-      DO 510 J=1,LL1
-      IF(NAUS.LT.7) GOTO 511
-      WRITE(NOUT,516) DM(K,L,J)
-  516 FORMAT(1X,' QUADI: DM = ',E16.8/)
-  511 A = A + ABS(DM(K,L,J))
-  510 CONTINUE
-      IF (A.NE.0.) IND(MM,NN)=1
-      IF(NAUS.GT.4) WRITE(NOUT,1002)NUML,NUMR,IK1,JK1,LL1,IND(MM,NN)
-      IF(IND(MM,NN).EQ.0) GOTO 481
-      WRITE (NBAND7) NUML, NUMR, IK1, JK1, LL1,
-     *               ((F(K,L),(DM(K,L,J),J=1,LL1),L=N1,N2)
-     *                           ,K=M1,M2)
-      IF(NAUS.LT.5) GOTO 481
-      DO 520 K=M1,M2
-      DO 520 L=N1,N2
-520   WRITE(NOUT,1051) F(K,L),(J-1,DM(K,L,J),J=1,LL1)
-C
-C     ENDE LOOP BASISVEKTOREN RECHTS
-  481 CONTINUE
-C
-C     ENDE LOOP BASISVEKTOREN LINKS
-  480 CONTINUE
-C >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-C     ENDE LOOP BASISVEKTOREN*RADIALPARAMETER RECHTS --- ARTI
-870   CONTINUE
-C
-C     ENDE LOOP BASISVEKTOREN*RADIALPARAMETER LINKS  --- ARTI
-880   CONTINUE
-C
-C
-C     AUSSCHREIBEN DER ERGEBNISSE AUF NBAND1
-C
-      WRITE (NBAND1) ((IND(MM,NN), NN=1, JRHO), MM=1, IRHO)
-      WRITE (17,*) ((IND(MM,NN), NN=1, JRHO), MM=1, IRHO)
-      REWIND NBAND7
-C
-      DO 920, MM=1, IRHO
-C     LOOP BASISVEKTOREN LINKS
-C
-      DO 910, NN=1, JRHO
-C     LOOP BASISVEKTOREN RECHTS
-C
-      IF (IND(MM,NN).EQ.0) GOTO 910
-      READ (NBAND7) NUML, NUMR, IK1H, JK1H, LL1,
-     *              ((F(K,L),(DM(K,L,J),J=1,LL1),L=1,JK1),
-     *                                                K=1,IK1)
-      WRITE (NBAND1) NUML, NUMR, IK1H, JK1H, LL1,
-     *               ((F(K,L),(J-1,DM(K,L,J),J=1,LL1),L=1,JK1),
-     *                                                K=1,IK1)
-      WRITE (17,*) NUML, NUMR, IK1H, JK1H, LL1,
-     *               ((F(K,L),(J-1,DM(K,L,J),J=1,LL1),L=1,JK1),
-     *                                                K=1,IK1)
-C
-C     ENDE LOOP BASISVEKTOREN RECHTS
-910   CONTINUE
-C
-C     ENDE LOOP BASISVEKTOREN LINKS
-920   CONTINUE
-C
-C
       IF (JWIED.EQ.0) GOTO 70
       JWIED=0
       GOTO 708
@@ -980,10 +888,63 @@ C     ENDE LOOP DC'S
 C
   900 CONTINUE
 C
+      I = 1
+      DO 480 M=1,IRHO
+C     LOOP BASISVEKTOREN LINKS
+C
+      NUML=NUM(3,M,MFL)
+C
+C
+      DO 481 N=1,JRHO
+C     LOOP BASISVEKTOREN RECHTS
+C
+      NUMR=NUM(3,N,MFR)
+      IF(NUML.LT.NUMR) GOTO 482
+      NUHILF = NZBMAX*(NUML-1) + NUMR
+      LL1 = LAHI(I)
+      M1=(M-1)*IK1+1
+      M2=M*IK1
+      N1=(N-1)*JK1+1
+      N2=N*JK1
+      II1 = 1
+      A = 0.
+      DO 510 K=M1,M2
+      DO 510 L=N1,N2
+      DO 510 J=1,LL1
+      A = A + ABS(DM(K,L,J))
+  510 CONTINUE
+      IF (A.GT.0) GOTO 512
+      WRITE (NBAND1) NUML, NUMR, IK1, JK1, LL1,
+     *               ((F(K,L),(J-1,DM(K,L,J),J=1,LL1),K=1,IK1),
+     *                                                L=1,JK1)
+      IF(NAUS.LT.2) GOTO 482
+      WRITE (nout,'(A19,5I3)') '(nband1-nullreco): ',
+     * NUML, NUMR, IK1, JK1, LL1
+      WRITE (nout,'(A19,2F8.4)') '(nband1-nullreco): ',
+     * F(K,L),DM(1,1,1)
+      GOTO 482
+512   WRITE (NBAND1) NUML, NUMR, IK1, JK1, LL1,
+     *               ((F(K,L),(J-1,DM(K,L,J),J=1,LL1),K=M1,M2),
+     *                                                L=N1,N2)
+      IF(NAUS.LT.2) GOTO 482
+      WRITE (nout,'(A10,5I3)') '(nband1): ',NUML, NUMR, IK1, JK1, LL1
+      WRITE (nout,*) '(nband1): ',
+     * ((F(K,L),(DM(K,L,J),J=1,LL1),K=M1,M2),L=N1,N2)
+c      DO 520 K=M1,M2
+c      DO 520 L=N1,N2
+c 520   WRITE(NOUT,1051) F(K,L),(J-1,DM(K,L,J),J=1,LL1)
+C
+  482 I = I + 1
+C     ENDE LOOP BASISVEKTOREN RECHTS in ZERLEGUNG (40)
+  481 CONTINUE
+C
+C     ENDE LOOP BASISVEKTOREN LINKS in ZERLEGUNG (40)
+  480 CONTINUE
+C
 C     ENDE LOOP OPERATOREN
    42 CONTINUE
 C
-C       ENDE LOOP'S ZERLEGUNGEN RECHTS *UND* LINKS
+C       ENDE LOOP'S ZERLEGUNGEN RECHTS UND LINKS
    40 CONTINUE
 C
       WRITE(NOUT,3010)
@@ -1013,17 +974,16 @@ C
 6100  FORMAT(/31H ES WIRD VOELLIG NEU GERECHNET /)
       END
       SUBROUTINE LURE (MKC,KZAHL)
-      IMPLICIT DOUBLE PRECISION (A-H,O-Z)        
 C     LURE LIEST DIE RECORDS AUS LUISE EIN
 C
       INCLUDE 'par/QUAL'
 C
       PARAMETER (NZAVMA=2*(NZCMAX-1), NDIM4=NZPOMA*NZLWMA)
 C
-      COMMON /LUP/ WERTL(NDIM4,NDIM4), EPO(NDIM1),
-     *             KVK(NDIM1), JQ(NDIM1), INDPO(NDIM1),
-     *             MVK(NZIQMA,NDIM1), NDIM3,
-     *             IZ, JZ, KZHV(2,2*NZAVMA), LUPAUS, IQM
+      COMMON /LUP/ KVK(NDIM1), JQ(NDIM1), INDPO(NDIM1),
+     *             MVK(NZIQMA,NDIM1), EPO(NDIM1), NDIM3,
+     *             IZ, JZ, KZHV(2,2*NZAVMA), LUPAUS, IQM,
+     *             WERTL(NDIM4,NDIM4)
 C
       COMMON /LUP2/ NDIM4H, MUL, INDEX(NDIM1), LINT(NZAVMA,NDIM1),
      *              LSUM(NDIM1), NDIM2H
@@ -1070,7 +1030,6 @@ C
 1001  FORMAT(1X,'GESAMTRECORD AUS LUISE ZU LANG',3I10)
       END
       SUBROUTINE FAPOR(IA,IE)
-      IMPLICIT DOUBLE PRECISION (A-H,O-Z)        
 C     FAPOR REPRODUZIERT DIE DREHIMPULS- UND POLYNOMSTRUKTUR
 C     DES MATRIXELEMENTS AUS INDPO UND DIE INNEREN DREHIMPULSE
 C     AUS INDEX
@@ -1079,10 +1038,10 @@ C
 C
       PARAMETER (NZAVMA=2*(NZCMAX-1), NDIM4=NZPOMA*NZLWMA)
 C
-      COMMON /LUP/ WERTL(NDIM4,NDIM4), EPO(NDIM1),
-     *             KVK(NDIM1), JQ(NDIM1), INDPO(NDIM1),
-     *             MVK(NZIQMA,NDIM1), NDIM3,
-     *             IZ, JZ, KZHV(2,2*NZAVMA), LUPAUS, IQM
+      COMMON /LUP/ KVK(NDIM1), JQ(NDIM1), INDPO(NDIM1),
+     *             MVK(NZIQMA,NDIM1), EPO(NDIM1), NDIM3,
+     *             IZ, JZ, KZHV(2,2*NZAVMA), LUPAUS, IQM,
+     *             WERTL(NDIM4,NDIM4)
 C
       COMMON /LUP2/ NDIM4H, MUL, INDEX(NDIM1), LINT(NZAVMA,NDIM1),
      *              LSUM(NDIM1), NDIM2H
@@ -1134,13 +1093,12 @@ C
      *       'LSUM(',I4,')/2*1:',I4,'   NDIM2:',I4)
       END
       SUBROUTINE BEGRI
-      IMPLICIT DOUBLE PRECISION (A-H,O-Z)        
 C
 C     BEGRI BESTIMMT DIE SIGMAFAKTOREN, DIE ALPHAS UND DIE VORFAKTOREN DER
 C     ORTSRAUMATRIXELEMENTE, SUMMIERT UEBER ALLE RECORDS AUS LUISE EINES
 C     OPERATORS AUS UND SPEICHERT DAS ERGEBNIS DES RED. ORTSRAUMMATRIXELEMENTS
 C     IN DIE FELDER DMM UND DEN EXPONENTIALVORFAKTOR IN FG AB
-C
+C 
       INCLUDE 'par/QUAL'
 
       PARAMETER (NZAVMA=2*(NZCMAX-1), NZVMAX=NZTMAX-1,
@@ -1150,8 +1108,8 @@ C
 C
       COMMON /BIG/ DM(NDIM,NDIM,NDIM2), F(NDIM,NDIM)
 C
-      COMMON /CSH/ NSH1(NDIM5), NSH2(NDIM5),
-     *             SH(NDIM5), NSH, NDIMH
+      COMMON /CSH/ NDIMH, NSH1(NDIM5), NSH2(NDIM5),
+     *             SH(NDIM5), NSH
 C
       COMMON /HPT/ VZ(NZVMAX,NZVMAX),QO(NZVMAX,NZVMAX),
      *                QOR(NZVMAX,NZVMAX)
@@ -1409,8 +1367,8 @@ C
 210   CONTINUE
 C     ALLE OPERATOREN
 C
-C     BERECHNUNG DER SIGMAFAKTOREN UND AUFSUMMATION DER ZUSAMMENGEHOERIGEN
-C     ORTSRAUMMATRIXELEMENTE IN MAT
+C BERECHNUNG DER SIGMAFAKTOREN UND AUFSUMMATION DER ZUSAMMENGEHOERIGEN
+C ORTSRAUMMATRIXELEMENTE IN MAT
       NQ=IZLURE
       CALL MAT(H,SS,NQ,ALPHAS)
 C
@@ -1419,19 +1377,18 @@ C     ADREESRECHNUNG UND BESTIMMUNG VON DMM
       DO 100 M=1,NSH
        I2 = NSH2(M)
        LL1 = LAMB(I2)
-       MHI = NUHI(M)
-       LAHI(MHI) = LL1
+C       MHI = NUHI(M)
+       LAHI(M) = LL1
        DO 100 K = 1,LL1
         C = SH(M) * WERTT(I2,K)
-c        write(6,53)MKC,SH(M) , WERTT(I2,K)
-        IF (C.EQ.0.) GOTO 100
+c        IF (C.EQ.0.) GOTO 100
         I1 = NSH1(M) + I0
         FGG(I1) = FG
         DMM(I1,K) = SH(M) * WERTT(I2,K)
         IF(NBAUS.EQ.0) GOTO 100
-        write(6,50) M,NSH,K,LL1,SH(M),WERTT(I2,K),DMM(I1,K),FG
+        write(6,50) I1,NSH,K,LL1,SH(M),WERTT(I2,K),DMM(I1,K),FG
 c        PRINT 50,M,NSH,K,LL1,SH(M),WERTT(I2,K),DMM(I1,K),FG
-   50 FORMAT(' BEGRI: M, NSH, K, LL1, SH(M), WERTT, DMM, FG:',
+   50 FORMAT(' BEGRI: I1, NSH, K, LL1, SH(M), WERTT, DMM, FG:',
      $ 4I4,4E16.8/)
    53 FORMAT(' BEGRI: MKC, SH(M), WERTT:',
      $ 1I4,2E16.8/)   
@@ -1442,7 +1399,6 @@ C     ENDE LOOP RADIALPARAMETER LI
       RETURN
       END
       SUBROUTINE HAUPT(MKC, NZV)
-      IMPLICIT DOUBLE PRECISION (A-H,O-Z)        
 C    HAUPT FUEHRT HAUPTACHSENTRANSFORMATION DURCH
 C    TRANSFORMATION IN VZ, HAUPTACHSENWERTE IN QO
 C
@@ -1474,7 +1430,6 @@ C
       RETURN
        END
       SUBROUTINE MAT(H,SIGMA,NQ,ALPHA)
-      IMPLICIT DOUBLE PRECISION (A-H,O-Z)        
 C     MAT BERECHNET MIT DEN SIGMA'S UND ALPHA'S AUS BEGRI
 C     UND DEN MVK'S UND LI'S AUS LUISE DEN WERT DES MATR.-EL.
 C
@@ -1483,10 +1438,10 @@ C
       PARAMETER (NZAVMA=2*(NZCMAX-1), NZVMAX=NZTMAX-1,
      *           NDIM4=NZPOMA*NZLWMA)
 C
-      COMMON /LUP/ WERTL(NDIM4,NDIM4), EPO(NDIM1),
-     *             KVK(NDIM1), JQ(NDIM1), INDPO(NDIM1),
-     *             MVK(NZIQMA,NDIM1), NDIM3,
-     *             IZ, JZ, KZHV(2,2*NZAVMA), LUPAUS, IQM
+      COMMON /LUP/ KVK(NDIM1), JQ(NDIM1), INDPO(NDIM1),
+     *             MVK(NZIQMA,NDIM1), EPO(NDIM1), NDIM3,
+     *             IZ, JZ, KZHV(2,2*NZAVMA), LUPAUS, IQM,
+     *             WERTL(NDIM4,NDIM4)
 C
       COMMON /LUP2/ NDIM4H, MUL, INDEX(NDIM1), LINT(NZAVMA,NDIM1),
      *              LSUM(NDIM1), NDIM2H
@@ -1512,13 +1467,8 @@ C
 C
 10    CONTINUE
 C     ANFANGSWERTZUWEISUNG
-      DO 20   LR = 1,JZ
-       DO 20   LL = 1,IZ
-        I = (LR - 1)*NDIM4 + LL
-        LAMB(I) = 0
-        DO 20   K = 1, NDIM2
-         WERT(LL,LR,K)=0.
-20    CONTINUE
+      LAMB = 0
+      WERT = 0.
 C
 C     EINLESEN DER RECORDLAENGEN DES OPERATORS
 C
@@ -1539,7 +1489,7 @@ C     MAGN. SPINOPERATOR
        IF (MKC.EQ.8.OR.MKC.EQ.9) VORFAK=H(2*N)
        IF (MKC.EQ.12.OR.MKC.EQ.13) VORFAK=H(2*N)
 C
-C      BERECHNUNG DER MATRIXELELMENTE
+C      BERECHNUNG DER MATRIXELELMENTE 
        DO 70 K=K1ZAHL,K2ZAHL
         MM = JQ(K)
         KZOM=LSUM(K)/2+1

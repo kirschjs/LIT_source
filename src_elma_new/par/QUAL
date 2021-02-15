@@ -1,8 +1,8 @@
       PARAMETER (NZOPER=13, NZOPOB=13, NZOPLU=7,  NZTMAX=12,
      *           NZFMAX=50, NZCMAX=6,  MZGMAX=12,  NZLWMA=14,
-     *           NZRHOM=30, MZPARM=30, NZPARM=20, NZBMAX=800,
-     *           NZPOMA=2, NZIQMA=7,  NDIM=600, NDIM1=400,
-     *           NDIM2=20, NDIM5=1000)
+     *           NZRHOM=30, MZPARM=30, NZPARM=30, NZBMAX=1240,
+     *           NZPOMA=2, NZIQMA=7,  NDIM=1040, NDIM1=1040,
+     *           NDIM2=30, NDIM5=140)
 
 C     NZOPER: ANZAHL DER OPERATOREN IN QUAL
 C     NZOPOB:   "     "       "      " OBEM

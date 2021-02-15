@@ -1,0 +1,20 @@
+      PARAMETER (NZOPER=10, NZOPOB=4, NZOPLU=4, NZTMAX=12, 
+     *           NZFMAX=120,  NZCMAX=6, MZGMAX=9, NZLWMA=10, 
+     *           NZRHOM=50, MZPARM=30, NZPARM=9,
+     *           NZPOMA=3, NZIQMA=9, NDIM=440, NDIMR=270, LWMAX=4,
+     *           NDIM1=117500, NDIM5=1600, NOUT=6, NPDC=1000)
+C     NZOPER: ANZAHL DER OPERATOREN IN QUAL
+C     NZOPOB:   "     "       "      " OBEM
+C     NZOPLU:   "     "       "      " LUISE
+C     NZTMAX: MAXIMALE ANZAHL DER TEILCHEN
+C     NZFMAX:    "       "     "  ZERLEGUNGEN
+C     NZCMAX:    "       "     "  CLUSTER
+C     MZGMAX:    "       "     "  SPINFUNKTIONEN
+C     NZLWMA:    "       "     "  DREHIMPULSSTRUKTUREN
+C     NZRHOM:    "       "     "  BASISVEKTOREN EINER ZERLEGUNG
+C     MZPARM:    "       "     "  RADIALPARAMETER
+C     NZPARM:    "       "     "  SAETZE INNERER WEITEN
+C     NZBMAX:    "       "     "  BASISVEKTOREN UEBER ALLE ZERLEGUNGEN
+C     NZPOMA:    "       "     "  POLYNOMSTRUKTUREN
+C     NDIML/R:   "       "    BASISVEKTOREN * RADIALPARAMETER LI/RE
+C             NDIM .LE. NZRHOM * MZPARM
