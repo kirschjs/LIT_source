@@ -43,3 +43,5 @@ sammel: sammel.o
 
 SAMMEL-uix: SAMMEL-uix.o  par.h
 	$(F77) $(FOPTS) $(MAKRO) -o $@ SAMMEL-uix.o $(LIBS)
+
+all: mpi_drqua_v7 SAMMEL-uix clean

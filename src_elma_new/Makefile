@@ -49,3 +49,5 @@ qual_M: qual_M.o par/QUAL
 
 enemb: enemb.o par/ENEMB
 	$(F77) $(FFLAGS) -o enemb.exe enemb.o $(LIBS)
+
+all: luise obem qual qual_M enemb clean

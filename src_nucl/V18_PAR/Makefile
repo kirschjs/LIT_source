@@ -45,3 +45,5 @@ sammel: sammel.o
 
 clean:
 	$(RM) *.o *.exe pvm_tniq *~
+
+all: mpi_quaf_v7 sammel clean
