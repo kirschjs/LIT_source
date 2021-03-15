@@ -1,7 +1,7 @@
       PROGRAM QUAF_S
 C     FUER SMIN STATTDESSEN
 CC    SUBROUTINE QUAF
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       include 'mpif.h'
 C 
 C     FUER ARGONNE-18 POTENTIAL
@@ -1184,7 +1184,7 @@ C     Ende Hauptprogramm
       END
 
       SUBROUTINE CALCU
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
 C
       include "par.h"
 C
@@ -1345,7 +1345,7 @@ C
       DO 81 NKC=1,MKCM
       UU(M,N)=UU(M,N)+WECPOT(IPOT,NKC+2,MKC)*U(M,N,NKC,MTE)*FOP
    81 CONTINUE
-      if(abs(uu(m,n)).lt. 1.e-10) uu(m,n)=0.   
+      if(abs(uu(m,n)).lt. 1.e-17) uu(m,n)=0.   
    82 CONTINUE
       DO 60   KPAR = 1,NC
       DO 62   M = 1,NZV
@@ -1365,7 +1365,7 @@ C
       JPL=(KPL-1)*NZLWMA+KLL
       NUML= NUM(3,M,MFL)
       TS = COF(KPAR,M,MFL)
-      IF (ABS(TS).LT.1.E-10) GOTO 101
+      IF (ABS(TS).LT.1.E-17) GOTO 101
       MADL = (M-1) * IK1
       DO 105 N=1,JRHO
       KSR= NUM(1,N,MFR)
@@ -1376,7 +1376,7 @@ C
       IF (MFL.EQ.MFR .AND. NUML.LT.NUMR) GOTO 105
       IF(WERTL(JPL,JPR).NE.1.) GOTO 105
        A = TS * UU(KSL,KSR)*COF(LPAR,N,MFR)
-      IF(ABS(A).LT.1.E-20) GOTO 105
+      IF(ABS(A).LT.1.E-17) GOTO 105
       MADR = (N-1) * JK1
       IF (I.LT.NDIM5) GOTO 110
 c     WRITE (NOUT,111) I
@@ -1426,7 +1426,7 @@ C
       RETURN
       END
       SUBROUTINE SCORR(POL,POR,Q,NA,F,KORR,NZT,POWE)
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
 C     SCORR BERECHNET DIE KORRELATIONSFUNKTION
 C
       include "par.h"
@@ -1480,7 +1480,7 @@ C
       RETURN
       END
       SUBROUTINE HAUPT
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
 C     HAUPT FUEHRT HAUPTACHSENTRANSFORMATION DURCH
 C     TRANSFORMATION IN VZ, HAUPTACHSENWERTE IN QO
 C
@@ -1510,7 +1510,7 @@ C
       RETURN
       END
       SUBROUTINE BEGRI(NB,FF1,POWE)
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
 C
 C
       include "par.h"
@@ -1825,7 +1825,7 @@ c      WRITE(NOUT,120) M,I1,I2,SH(M),WS,DMM(I1,1),DMM(I1,2)
       STOP '30'
       END
       SUBROUTINE MAT(H,S,NQ)
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
 C
 C
       include "par.h"
@@ -1864,7 +1864,7 @@ c      WRITE(NOUT,*) ' S ',(S(N),N=1,12)
       DO 1 N=NU,NN
       K3ZAHL = KZHV(2,N)
       IF(K3ZAHL.EQ.0) GOTO 1
-      IF(ABS(H(N)).LT.1.E-15)  GOTO 1
+      IF(ABS(H(N)).LT.1.E-17)  GOTO 1
       K1ZAHL = KZHV(1,N) + 1
       K2ZAHL = K1ZAHL + K3ZAHL - 1
       if(jq(k1zahl).ne.jq(k2zahl)) stop 'mehrere jq'
@@ -1914,7 +1914,7 @@ c      wertt(1)=wertt(1)+W
       RETURN
       END
       SUBROUTINE LURE(MKC,ITV2)
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
 C     LURE LIEST MATRIXELEMENTE AUS LUDWIG EIN
 C
       include "par.h"
@@ -1991,7 +1991,7 @@ C
      *       'IIZ, IQM, NZIQMA:',3I4)
       END
       SUBROUTINE FAPOR(IA,IE)
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
 C     FAPOR REPRODUZIERT DIE DREIMPULS- UND POLYNOMSTRUKTUR
 C
       include "par.h"
@@ -2024,7 +2024,7 @@ C
       RETURN
       END
       SUBROUTINE ORDSRT(IIZ,KUNTEH,KOBEH)
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
 C     ORDSRT SORTIERT DEN GESAMTEN COMMONBLOCK LUP NACH AUFSTEIGENDER
 C     ANZAHL VON SIGMAFAKTOREN
       

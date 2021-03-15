@@ -1,5 +1,5 @@
       PROGRAM OBELMA
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
 C    OBERPROGRAMM FUER EINTEILCHENOPERATOREN MIT EINTEILCHEN PUNKTIERTEN
 C     ELEKTROMAGNETISCHE UEBERGAENGE
 C
@@ -451,7 +451,8 @@ C      NBAND3 GESCHRIEBEN
       N3 = NDIM2
       WRITE (NOUT,5000) N1,N2,N3                                        
       IF (N2.GT.N3) GOTO 1021
-      REWIND NBAND3                                                     
+      REWIND NBAND3               
+      WRITE (nout,*) '<>',NNN, NNN, NNN                                      
       WRITE(NBAND2)    NNN,NNN,NNN                                      
       IF(NNN.EQ.0) GOTO 700
 C     MATRIXELEMENTE ZWISCHEN ZUSAMMENGESETZTEN STRUKTUREN              
@@ -529,7 +530,7 @@ C      ENDE LOOP OPERATOREN
       STOP                                                              
       END                                                               
       SUBROUTINE ELEML(MKC)                                             
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
 C     SUBROUTINE ZUR AUFSTELLUNG DER ELEMENTAREN LISTEN                 
 C     WIRD FUER JEDE ZERL. LI. U. RE., JEDEN OPERATOR, JEDES ELEMENTARE
 C     SPIN-ISOSPIN-PRODUKT AUFGERUFEN
@@ -757,7 +758,7 @@ C      LOOP UEBER ALLE PUNKTIERTEN DC
       RETURN                                                            
       END                                                               
       SUBROUTINE PERME(MKC,KENN,NZAHL)
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
 C      PERME WIRD GERUFEN MIT KENN=-1 VON ELEML ZUM AUSDRUCK FUER JEDE
 C      ELEMENTARE SPINFUNKTION
 C      PERME WIRD GERUFEN MIT KENN=1 VON HAUPT IMMER,SCHREIBT REPRESENTA
@@ -836,7 +837,7 @@ C     N1 REPRESENTANT FUER WW TEILCHEN 1
       RETURN                                                            
       END                                                               
       SUBROUTINE DCADD(K)
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
 C     DCADD BERECHNET AUS DER ADRESSE DEN ENTSPRECHENDEN DOPPELNEBEN
 C     KLASSENREPRESENTANTEN ZURUECK
 C     DIESER STEHT IN DC-FORM IN NSH,BZW ALS PERMUTATION IN NZD
@@ -898,7 +899,7 @@ C     REPRESENTANT BESTIMMT
       RETURN
        END
       SUBROUTINE SJACK(K1,LL,MFL)                                       
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
 C     DIESE SUBROUTINE BERECHNET DIE JACOBI KOORDINATEN UND SCHREIBT
 C     SIE AUF BAND
 C     EINGABE !  K1 = ZAHL DER CLUSTER, MFL= NR DER ZERLEGUNG

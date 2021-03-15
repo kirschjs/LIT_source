@@ -852,7 +852,7 @@ C
       UU(M,N)=.0
       DO 81 NKC=1,MKCM
    81 UU(M,N)=UU(M,N)+WECPOT(IPOT,NKC+2,MKC)*U(M,N,NKC,MTE)*FOP
-      if(abs(uu(m,n)).lt. 1.e-10) uu(m,n)=0.
+      if(abs(uu(m,n)).lt. 1.e-20) uu(m,n)=0.
    82 CONTINUE
       DO 60   KPAR = 1,NC
       DO 62   M = 1,NZV
@@ -872,7 +872,7 @@ C
       JPL=(KPL-1)*NZLWMA+KLL
       NUML= NUM(3,M,MFL)
       TS = COF(KPAR,M,MFL)
-      IF (ABS(TS).LT.1.E-10) GOTO 101
+      IF (ABS(TS).LT.1.E-20) GOTO 101
       MADL = (M-1) * IK1
       DO 105 N=1,JRHO
       KSR= NUM(1,N,MFR)

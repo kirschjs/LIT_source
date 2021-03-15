@@ -1,6 +1,6 @@
       PROGRAM ENEMB
 C     ENPON FUER QUAL
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
 C  
 C      ELEKTROMAGNETISCHE UEBERGAENGE ZWISCHEN BOUND STATES OHNE
 C     LANGWELLE (MIT SIEGERTOPERATOR)
@@ -89,7 +89,7 @@ C
      *         ECFG(NDIM1,NZOPER-2), OCP(NDIM2,NDIM1,NZOPER-2),
      *         LL1MAX(NZOPER-2)
 C
-      COMMON /OUTPF/ EK(NZEKMA),EKNULL
+      COMMON /OUTPF/ EK(NZEKMA)
       COMMON /OUTPI/ INR, ISRB, JWSL, JWSR, MUL,
      *               NBAND2, JWSLM, MULM, MUL2
 C
@@ -141,10 +141,10 @@ C
       D(1)=.0
       D(2)=.0
       DO 199 I=2,99
-  199 D(I+1)=ALOG( FLOAT(I))+D(I)
+  199 D(I+1)=ALOG( REAL(I))+D(I)
       DF(1)=1.
       DO 200 I=2,12,2
-200   DF(I+1)=FLOAT(I+1)*DF(I-1)
+200   DF(I+1)=REAL(I+1)*DF(I-1)
 C     DF(I) = I!!
       WRITE(6,1003)
       READ(5,1002) NBAND1,IGAK,KEIND,IQUAK
@@ -208,9 +208,6 @@ C     EINLESEN DER NORMIERUNG DER ZUSTAENDE
       READ(5,1013) ANORML,ANORMR
 C     ENER = EK(1) (below) in MeV      
       READ(5,1013) ENER
-C     MeV -> fm^-1      
-      EKNULL=ENER/HC
-C
 C                   Anz. energies      
       READ (5,1002) NZEK, INR, ISRB
 C                   E(photon)_0 dE in MeV      
@@ -219,7 +216,6 @@ C                   E(photon)_0 dE in MeV
       EKDIFF=EKDIFF/HC
       DO 9, NEK=2, NZEK
        EK(NEK)=EK(NEK-1)+EKDIFF
-      EKNULL = EK(1)
 9     CONTINUE
 C     EK: K-VEKTOR DES (VIRTUELLEN) PHOTONS  in fm^-1 !
       GOTO 11
@@ -227,7 +223,6 @@ C
 C     PHOTOABSORBTION
 10    CONTINUE
       NZEK=1
-      EK(1)=EKNULL
 C
 11    CONTINUE
 C
@@ -317,33 +312,27 @@ C               2*( Jl   Jr              m_jl m_L )
 C     BEI NORM MUESSEN GESAMTDREHIMPULSE LI UND RE UEBEREINSTIMMEN
 C
 C     BESTIMMUNG DER CLEBSCH DES RED. MATR.-EL.
-      GJL=.5*FLOAT(JWSL)
-      GJLM=.5*FLOAT(JWSLM)
-      GJR=.5*FLOAT(JWSR)
-      AK=FLOAT(MUL)
-      AKM=.5*FLOAT(MULM)
+      GJL=.5*REAL(JWSL)
+      GJLM=.5*REAL(JWSLM)
+      GJR=.5*REAL(JWSR)
+      AK=REAL(MUL)
+      AKM=.5*REAL(MULM)
 c      AKM=GJL-GJR
 
-      AJRD=FLOAT(JWSR+1)
+      AJRD=REAL(JWSR+1)
       MUL2=2*MUL
       
       CL=CLG(INT(2*AK), INT(2*GJR),INT(2*GJL),
      1      INT(2*AKM),INT(2*(GJLM-AKM)))
 c      WRITE (6,1204) AK,AKM,GJR,(GJLM-AKM),GJL,GJLM,CL
 C      CL=YG(GJR,AK,GJL,GJR,AKM)
-      IF(CL.NE.0.) GOTO 101
-      STOP 4
-C
-C     PARITAETSCHECK FOR EACH FRAGMENTATION
-101   CONTINUE
+      IF(CL.EQ.0.) STOP 4
 C
       DO 1126 NZERL=1,NZF
       NBVO = 1
       DO 1127 NZERLE=1,NZERL-1
 1127  NBVO = NBVO + NZRHO(NZERLE)
 1126  NPARZ(NZERL) = MOD(MLWERT(3,NBVO)+MLWERT(4,NBVO),2)
-
-      A=IABS(((-1)**MUL-1)/2)
 
 c C     AUDRUCK DER GESDAMTDREHIMPULSE UND DER PARITAET
 c       IF(NPARL.EQ.1) GOTO 570
@@ -385,26 +374,28 @@ C
       DO 41 MKC=MKCMIN, MKCMAX
 C     LOOP OPERATOREN
 C
+      A=IABS(((-1)**MUL-1)/2)
+c      write(nout,*)'A=',A
       AA=IABS(NPARZ(MFL)-NPARZ(MFR))
 c      write(nout,'(A19,2I3)')'(ecce) Parity L/R: ',
 c     *  NPARZ(MFL),NPARZ(MFR)
       IF(LREG(MKC).LE.0) GOTO 41
       FPAR = 1.
 C
-      GOTO(104,105,105,107,107,105,105,107,107,105,105) MKC
+      GOTO(104,107,107,107,107,107,107,107,107,105,105) MKC
 103   STOP 5
 104   A=0.
 105   IF (A.EQ.AA) GOTO 106
       WRITE (6,1203) MKC
+      write(6,*)'MUL,IABS(((-1)**MUL-1)/2)',MUL,IABS(((-1)**MUL-1)/2)
       FPAR = 0.
       GOTO 106
-107   IF(A.NE.AA) GOTO 106
-      WRITE (6,1203) MKC
-      FPAR = 0.
+107   WRITE(6,*)'No implementation for MKC=',MKC
+      STOP 107
 106   CONTINUE
 C
 C
-C      write(nout,'(A13,3I3)')'Zl,Zr - MKC: ',MFL,MFR,MKC
+c      write(6,'(A13,3I3)')'Zl,Zr - MKC: ',MFL,MFR,MKC
 C 
 C     LOOP BASISVEKTOR-MATRIZEN
 C      DO 40 NLES=1,MLES
@@ -418,10 +409,11 @@ C        NTI = 1 if 1<=MKC<=11
      * (IDUMMY,DNN(K,L,J),J=1,LL1),L=1,JK1),K=1,IK1)
           NZREL(MFL) = IK1
           NZREL(MFR) = JK1
-C
-c      write (nout,'(A13,5I4)') '(from qual): ',NUML,NUMR,IK1,JK1,LL1
-c      write(nout,'(A28,F12.4,I3,F12.4)')
-c     * 'FGN(1,1),IDUMMY,DNN(1,1,1): ',FGN(1,1),IDUMMY,DNN(1,1,1)
+C 
+      write(6,'(A13,5I4)') '(from qual): ',NUML,NUMR,IK1,JK1,LL1
+      write(6,'(2F18.8)') 
+     *     ((FGN(K,L),DNN(K,L,1),L=1,JK1),K=1,IK1)
+
 c     
       ELSE
         IF (NBVL.le.NBVR) THEN
@@ -430,9 +422,9 @@ C
      *       ((FGN(K,L),
      * (IDUMMY,DNN(K,L,J),J=1,LL1),L=1,JK1),K=1,IK1)
 C
-c      write(nout,'(A13,5I4)') '(from qual): ',NUML,NUMR,IK1,JK1,LL1
-c      write(nout,'(A28,F12.4,I3,F12.4)')
-c     * 'FGN(1,1),IDUMMY,DNN(1,1,1): ',FGN(1,1),IDUMMY,DNN(1,1,1)
+      write(6,'(A13,5I4)') '(from qual): ',NUML,NUMR,IK1,JK1,LL1
+      write(6,'(A28,E12.4,I3,E12.4)')
+     * 'FGN(1,1),IDUMMY,DNN(1,1,1): ',FGN(1,1),IDUMMY,DNN(1,1,1)
 C
          IF (MFL.ne.MFR) stop 23
          NZREL(MFL) = IK1
@@ -446,12 +438,13 @@ c      if(nzero.ne.2) goto 142
       LBR=MLWERT(5,NUMR)
       LBR2=2*LBR
       ML=MMS(3,NUML)
-      SPL=.5* FLOAT(ML)
+      SPL=.5* REAL(ML)
       MR=MMS(3,NUMR)
-      SPR=.5* FLOAT(MR)
+      SPR=.5* REAL(MR)
 C      F=YG(GJR,AK,GJL,GJR,AKM)
       F=CLG(INT(2*AK), INT(2*GJR),INT(2*GJL),
      1      INT(2*AKM),INT(2*(GJLM-AKM)))
+      if(F.NE.CL) STOP 89
 c      WRITE (6,1204) AK,AKM,GJR,(GJLM-AKM),GJL,GJLM,F
 C           1  2- SPIN -5  6- BAHN -9 Sp Sn
       GOTO(99,92,92,92,92,91,91,91,91,91,91), MKC
@@ -464,12 +457,16 @@ C         WRITE (6,1200) MKC, ML, MR
          FPAR = 0.
       ENDIF
 C
-C    PHASE FUER VERTAUSCHEN DER BASISVEKTOREN LINKS UND RECHTS
+C    o/srank: rank of the spatial/spin component of the radiation operator
       ISRANK2  = INT(0)
+C    if spin rank=0, I set the m projection maximal which is allowed b/c
+C    this is the reduced matrix element       
       IORANK2  = INT(MUL2)
       FK1new = (-1)**(AK-GJR+GJL)*SQRT(JWSR+1.)*SQRT(MUL2+1.)
      1        *F9J(LBL2,LBR2,IORANK2,ML,MR,ISRANK2,JWSL,JWSR,MUL2)
 C
+c      write(6,'(9I3)')LBL2,LBR2,IORANK2,ML,MR,ISRANK2,JWSL,JWSR,MUL2
+c      write(6,'(2F8.4)')FK1new,CL
       GOTO 100
 C
   92  CONTINUE
@@ -512,7 +509,7 @@ C     EL. + MAGN. PION SEAGULL
 C     MSPIN2: 2*RANG DES SPINANTEIL DES OPERATORS
       FK1=(-1)**((MSPIN2+MUL2M1-MUL2)/2)
       FK1=FK1*SQRT(AJRD*(2.*AK+1.))
-      FK1=FK1*SQRT(FLOAT(MSPIN2+1))*F6J(MUL2,MUL2M2,2,2,MSPIN2,MUL2M1)
+      FK1=FK1*SQRT(REAL(MSPIN2+1))*F6J(MUL2,MUL2M2,2,2,MSPIN2,MUL2M1)
       FK1=FK1*F9J(LBL2,ML,JWSL,LBR2,MR,JWSR,MUL2M1,MSPIN2,MUL2)
 C     PHASE FUER VERTAUSCHEN DER BASISVEKTOREN LINKS UND RECHTS
       GOTO 100
@@ -524,23 +521,28 @@ C     NORM
 c        STOP 13
       ENDIF 
       FK1=(-1)**((LBL2+ML+JWSR)/2)
-      FK1=FK1*SQRT(AJRD/(2.*SPR+1))
+c      FK1=FK1*SQRT(AJRD/(2.*SPR+1))
+C     HIER WIRD  DER FUER DIE NORM FALSCHE CLEBSCH-GORDAN-KOEFFIZIENT
+C     DES RED. MATR.-ELEMENTS HERAUSGEKUERZT.
       FK1=FK1*F6J(LBL2,LBR2,0,JWSL,JWSR,ML)
-      FK1new=FK1
+c      stop 666
+c      FK1=FK1*F6J(LBR2,MR,JWSR,ML,LBL2,0)
+      FK1new=FK1/CL
 C
   100 CONTINUE
 C  for F1 <J'|L|J> + F2 <J|L|J'>
       F=CL
       IF (MREG(MKC).eq.0) THEN
       F = 0.
-      stop MKC
+      write(6,*) '(ecce) MKC = ',MKC
+c      stop 100
       ENDIF
-C     HIER WIRD  DER FUER DIE NORM FALSCHE CLEBSCH-GORDAN-KOEFFIZIENT
-C     DES RED. MATR.-ELEMENTS HERAUSGEKUERZT.
 C     ALLE OPERATOREN
 C                 = hbarc/mn for siegert proton      
       F1=F*FK1new*GEFAK(MKC)*FPAR
-C
+      write(6,'(A30,5F12.8,/)')'F1=F*FK1new*GEFAK(MKC)*FPAR = ',
+     *           F1,F,FK1new,GEFAK(MKC),FPAR
+
       KANL=1
       KANR=1
 C LL1 is of order 1 for small angular momenta and multipolarities
@@ -570,19 +572,27 @@ C
   589 CONTINUE
 C
       DO 458 K=1,IK1
-      DO 458 L=1,JK1        
+      DO 458 L=1,JK1
+      if(MKC.ne.1) then        
       DNN(K,L,JJ) = 
      *    DNN(K,L,JJ)*
      *    F1*
      *    (EK(1)**JQ)*
      *    EXP((EK(1)**2)*FGN(K,L))
-C     AUSDRUCK DER OP-WERTE  UND DER K-POTENZ LAMBDA
+      ELSE
+      DNN(K,L,JJ) = DNN(K,L,JJ)
+      endif
+C     AUSDRUCK DER OP-WERTE UND DER K-POTENZ LAMBDA
 c      write(nout,'(A13,F8.4,3I3)')'(ecce) DNN = ',DNN(K,L,JJ),K,L,JJ
-      IF(IQUAK.gt.0) then
-      WRITE(6,1037) MFL,MFR,MKC,NBVL,NBVR,K,L,
-     *           FGN(K,L),
-     *           F1,
-     *           DNN(K,L,JJ)
+      IF(IQUAK.ge.0.and.ABS(FGN(K,L)).gt.0) then
+      WRITE(6,'(A42,7I3,3F12.8)') 
+     *         'MFL,MFR,MKC,NBVL,NBVR,K,L,FGN(K,L),F1,DNN: ',
+     *           MFL,MFR,MKC,NBVL,NBVR,K,L,
+     *           FGN(K,L),F1,DNN(K,L,JJ)
+      write(6,'(/,A30,E12.4)')'F1*EK**JQ*EXP(EK**2*FGN(K,L))=',
+     *           F1*(EK(1)**JQ)*EXP((EK(1)**2)*FGN(K,L))
+      write(6,'(/,A10,2F12.8,I3)')'F1,EK,JQ: ',
+     *           F1,EK(1),JQ
       endif
   458 CONTINUE
    47 CONTINUE
@@ -612,7 +622,8 @@ c      write(nout,'(A20,2I5)') '(ecce): row0, col0: ',NROWOz,NCOLOz
       NROW = NROWOv
       DO 469 K=1,IK1
       NCOL = NCOLOv
-      DO 468 L=1,JK1        
+      DO 468 L=1,JK1
+      if(ABS(DN(K,L)).lt.1E-20) DN(K,L)=0
       DM(NROW,NCOL,MKC) = DN(K,L)
 c      write(nout,'(A11,I4,A1,I4,A1,I4,A4,E18.8)')'(ecce): DM(',
 c     *   NROW,',',NCOL,',',MKC,') = ',DN(K,L)
@@ -639,220 +650,16 @@ C     BESTIMMUNG VON SIEGERT OPWERT = op10 + op11
 c      WRITE(NBAND2,1638)
 1638  FORMAT('      E [fm]   JL  MUL   JR   JM', 
      * ' MULM   <JL,JM|MUL|JR>')
-c      DO 143 K=1,NROW-1
-c      DO 143 L=1,NCOL-1
-c  143 WRITE(6,*) DM(L,L,1),DM(K,K,1),DM(K,L,10),DM(K,L,11)
-      WRITE(NBAND2)((DM(K,L,10)+DM(K,L,11)
-     *   ,L=1,NCOL-1),K=1,NROW-1)
+      DO 143 K=1,NROW-1
+      DO 143 L=1,NCOL-1
+  143 WRITE(6,'(A32,4E12.4)') 
+     *      'DM(L,L,1),DM(K,K,1),DM(K,L,10),DM(K,L,11):',
+     *       DM(L,L,1),DM(K,K,1),DM(K,L,10),DM(K,L,11)
+      WRITE(NBAND2)
+     * (( (DM(K,L,10)+DM(K,L,11))/SQRT(DM(L,L,1)*DM(K,K,1))
+     *   ,L=1,NCOL-1 ),K=1,NROW-1 )
 C
 1637  FORMAT(E12.4,5I5,'     ',E20.14)      
-C
-C
-      GOTO 980
-C     berechnung der vorfaktoren (multipol, siegert, ...)
-C     alles, was nichts mit kopplungen und basis spezifika
-C     zu tun hat
-C     ========================
-c ----- old
-C DF=!! from long-wave-length limit of j_l (see Walecka Eq.(7.46))      
-C      VF1=1.
-C      IF (MUL.GT.0) VF1=(AK+1.)/AK
-C      (see Eq.(7.44) in Walecka) this factor compensates T^2 and hence
-C      (2L+1)!! has to be devided out twice
-C      VF=8.*PI*VF1/(DF(MUL2+1)**2)
-C      VF=HC/137.03604
-C      VF=VF*EKNULL
-C      VFE=VF1/(DF(MUL2+1)**2)
-
-c Siegert for LIT benchmark (Eq.(55) in Bampa)
-      WRITE (6,*)"E_0[fm^-1] = ", EK(1)
-C  HC/mn has been considered via GEFAK earlier
-C  sqrt(2pi)L^ is included in the def. of P (see Bampa (29))
-C    Siegert Vorfaktor: (L+1)/L/(hbarc k) * e, e=(4pihbarc alpha)^0.5      
-c      WRITE (6,*)"Kopplungsfaktor(FA) = ", FA
-c      WRITE (6,*)"Kopplungsfaktor(FB) = ", FB
-      VFE=VF     
-
-C     AUSRDRUCK DER ERGEBNISSE
-C     ========================
-C
-c      write(6,*) (MREG(N),N=1,NZOPER)
-C     NORMOPERATOR
-      IF (MREG(1).EQ.0) GOTO 625
-      OPE = OPWERT(1,1)/(SQRT(2.*GJL+1.)*FLOAT(MMASSE(1,1)+
-     *                            MMASSE(2,1)))
-
-
-      WRITE (6,1040)
-      WRITE (6,1033)
-      WRITE (6,1029) OPE
-
-c
-625   CONTINUE
-      IF (MREG(12).EQ.0) GOTO 630
-      WRITE (6,1033)
-      WRITE (6,1029) OPWERT(1,12)/(SQRT(2.*GJL+1.)*2.)
-C
-630   CONTINUE
-
-      write(6,1077) 
-1077  FORMAT(1X,' EK2         EK(NEK)     JWSL   MUL  JWSR JWSLM', 
-     * 2X,'MULM  OP          MET   ')
-
-
-      DO 900, NEK=1, NZEK
-
-C   momentum in fm^-1 => the ME is returned as [] = fm b/c
-C 2x RGM wfkt -3/2 +3 from integral + this fm above        
-C      VF = 1./EK(NEK)
-C 
-      VF = 1.
-C      SQRT(4.*PI*HC/137.03604)
-C      IF (MUL.GT.0) VF=VF*(FLOAT(MUL)+1)/FLOAT(MUL)
-      WRITE (6,*)"Vorfaktor = ", VF,NEK,NZEK
-C      ELEKTRISCHE OPERATOREN MIT SIEGERTOPERATOR
-       IF (MREG(10)+MREG(11).EQ.0) GOTO 900
-
-C sum        
-       OPE=OPWERT(NEK,10)+OPWERT(NEK,11)
-       OPE=OPE*VF
-C      ECCE: LIT benchmark => no other operators or corrections
-C            goto next energy
-       GOTO 900
-900   CONTINUE
-C    END and EXIT program for Siegert E1 benchmark
-      GOTO 980
-C
-       VFUE=FLOAT(LAD**2)/(4.*PI)
-C      VORFAKTOR DES UEBERALLFORMFAKTORS
-C
-C      KORREKTURFAKTOREN FUER DIE LADUNGSFORMFAKTOREN VON PROTON UND
-C      NEUTRON
-C      BERECHNUNG NACH UEBERALL "ELECTRON SCATTERING FROM COMPLEX
-C      NUCLEI", PART A, NEW YORK AND LONDON 1971, S. 188
-       EK2=(EK(NEK)+EKNULL)*(EK(NEK)-EKNULL)
-       GS=.5*(2.5/(1.+EK2/15.7)-1.6/(1.+EK2/26.7)+.1)
-       GV=.5*(1.16/(1.+EK2/8.19)-.16)
-       GEP=GS+GV
-       GEN=GS-GV
-C
-C      KORREKTUR FUER DIE MAGN. MOMENTE VON PROTON UND NEUTRON
-C      BERECHNUNG NACH: FRIAR AND NEGELE "DETERMINATION OF NUCLEAR CHARGE
-C      DISTRIBUTIONS" IN "ADVACES IN NUCLEAR PHYSICS", 8 (1975), S. 227
-       GMP=(1./(1.+EK2*HC*HC/(840.*840.)))**2
-       GMN=GMP
-C
-940   CONTINUE
-C     AUSDRUCK FUER PHOTOABSORPTION
-C
-      DO 950, MKC=1, NZOPER
-       OPWERT(1,MKC)=OPWERT(1,MKC)/EKNULL**MUL
-C      UMRECHNUNG AUF MERTELMEIERDEFINITION
-950   CONTINUE
-C
-C     ELEKTISCHE OPERATOREN
-      IF(MREG(2)+MREG(3)+MREG(6)+MREG(7)+MREG(10)+MREG(11).EQ.0)
-     *  GOTO 970
-C      IF(MREG(2)+MREG(3)+MREG(6)+MREG(7)+MREG(10)+MREG(11)+
-C     *    MREG(13)+MREG(14).EQ.0) GOTO 970      
-      WRITE (6,1053)
-      WRITE (6,1054) MUL
-      IF (MREG(2)*MREG(3).NE.0) THEN
-         OPWE(1)=OPWERT(1,2)+OPWERT(1,3)
-         WRITE (6,1039) OPWE(1), MUL
-      ELSE
-         OPWE(1)=0.
-         WRITE (6,1090)
-      ENDIF
-      WRITE (6,1055) MUL
-      IF (MREG(6)*MREG(7).NE.0) THEN
-         OPWE(3)=OPWERT(1,6)+OPWERT(1,7)
-         WRITE (6,1039) OPWE(3), MUL
-      ELSE
-         OPWE(3)=0.
-         WRITE (6,1090)
-      ENDIF
-      WRITE (6,1056) MUL
-      IF (MREG(10)*MREG(11).NE.0) THEN
-         OPWE(2)=OPWERT(1,10)+OPWERT(1,11)
-         WRITE (6,1039) OPWE(2), MUL
-      ELSE
-         OPWE(2)=0.
-         WRITE (6,1090)
-      ENDIF
-      OPWE(2)=OPWE(2)+OPWE(1)
-      OPWE(1)=OPWE(1)+OPWE(3)
-      WRITE (6,1057) MUL
-C      IF (MREG(13)*MREG(14).NE.0) THEN
-C         OPWE(3)=OPWERT(1,12)+OPWERT(1,13)
-C         WRITE (6,1039) OPWE(3), MUL
-C      ELSE
-         OPWE(3)=0.
-         WRITE (6,1090)
-C      ENDIF
-      OPWE(3)=OPWE(3)+OPWE(2)
-C
-      DO 960, I=1,3
-       IF (I.EQ.1) WRITE (6,1080) MUL
-       IF (I.EQ.2) WRITE (6,1081) MUL
-       IF (I.EQ.3) WRITE (6,1082) MUL
-       WRITE (6,1039) OPWE(I), MUL
-       BE=OPWE(I)*OPWE(I)/AJRD
-       WRITE (6,1064) MUL, BE, MUL2
-       IF (ENER.LE.0.) GOTO 960
-       WIDE=VF*BE
-       WRITE (6,1066) MUL, WIDE
-960   CONTINUE
-C     ENDE ERGEBNISAUSDRUCK ELEKTRISCHE OPERATOREN
-C
-C
-970   CONTINUE
-C     MAGNETISCHE OPERATOREN
-      IF(MREG(4)+MREG(5)+MREG(8)+MREG(9).EQ.0)
-     *                                                  GOTO 980
-C      IF(MREG(4)+MREG(5)+MREG(8)+MREG(9)+MREG(15)+MREG(16).EQ.0)
-C     *                                                  GOTO 980     
-      WRITE (6,1052)
-      WRITE (6,1058) MUL
-      IF (MREG(4)*MREG(5).NE.0) THEN
-         OPWE(1)=OPWERT(1,4)+OPWERT(1,5)
-         WRITE (6,1039) OPWE(1), MUL
-      ELSE
-         OPWE(1)=0.
-         WRITE (6,1090)
-      ENDIF
-      WRITE (6,1059) MUL
-      IF (MREG(8)*MREG(9).NE.0) THEN
-         OPWE(2)=OPWERT(1,8)+OPWERT(1,9)
-         WRITE (6,1039) OPWE(2), MUL
-      ELSE
-         OPWE(2)=0.
-         WRITE(6,1090)
-      ENDIF
-      OPWE(1)=OPWE(1)+OPWE(2)
-      WRITE (6,1060) MUL
-C      IF (MREG(15)*MREG(16).NE.0) THEN
-C         OPWE(2)=OPWERT(1,15)+OPWERT(1,16)
-C         WRITE (6,1039) OPWE(2), MUL
-C      ELSE
-         OPWE(2)=0.
-         WRITE(6,1090)
-C      ENDIF
-      OPWE(2)=OPWE(1)+OPWE(2)
-C
-      DO 975, I=1,2
-       IF (I.EQ.1) WRITE (6,1083) MUL
-       IF (I.EQ.2) WRITE (6,1084) MUL
-       WRITE (6,1039) OPWE(I), MUL
-       BM=OPWE(I)*OPWE(I)/AJRD
-       BMK=BM/H2MCP**2
-       MUL22=MUL2-2
-       WRITE (6,1065) MUL, BM, MUL2, BMK, MUL22
-       IF (ENER.LE.0.) GOTO 975
-       WIDM=VF*BM
-       WRITE (6,1067) MUL, WIDM
-975   CONTINUE
-C     ENDE ERGEBNISAUSDRUCK MAGNETISCHE OPERATOREN
 C
 C
 980   WRITE (6,1026)
@@ -950,13 +757,13 @@ C
       END
 C
       SUBROUTINE OUT(NEK,IP,OP,MTD)
-      IMPLICIT REAL*8 (A-H,O-Z)        
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)        
 C     OUT DIENT ZUM AUSDRUCK DER ERGEBNISSE BEI ELEKTRONENSTREUUNG
 C     AUSDRUCK IM GLEICHEN FORMAT WIE EXODUS
 C
       INCLUDE 'par/ENEMB'
 C
-      COMMON /OUTPF/ EK(NZEKMA),EKNULL
+      COMMON /OUTPF/ EK(NZEKMA)
       COMMON /OUTPI/  INR, ISRB, JWSL, JWSR, MUL,
      *              NBAND2, JWSLM, MULM, MUL2
 C
@@ -971,7 +778,7 @@ C
       END
 
       FUNCTION CLG(J1,J2,J3,M1,M2)
-      IMPLICIT REAL*8 (A-H,O-Z)      
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)      
 C
 C     CLG BERECHNET DIE CLEBSCH-GORDAN-KOEFFIZIENTEN
 C     (J1/2,M1/2;J2/2,M2/2|J3/2,(M1+M2)/2) NACH
@@ -1076,7 +883,7 @@ C     ENDE DER RECHNUNG FUER PARITAETSCLEBSCH
       END
 
       FUNCTION F6J(JD1,JD2,JD3,LD1,LD2,LD3)
-      IMPLICIT REAL*8 (A-H,O-Z)        
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)        
 C      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
 C     VERSION I F6J FUNCTION CALLS S6J  FORTRAN IV
 C     VEREINFACHT 27.9.95 H.M.H
@@ -1102,7 +909,7 @@ C     ANGULAR MOMENTUM COUPLING TESTS FOR 6J COEFFICIENT
       RETURN
       END
       FUNCTION F9J(JD1,JD2,JD3,JD4,JD5,JD6,JD7,JD8,JD9)
-      IMPLICIT REAL*8 (A-H,O-Z)        
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)        
 C      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
 C     F9J VERSION I  CALLS S6J  FORTRAN IV
 C     VEREINFACHT 27.9.95 H.M.H.
@@ -1215,7 +1022,7 @@ C     SUMMATION OF SERIES OF EQUATION (2)
       RETURN                       
       END                         
       FUNCTION S6J(JD1,JD2,JD3,LD1,LD2,LD3)
-      IMPLICIT REAL*8 (A-H,O-Z)        
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)        
 C      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
 C     VERSION I  FORTRAN IV
       DIMENSION MA(4),MB(3),MED(12)

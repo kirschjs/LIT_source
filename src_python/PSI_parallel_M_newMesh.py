@@ -9,7 +9,7 @@ from plot_spectrum import plotHspec
 from sklearn.cluster import KMeans
 from sklearn.datasets import make_blobs
 from sklearn.neighbors import BallTree
-#from diversipy import *
+from meshtest import *
 
 tnni = 11
 parall = -1
@@ -45,100 +45,48 @@ for bastype in bastypes:
         for scfg in angu[lcfg][1]:
             lfrags = lfrags + [angu[lcfg][0]]
 
-    wli = 'lin'
-
     he_iw = he_rw = he_frgs = ob_stru = lu_stru = sbas = []
     bvma = 12
     rvma = 20
-
-    inv_scale_i = 0.25
-    inv_scale_r = 5.1
-    nwadd = 0
-
-    nwint = 12
-    nwrel = 6
+    relPerBV = 5
 
     mindist_int = 0.001
     if bastype == boundstatekanal:
 
-        rel_scale = 0.01
-        wi, wf, nw = 0.03, 12.85, [nwint
-                                   for n in lfrags]  # for lit-state continuum
-
+        nwint = 7
+        nwrel = 6
+        rel_scale = 0.85
+        wi, wf = 0.02, 7.85
     else:
 
-        nwint = 28
-        nwrel = 8
-        rel_scale = 0.01
-        wi, wf, nw = 0.003, 7.85, [nwint
-                                   for n in lfrags]  # for lit-state continuum
+        nwint = 6
+        nwrel = 6
+        wi, wf = 0.02, 7.85
 
     # to include all reference basis states in the augmented basis
     #lit_rw_sparse = np.empty(max(len(sfrags), len(ob_stru)), dtype=list)
     # to use a small subset comprising all internal, but not all relative parameters sets
     lit_rw_sparse = np.empty(len(sfrags), dtype=list)
 
+    rwss, iwss = meshgenB(
+        len(lfrags),
+        nwint,
+        nwrel,
+        mindist_int, [wi, wf], [wi * rel_scale, wf * rel_scale],
+        plti=0)
+
+    #np.random.shuffle(widthgrid, axis=1)
     for frg in range(len(lfrags)):
 
-        if wli == 'lin':
-            #  -- internal widths --------------------------------------------------
-            offset = frg / len(lfrags) * (wf - wi) / nw[frg]
+        #  -- internal widths --------------------------------------------------
+        lit_w[frg] = np.sort(iwss[frg * nwint:(1 + frg) * nwint])[::-1]
 
-            lit_w_tmp = np.abs(
-                np.geomspace(
-                    start=wi + offset,
-                    stop=wf + offset,
-                    num=nw[frg],
-                    endpoint=True,
-                    dtype=None))
+        #  -- relative widths --------------------------------------------------
+        lit_rw[frg] = []
+        for bv in range(len(lit_w[frg])):
+            lit_rw[frg].append(rwss[bv * nwrel:(1 + bv) * nwrel].flatten())
 
-            lit_w_tmp_add = np.abs(
-                np.geomspace(
-                    start=wf + offset,
-                    stop=inv_scale_i * (2 * wf - wi) + offset,
-                    num=nwadd,
-                    endpoint=True,
-                    dtype=None))
-
-            lit_w[frg] = [
-                float(x) for x in np.sort(
-                    np.concatenate((lit_w_tmp, lit_w_tmp_add), axis=0))
-            ] if nwadd != 0 else lit_w_tmp
-
-            lit_w[frg] = sparse(lit_w[frg], mindist=mindist_int)
-            #  -- relative widths --------------------------------------------------
-            #geomspace
-
-            wir, wfr, nwr = rel_scale * wi, rel_scale * wf, nwrel * len(
-                lit_w[frg])
-            offset = (1 + frg) / len(lfrags) * (wfr - wir) / nwr
-
-            lit_w_tmp = np.geomspace(
-                start=wir + offset,
-                stop=wfr + offset,
-                num=nwr,
-                endpoint=True,
-                dtype=None)
-
-            lit_w_add = np.geomspace(
-                start=wfr + offset,
-                stop=inv_scale_r * (2 * wfr - wir) + offset,
-                num=nwadd * len(lit_w[frg]),
-                endpoint=True,
-                dtype=None)
-
-            lit_w_tmp = [
-                float(x) for x in np.sort(
-                    np.concatenate((lit_w_tmp, lit_w_add), axis=0))
-            ] if nwadd != 0 else lit_w_tmp
-
-            lit_rw_tmp = np.abs(
-                np.sort(np.array(lit_w_tmp).flatten())[::-1].tolist())
-
-            lit_rw[frg] = []
-            for bv in range(len(lit_w[frg])):
-                lit_rw[frg].append(lit_rw_tmp[bv::len(lit_w[frg])])
-
+    #exit()
     widi = []
     widr = []
 
@@ -155,7 +103,10 @@ for bastype in bastypes:
         bnds = np.cumsum(bins)
 
         tmp2 = [list(tmp[bnds[nn]:bnds[nn + 1]]) for nn in range(zer_per_ws)]
-        tmp3 = [lit_rw[n][bnds[nn]:bnds[nn + 1]] for nn in range(zer_per_ws)]
+        tmp3 = [
+            np.sort(lit_rw[n][bnds[nn]:bnds[nn + 1]])[::-1]
+            for nn in range(zer_per_ws)
+        ]
         sfrags2 += len(tmp2) * [sfrags[n]]
         lfrags2 += len(tmp2) * [lfrags[n]]
 
@@ -171,14 +122,31 @@ for bastype in bastypes:
         bv = 1
         for n in range(len(lfrags2)):
             for m in range(len(widi[n])):
-                #sbas += [[bv, rwind[1][m][::-1][:-2]]]
-                sbas += [[
-                    bv, [
-                        x for x in range(
-                            1, 1 + max([len(wid) for wid in widr[n]]), 1)
-                    ]
-                ]]
-                bv += 1
+                if 42 == 43:
+                    #sbas += [[
+                    #    bv,
+                    #    [x * ((x + m % 2) % 2) for x in range(len(widr[n]))]
+                    #]]
+                    #sbas += [[bv, [x for x in range(1, 1 + len(widr[n]), 2)]]]
+                    decider = np.random.randint(0, 2)
+                    sbas += [[
+                        bv,
+                        np.sort(
+                            np.unique(
+                                np.random.choice([
+                                    g for g in range(1, len(widr[n]))
+                                    if ((g % 2) == decider)
+                                ], min(relPerBV, len(widr[n])))))
+                    ]]
+                else:
+                    #sbas += [[bv, rwind[1][m][::-1][:-2]]]
+                    sbas += [[
+                        bv, [
+                            x for x in range(
+                                1, 1 + max([len(wid) for wid in widr[n]]), 1)
+                        ]
+                    ]]
+                    bv += 1
     else:
         sfrags2 = ob_stru
         lfrags2 = lu_stru

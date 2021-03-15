@@ -32,6 +32,9 @@ qual_M: qual_M.o
 luise: luise.o
 	$(F77) $(FFLAGS) -o luise.exe luise.o $(LIBS)
 
+ober: ober.o
+	$(F77) $(FFLAGS) -o ober.exe ober.o $(LIBS)
+
 obem: obem.o
 	$(F77) $(FFLAGS) -o obem.exe obem.o $(LIBS)
 

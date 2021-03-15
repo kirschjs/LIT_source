@@ -22,7 +22,7 @@ def cartesian_coord(*arrays):
     #print(cartesian_coord(*3 * [a]))
 
 
-suffix = 'miwchan_M2'
+suffix = 'miwchan'
 anzproc = 6  #int(len(os.sched_getaffinity(0)) / 1)
 
 home = os.getenv("HOME")

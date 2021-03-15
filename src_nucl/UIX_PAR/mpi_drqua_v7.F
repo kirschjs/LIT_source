@@ -2,7 +2,7 @@
 C ----- MPI VERSION VON DRQUA_AK_N -----------------------------------    
 C     FUER SMIN STATTDESSEN
 CC    SUBROUTINE QUAF
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       include 'mpif.h'
 C
 C     FUER URBANA 3N-POTENTIAL
@@ -1132,7 +1132,7 @@ C      STOP
       END
 C--------------------------------------------------------------------
       SUBROUTINE CALCU
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
 
       INCLUDE 'par.h'
 
@@ -1505,7 +1505,7 @@ c1051  FORMAT(1X,'DIESER BASISVEKTOR WIRD NICHT NEU GERECHNET')
 c      END
 c--------------------------------------------------------------------
       SUBROUTINE LURE(MKC,ITV2)
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
 C     LURE LIEST MATRIXELEMENTE AUS LUDWIG EIN
 C
       INCLUDE 'par.h'
@@ -1568,7 +1568,7 @@ C
       END
 c--------------------------------------------------------------------
       SUBROUTINE FAPOR(IA,IE)
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
 C     FAPOR REPRODUZIERT DIE DREIMPULS- UND POLYNOMSTRUKTUR
 C
       INCLUDE 'par.h'
@@ -1606,7 +1606,7 @@ C
       END
 c--------------------------------------------------------------------
       SUBROUTINE HAUPT
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
 C     HAUPT FUEHRT HAUPTACHSENTRANSFORMATION DURCH
 C     TRANSFORMATION IN VZ, HAUPTACHSENWERTE IN QO
 C
@@ -1646,7 +1646,7 @@ C
       END
 c--------------------------------------------------------------------
       SUBROUTINE BEGRI(NB,FF1,UR,RIK)
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
 C
 C
       INCLUDE 'par.h'
@@ -1789,7 +1789,7 @@ C       DMM(.,.,1) ENTHAELT NUR BEITRAEGE FUER NB=0
       END
 c--------------------------------------------------------------------
       SUBROUTINE MAT(H,S)
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
 C
 C
       INCLUDE 'par.h'
@@ -1842,7 +1842,7 @@ C------------------------ loop parallel -----------------------------
 c----------- MVK umdrehen wenn aktiv! -------------------------------
       N=1
       IF(KZAHL.EQ.0) GOTO 1
-      IF(ABS(H).LT.1.E-15)  GOTO 1
+      IF(ABS(H).LT.1.E-17)  GOTO 1
       w=0.
             IF(KZHX(0).GT.KZHX(1)) GOTO 41
       goto (21,22,23,24,25,26,27,28,29,30),jqq
@@ -1890,7 +1890,7 @@ C-------------------------- ende loop parallel ----------------------
       END
 c--------------------------------------------------------------------
       SUBROUTINE ORDSRT(KOBEH)
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
 C     ORDSRT SORTIERT DEN GESAMTEN COMMONBLOCK LUP NACH AUFSTEIGENDER
 C     ANZAHL VON SIGMAFAKTOREN
       INCLUDE 'par.h'

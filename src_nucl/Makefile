@@ -3,7 +3,7 @@ FFLAGS  =       -Ofast -ffpe-summary=none  -mcmodel=large
 #-ffpe-trap=denormal -pg -funroll-loops -g -fdefault-real-8 -fconvert=native -frecord-marker=4
 
 # hexpresso
-LIBS    = -L${MKLROOT} -llapack -lblas
+LIBS    = -L${MKLROOT} -llapack -lblas  -lm -ldl
 #theogate
 #LIBS    = -L${MKLROOT} -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5
 
@@ -71,6 +71,9 @@ DR2END_AK: DR2END_AK.o par/DR2END_AK
 
 DR2END_NORMAL: DR2END_NORMAL.o par/DR2END_AK
 	$(F77) $(FFLAGS) -o DR2END_NORMAL.exe DR2END_NORMAL.o $(LIBS)
+
+DR2END_BM: DR2END_BM.o par/DR2END_AK
+	$(F77) $(FFLAGS) -o DR2END_BM.exe DR2END_BM.o $(LIBS)	
 
 DR2END_AK_I: DR2END_AK_I.o par/DR2END_AK_I
 	$(F77) $(FFLAGS) -o DR2END_AK_I.exe DR2END_AK_I.o $(LIBS)

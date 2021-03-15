@@ -630,7 +630,6 @@ C                   BEITRAEGE DER OPERATOREN FUER DIE ERSTEN NDIMD E.V.
 C
 C
       IIKUNT=2
-C NENTP=1 for bound-state calculations => MEMPT assumes 1,2      
       IF(NENTP.EQ.2) IIKUNT=1
       IF (MEMPT.EQ.1) IIKUNT=NZOP
 C
@@ -761,7 +760,6 @@ C       2(SR+1)  <SL||id||SR> = 1/Sqrt[2S+1]
       IF(KANL.EQ.KANR) KWIED=1
       F1=FAK1*F
       F2=FAK2*F
-c      write(nout,*)'F1/2,MKC=',F1,F2,MKC
       DO 46 K=1,IK1
       DO 146 L=1,JK1
       K1=LUM(K,KANL)
@@ -773,22 +771,24 @@ c      write(nout,*)'F1/2,MKC=',F1,F2,MKC
       LK=NZQ(KANR)+K2
       KL=NZQ(KANL)+L2
 C
-c      write(nout,*)'F1/2=',F1,F2
+c      if(mkc.eq.1) then
+c        F1=1
+c        F2=0
+c        endif
+c      write(nout,*)'MKC,F1/2:',MKC,F1,F2
+C
       IF(K1*L1.LE.0) GOTO 420
 C   DN(.,.,1) ENTHAELT NUR TERME MIT AUSTAUSCH ODER WW UEBER FRAGMENTGRENZEN
-C   DN(.,.,2) ENTHAELT ALLE TERME
-C   KPUTZ=1 for norm , for all other operators KPUTZ=2
-      DM(KK,LL,1,KPUTZ) = DM(KK,LL,1,KPUTZ) + DN(K,L,1) * F1
+C    DN(.,.,2) ENTHAELT ALLE TERME
+      DM (KK,LL,1,KPUTZ) = DM (KK,LL,1,KPUTZ) + DN(K,L,1) * F1
       DM(KK,LL,2,KPUTZ) = DM(KK,LL,2,KPUTZ) + DN(K,L,2) * F1
  420   IF(K2*L2.LE.0) GOTO 45
-      DM(KL,LK,1,KPUTZ) = DM(KL,LK,1,KPUTZ) + DN(K,L,1) * F2
+      DM (KL,LK,1,KPUTZ) = DM (KL,LK,1,KPUTZ) + DN(K,L,1) * F2
       DM(KL,LK,2,KPUTZ) = DM(KL,LK,2,KPUTZ) + DN(K,L,2) * F2
-      if(MKC.eq.1)write(nout,*)'MEMPT/DN1,2/F1,2 = ',
-     *    MEMPT,DN(KL,LK,1),DN(KL,LK,2),F1,F2
 45    IF(MEMPT.GT.1) GOTO 50
       IF(IABS(KANL-KANR)+IABS(K-L).NE.0) GOTO 50
       IF(K1.LE.0) GOTO 50
-      OPWERT(MKC,KK)=OPWERT(MKC,KK) + (F1+F2)*DN(K,K,2)
+      OPWERT(MKC,KK )=OPWERT(MKC,KK ) + (F1+F2)*DN(K,K,2)
       IF(MKC.NE.1 .AND. MKC.NE.15) GOTO 49
       OPWERT(NZOPER+1,KK) =
      *   OPWERT(NZOPER+1,KK) + (F1+F2)*(DN(K,K,2)-DN(K,K,1))
@@ -855,6 +855,7 @@ C
       WRITE(19,'(E20.14)')
      *  (((DM(N,M,2,JK1),N=1,MMM),M=1,MMM),JK1=1,2)
       ENDIF
+      stop 666
 CC
 C      IF(ICOPMA.GT.0 .AND. MEMPT.EQ.1 ) THEN
 C      OPEN(UNIT=19,FILE='MATOUT',STATUS='UNKNOWN',FORM='UNFORMATTED')
@@ -927,16 +928,9 @@ C     WIRD NUR EINMAL DURCHLAUFEN (FUER MEMPT=1)
       DO 1100 K=1,NZKAPO
        KANF=IZQ(K)+1
        KEND=IZQ(K)+NZP(K)
-       WRITE(NOUT,'(A37,10F16.12)') 
-     *            'NORM: (F1+F2)*(DN(K,K,2)-DN(K,K,1)): ',
-     *                   (OPWERT(NZOPER+1,KK),KK=KANF,KEND)
-       WRITE(NOUT,'(A37,10F16.12)') 
-     *            'NORM: (F1+F2)* DN(K,K,2)           : ',
-     *                   (OPWERT(1,KK),KK=KANF,KEND)
-       WRITE(NOUT,'(A37,10F16.12)') 
-     *            'HAMI: (F1+F2)*(DN(K,K,2)-DN(K,K,1)): ',
-     *                   (OPWERT(NZOPER+2,KK),KK=KANF,KEND)
-165   FORMAT(' OPW FUER MM VGL',10E12.5)
+       WRITE(NOUT,165) (OPWERT(NZOPER+1,KK),KK=KANF,KEND)
+165   FORMAT(' OPW ',10E12.5)
+       WRITE(NOUT,165) (OPWERT(NZOPER+2,KK),KK=KANF,KEND)
  1100 CONTINUE
 C
 1168  IF (NENTP.EQ.1) GOTO 800
@@ -993,14 +987,12 @@ C     KEIN AUSDRUCK DER ENERGIEN FUER KAUSD .LT. 0
 71    CONTINUE
    70 CONTINUE
 C
-840   continue
-      CALL UMNORM(NENTP,NBAND9,MEMPT,2,IPLO)
+840   CALL UMNORM(NENTP,NBAND9,MEMPT,2,IPLO)
       IF (KAUSD.LT.2) GOTO 845
       WRITE(NOUT,*) 'VOR ORTHO H'
       CALL SCHEMA(DM(1,1,2,2),MMM,MMM,NDIMD,MIN(MMM,10))
       WRITE(NOUT,*) 'VOR ORTHO EN'
       CALL SCHEMA(DM(1,1,2,1),MMM,MMM,NDIMD,MIN(MMM,10))
-C
 845   CALL ORTHO(NZQ(NZKA+1),EOV)
 C
 C     ENDE LOOP ITT
@@ -1343,10 +1335,6 @@ C
       COMMON /POKA/ B, IKAPO(NZKMAX),IZP(NZKMAX),IZQ(NZKMAX+1),
      *               NZKAPO,KAPO(NZKMAX),IZPWM
 C
-      COMMON /UMNO/ REDM(NZKMAX), NZKA, NZKB, MMM, 
-     *              NZQ(NZKMAX+1), LWERT(5,NZKMAX), 
-     *              KPK(NZKMAX), MASSE(2,NZKMAX)
-C
       COMMON /BIGG/ DM(NDIMD,NDIMD,2,2)
 C
       COMMON /PLO/ SNORM(NZKMAX), QQN(NDIMD), SWW
@@ -1387,7 +1375,7 @@ C
 C     STREURECHNUNG UND BINGUNGRECHNUNG MIT GEKOPPELTEN FUNKTIONEN
 C     OHNE NENTP=3 WEGEN SINGLE RECHNUNG
 C     UMNORMIEREN VON EN UND H
-c     write(nout,*) 'normierung b=',b
+c      write(nout,*) 'normierung b=',b
       DO 910   N = 1,NX
       DO 910   M = 1,NX
       DM(M,N,1,1) = B*DM(M,N,1,1)
@@ -1427,7 +1415,7 @@ c     FUER BINDUNGSRECHNUNGEN NUR NZZ EIGENWERTE UND VEKTOREN BERECHNEN
       IU= NZZ
       ABSTOL=0.0
       LWORK=8*NDIMD      
-c      write(nout,*)'DSYEVX args: ',JOBZ,RANGE,UPLO
+      write(nout,*)'DSYEVX args: ',JOBZ,RANGE,UPLO
       DO 352 M=1,NX
       DO 352 N=1,NX
   352 EN(N,M) =  DM(N,M,2,1)
@@ -1478,16 +1466,15 @@ C
       CALL SCHEMA (EN,NX,NX,NDIMD,5)
       CALL SCHEMA (H,NX,NX,NDIMD,5)
 
-      write(nout,*)'MMM=',MMM
-      OPEN(UNIT=29,FILE='MATOUTB',STATUS='REPLACE',
-     *   FORM='UNFORMATTED')
-      WRITE(29) 
-     * ((EN(N,M),N=1,MMM),M=1,MMM),
-     * ((H(N,M),N=1,MMM),M=1,MMM)
-      CLOSE(UNIT=29,STATUS='KEEP')      
-      STOP 'NORM, HAMILTONIAN MATRICES WRITTEN.'
+      OPEN(UNIT=19,FILE='MATOUT',STATUS='UNKNOWN',FORM='FORMATTED')
+      WRITE(19,'(I8)') MMM
+      WRITE(19,'(E20.14)')
+     *  ((EN(N,M),N=1,MMM),M=1,MMM)
+      WRITE(19,'(E20.14)')
+     *  ((H(N,M),N=1,MMM),M=1,MMM)     
+      CLOSE(UNIT=19,STATUS='KEEP')
 
-C      STOP 'NORM, HAMILTONIAN MATRICES WRITTEN.'
+      STOP 'NORM, HAMILTONIAN MATRICES WRITTEN.'
 C     LAPACK-AUFRUF
       ITYPE=1
       JOBZ='V'

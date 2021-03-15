@@ -1,5 +1,5 @@
       PROGRAM SAMMEL
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
 
       include "par.h"
       

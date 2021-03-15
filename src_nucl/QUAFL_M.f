@@ -688,6 +688,7 @@ C     OPERATOR 1   2    3    4    5    6    7    8    9    10
       STOP 'NPDC'
 6029  CONTINUE
       IF(NTE.EQ.0) GOTO 440
+      write(6,*)'NTE=',NTE
       DO 922   MTE = 1,NTE
       READ(NBAND2) NT1(MTE),NT2(MTE),IZT,IMQ,(LCALT(I),I=1,IZT)
      *  ,           (IMV(I),UM(I),I=1,IMQ)
@@ -1126,7 +1127,7 @@ C
       DO 7 M=1,NZV
       QO(N,M)=0.
 7     QOR(N,M)=0.
-      DO 100K=1,KORR
+      DO 100 K=1,KORR
       FF=F*ABC(K)
        GOTO (30,5,2,2,5,2,2,2,2,2,2,2,2,2,2),MKC
    30 IF(K.EQ.1) GOTO 8
@@ -1344,7 +1345,7 @@ C     SIGMA(N,N') EQ 7.14
       BETA(NZV) = 1./ SQRT(QO(NZV,NZV)+RPAR(KPAR,KPARR,MFL))
       FFW = FFF *PHI2*BETA(NZV)
       FF=FFW**3*FF1
-      IF(NAUS.GT.2) WRITE(NOUT,*) 'BETA',(BETA(K),K=1,NZV),' FF1,FF ',
+      IF(NAUS.GT.0) WRITE(NOUT,*) 'BETA',(BETA(K),K=1,NZV),' FF1,FF ',
      *   FF1,FF
       DO 91   M = 1,NZAV
    91 P(M,NZV) = ZH(M)*BETA(NZV)
@@ -1494,8 +1495,8 @@ C       DMM(.,.,2) ENTHAELT ALLE BEITRAEGE
 C       DMM(.,.,1) ENTHAELT NUR BEITRAEGE FUER NB=0
  110  DMM(I1,1) = DMM(I1,1) + CC
  111  DMM(I1,2) = DMM(I1,2) + CC
-        IF(NAUS.lt.5) GOTO 100
-        write(6,50) I1,NSH,SH(M),WERTT(I2),DMM(I1,1)
+        IF(NAUS.eq.5) GOTO 100
+        write(6,50) I1,NSH,SH(M),WERTT(I2),DMM(I1,2)
 c        PRINT 50,M,NSH,K,LL1,SH(M),WERTT(I2,K),DMM(I1,K),FG
    50 FORMAT(' BEGRI: I1, NSH, SH(M), WERTT, DMM:',
      $ 2I4,3E16.8/)
