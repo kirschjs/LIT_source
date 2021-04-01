@@ -29,16 +29,17 @@ home = os.getenv("HOME")
 
 pathbase = home + '/kette_repo/ComptonLIT'
 
-litpath3He = pathbase + '/systems/mul_helion_' + suffix + '/'
+litpathD = pathbase + '/systems/mul_deuteron_' + suffix + '/'
 
-if os.path.isdir(litpath3He) == False:
-    os.mkdir(litpath3He)
+if os.path.isdir(litpathD) != False:
+    os.system('rm -rf ' + litpathD)
+os.mkdir(litpathD)
 
-helionpath = litpath3He + 'he3/'
-if os.path.isdir(helionpath) == False:
-    os.mkdir(helionpath)
-v18uixpath = litpath3He + 'LITstate/'
-respath = litpath3He + 'results/'
+deuteronpath = litpathD + 'D/'
+if os.path.isdir(deuteronpath) == False:
+    os.mkdir(deuteronpath)
+v18uixpath = litpathD + 'LITstate/'
+respath = litpathD + 'results/'
 if os.path.isdir(respath) == False:
     os.mkdir(respath)
 
@@ -56,7 +57,7 @@ potnnn = pathbase + '/data/urbana9_AK_neu'
 cal = [
     'dbg',
     'einzel',
-    #'construe_fresh_helion',
+    #'construe_fresh_deuteron',
     #'reduce',
     #'coeff',
     'rhs',
@@ -67,52 +68,39 @@ cal = [
     'lhs_lu-ob-qua',
     #'couple',
 ]
-new_helion = True
+new_deuteron = True
 # convention: bound-state-expanding BVs: (1-8), i.e., 8 states per rw set => nzf0*8
 channels = {
-    # helion
-    'npp0.5^+': [
-        ['000', ['he_no1', 'he_no6']],
-        ['022', ['he_no2']],
-        ['202', ['he_no2']],
-        #['222', ['he_no2']],
-        #['221', ['he_no1']],  #, 'he_no6', 'he_no2']],
-        #['220', ['he_no1']],  #, 'he_no6']],
-        #['111', ['he_no3']],  #, 'he_no5'
-        #['112', ['he_no5']],
+    # deuteron
+    'np1^+': [
+        ['0', ['np_S1']],
+        ['2', ['np_S1']],
     ],
     #          [l1l2L,[compatible (iso)spin configurations]]
-    '0.5^-': [
-        ['011', ['he_no1', 'he_no6']],
-        ['212', ['he_no2']],
-        ['211', ['he_no2']],
-        #['101', ['he_no2']],  #, 'he_no4i', 'he_no5']],
-        #['121', ['he_no2']],  #, 'he_no4i', 'he_no5']],
-        #['122', ['he_no2']],
+    '0^-': [
+        ['1', ['np_S1']],
     ],
-    '1.5^-': [
-        ['011', ['he_no1', 'he_no2', 'he_no6']],
-        ['211', ['he_no1', 'he_no2', 'he_no6']],
-        ['212', ['he_no1', 'he_no2', 'he_no6']],
-        ['213', ['he_no2']],  #, 'he_no6''he_no1',
-        #['101', ['he_no3']],  #, 'he_no4i', 'he_no5'
-        #['121', ['he_no3']],  #, 'he_no4i', 'he_no5'
-        #['122', ['he_no5']],  #, 'he_no4i'
-    ]
+    '1^-': [
+        ['1', ['np_S1']],
+    ],
+    '2^-': [
+        ['1', ['np_S1']],
+        #['3', ['np_S1']],
+    ],
 }
 
-streukas = ['0.5^-']  #, '1.5^-']
+streukas = ['0^-', '1^-', '2^-']
 
 #                  realistic    L>0 (only)         deuteron
-boundstatekanal = 'npp0.5^+'
+boundstatekanal = 'np1^+'
 
-J0 = float(boundstatekanal.split('^')[0][-3:])
+J0 = float(boundstatekanal.split('^')[0][-1])
 
 multipolarity = 1
 
 anz_phot_e = 1
-phot_e_0 = 1.0  #  enems_e converts to fm^-1, but HERE the value is in MeV
-phot_e_d = 1000.0  #  delta E
+phot_e_0 = 0.01  #  enems_e converts to fm^-1, but HERE the value is in MeV
+phot_e_d = 1.0  #  delta E
 
 opME_th_low = 10**(-24)
 opME_th_up = 10**24
@@ -123,72 +111,9 @@ min_eucl_pair_dist = 0.0001
 eps_up = [10.2, 10.01]
 eps_low = [0.2, 0.1]
 
-wini0 = w120  #wLAPLACE[::-1]
-
-addw = 1
-addwt = 'middle'
-scale = 1.
-min_spacing = 0.02
-min_spacing_to_LITWs = 0.001
-
-rw0 = wid_gen(
-    add=addw, addtype=addwt, w0=wini0, ths=[1e-5, 2e2, 0.2], sca=scale)
-rw0 = sparsify(rw0, min_spacing)
-
-nzf0 = int(np.ceil(len(rw0) / 20.0))
-
-#LIT basis ---------------------------------------------------------------
-
-basisdimLITint = 10
-basisdimLITrel = 10
-LD = 20
-
-basisdimLIT = 40
-wli = 'wd'
-
-if wli == 'wd':
-    #scale deuteron
-    winiLIT = [ww for ww in 1.1 * rw0 if ((ww < 10) & (ww > 0.01))] + [10.01]
-
-if wli == 'lin':
-    #linspace
-    w0l, dw = 0.035, 1.4
-    winiLIT = np.linspace(
-        start=w0l,
-        stop=w0l + basisdimLIT * dw,
-        num=basisdimLIT,
-        endpoint=True,
-        dtype=None)
-if wli == 'log':
-    #logspace
-    exp0log, expmaxlog = -1, 1
-    winiLIT = np.logspace(
-        start=exp0log,
-        stop=expmaxlog,
-        num=basisdimLIT,
-        endpoint=True,
-        dtype=None)
-if wli == 'geom':
-    #geomspace
-    wminl, wmaxl = 0.01, 20
-    winiLIT = np.geomspace(
-        start=wminl, stop=wmaxl, num=basisdimLIT, endpoint=True, dtype=None)
-if wli == 'lap':
-    #laplace space
-    laplace_loc, laplace_scale = .9, .4
-    winiLITlaplace = np.sort(
-        np.abs(np.random.laplace(laplace_loc, laplace_scale, basisdimLIT)))
-    winiLITlaplace = wid_gen(
-        add=addw,
-        addtype=addwt,
-        w0=winiLITlaplace[::-1],
-        ths=[1e-5, 2e2, 0.2],
-        sca=scale)
-    winiLIT = sparsify(winiLITlaplace, min_spacing)
-
 # -- here, I allowed for an enhancement of certain operators, to bind an S-wave triton with v18/uix
 costr = ''
-for nn in range(1, 31):
+for nn in range(1, 14):
     cf = 1.0 if (nn < 28) else 0.0
     cf = 1.0 if (nn == 2) else cf
     costr += '%12.7f' % cf if (nn % 7 != 0) else '%12.7f\n' % cf
@@ -196,7 +121,6 @@ for nn in range(1, 31):
 #print('costr = ', costr)
 
 # for the cleaner --------------------------------------------------------
-streukanalweiten = range(1, len(winiLIT) + 1)
 
 maxCoef = 10000
 minCoef = 1200

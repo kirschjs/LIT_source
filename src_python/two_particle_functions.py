@@ -2,7 +2,326 @@ import os, re
 import numpy as np
 import random
 import rrgm_functions
-from bridge import *
+from bridgeA2 import *
+
+elem_spin_prods_2 = {
+    #
+    'np_S1': '  2  1  1  1            np: s12=1\n  1  1\n  1  3\n  1  1\n',
+    #
+}
+
+
+def n2_inob(fr, anzO, fn='INOB', indep=0):
+    #                IBOUND => ISOSPIN coupling allowed
+    out = '  0  2  2  1%3d\n' % indep
+    for n in range(anzO):
+        out += '  1'
+    out += '\n  4\n%3d  2\n' % len(fr)
+
+    for n in fr:
+        out += elem_spin_prods_2[n]
+
+    with open(fn, 'w') as outfile:
+        outfile.write(out)
+
+
+def lit_2inob(anzo=13, fr=[], fn='INOB'):
+    s = ''
+    s += '  8  3  3  3\n'
+    for n in range(anzo):
+        s += '  1'
+    s += '\n  4\n'
+    s += '%3d  2\n' % len(fr)
+
+    for n in fr:
+        s += elem_spin_prods_2[n]
+
+    with open(fn, 'w') as outfile:
+        outfile.write(s)
+    return
+
+
+def n2_inlu(anzO, fn='INLUCN', fr=[], indep=0):
+    out = '  0  0  0  0  0%3d\n' % indep
+    for n in range(anzO):
+        out += '  1'
+    out += '\n%d\n' % len(fr)
+    for n in range(0, len(fr)):
+        out += '  1  2\n'
+
+    for n in fr:
+        out += '%3d\n' % (int(n[0]))
+
+    with open(fn, 'w') as outfile:
+        outfile.write(out)
+
+
+def lit_2inlu(mul=0, anzo=7, frag=[], fn='INLU'):
+    s = ''
+    #   NBAND1,NBAND2,LAUS,KAUS,MKAUS,LALL
+    s += '  9  2  0  0  0\n'
+    for n in range(anzo):
+        s += '  1'
+    s += '\n%3d%3d\n' % (len(frag), mul)
+    for n in range(len(frag)):
+        s += '  1  2\n'
+    for n in range(len(frag)):
+        s += '%3d\n' % int(frag[n])
+
+    with open(fn, 'w') as outfile:
+        outfile.write(s)
+    return
+
+
+def DinquaBS(intwi=[], potf=''):
+    s = ''
+    # NBAND1,NBAND2,NBAND3,NBAND4,NBAND5,NAUS,MOBAUS,LUPAUS,NBAUS
+    s += ' 10  8  9  3 00  0  0  0  0\n%s\n' % potf
+    zerl_counter = 0
+    bv_counter = 1
+    for n in range(len(intwi)):
+        zerl_counter += 1
+        nrel = len(intwi[n])
+        s += '%3d%60s%s\n%3d%3d\n' % (1, '', 'Z%d  BVs %d - %d' %
+                                      (zerl_counter, bv_counter,
+                                       bv_counter - 1 + len(intwi[n])), 1,
+                                      nrel)
+
+        s += '%12.2f%12.2f\n' % (0, 0)
+        for rw in range(0, len(intwi[n])):
+            s += '%12.8f' % float(intwi[n][rw])
+        s += '\n'
+        s += '  1  1\n1.\n'
+
+    with open('INQUA_M', 'w') as outfile:
+        outfile.write(s)
+
+    return
+
+
+def n2_inen_rhs(bas, jay, co, rw, fn='INEN', pari=0, nzop=14, tni=10, anzb=0):
+    head = '%3d  2 12%3d  1  0 +2  0  0 -1  0  1\n' % (tni, nzop)
+    head += '  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1\n'
+
+    head += co + '\n'
+
+    relstr = ''
+    for rwi in rw:
+        relstr += '%3d' % int(rwi)
+
+    out = ''
+    if anzb == 0:
+        out += '%4d%4d   1   0%4d\n' % (int(2 * jay), len(bas), pari)
+    else:
+        out += '%4d%4d   1   0%4d\n' % (int(2 * jay), anzb, pari)
+
+    for bv in bas:
+        out += '%4d%4d\n' % (1, bv[0])
+        tmp = ''
+        for i in range(bv[1] - 1):
+            tmp += '%3d' % (0)
+        tmp += '  1\n'
+        out += tmp
+
+    with open(fn, 'w') as outfile:
+        outfile.write(head + out)
+
+
+def lit_2inqua_M(intwi=[], relwi=[], LREG='', anzo=13, outfile='INQUA'):
+    s = ''
+
+    # NBAND1,NBAND2,NBAND3,NBAND4,NBAND5,NAUS,MOBAUS,LUPAUS,NBAUS
+    s += ' 10  8  9  3 00  0  0  0  0\n'
+    if (LREG == ''):
+        for n in range(anzo):
+            s += '  1'
+    else:
+        s += LREG
+    s += '\n'
+    zerl_counter = 0
+    bv_counter = 1
+    for n in range(len(intwi)):
+        zerl_counter += 1
+        nrel = len(intwi[n])
+        s += '%3d%60s%s\n%3d%3d\n' % (1, '', 'Z%d  BVs %d - %d' %
+                                      (zerl_counter, bv_counter,
+                                       bv_counter - 1 + len(intwi[n])), 1,
+                                      nrel)
+
+        s += '%12.2f%12.2f\n' % (0, 0)
+        for rw in range(0, len(intwi[n])):
+            s += '%12.8f' % float(intwi[n][rw])
+        s += '\n'
+        s += '  1  1\n1.\n'
+
+    appe = 'w'
+    with open(outfile, appe) as outfi:
+        outfi.write(s)
+    return
+
+
+def n2_inen_bdg(bas, jay, co, fn='INEN', pari=0, nzop=14, tni=10, idum=2):
+    # idum=2 -> I4 for all other idum's -> I3
+    head = '%3d%3d 12%3d  1  0 +2  0  0 -1  0  1\n' % (tni, idum, nzop)
+    head += '  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1\n'
+
+    head += co + '\n'
+
+    out = ''
+    if idum == 2:
+        out += '%4d%4d   1   0%4d\n' % (int(2 * jay), len(bas), pari)
+    else:
+        out += '%3d%3d  1  0%3d\n' % (int(2 * jay), len(bas), pari)
+
+    relset = False
+
+    for bv in bas:
+        if idum == 2:
+            out += '%4d%4d\n' % (1, bv[0])
+        else:
+            out += '%3d%3d\n' % (1, bv[0])
+
+        tmp = ''
+        for n in range(1, max(1, 1 + max(bv[1]))):
+            if n in bv[1]:
+                tmp += '%3d' % int(1)
+            else:
+                tmp += '%3d' % int(0)
+
+        tmp += '\n'
+        out += tmp
+
+    with open(fn, 'w') as outfile:
+        outfile.write(head + out)
+
+
+def lit_2inen(BUECO,
+              KSTREU,
+              JWSL,
+              JWSLM,
+              MULM2,
+              JWSR,
+              MREG='',
+              NPARL=2,
+              NPARR=2,
+              anzo=11,
+              ANORML=1.0,
+              ANORMR=1.0,
+              EB=-2.2134173,
+              NZE=100,
+              EK0=1e3,
+              EKDIFF=20.0,
+              withhead=True,
+              bnd='',
+              outfile='INEN'):
+    s = ''
+    # NBAND1,IGAK,KEIND,IQUAK
+    s += ' 10  0  0  0\n'
+    # 1-11 Einteilchen, if any MREG>=12 # 0 => MODUS=1 => lese QUALMOUT
+    # 10,11: el. siegert limes fuer p,n
+    if MREG == '':
+        s += '  1'
+        for n in range(anzo - 3):
+            s += '  0'
+        s += '  1  1'
+    else:
+        s += MREG
+
+    s += '\n'
+    # g faktoren (6)
+    s += '5.586       -3.826      1.          0.          1.          0.\n'
+    s += '%11.4f%11.4f\n%11.4f\n' % (ANORML, ANORMR, EB)
+    # nbrE , E0 , dE  (in MeV)
+    s += '%3d\n%-12.4f%-12.4f\n' % (NZE, EK0, EKDIFF)
+    # JWSL,JWSR,NPARL,NPARR=1,2(-,+),JWSLM,MULM2
+    s += '%3d%3d%3d%3d%3d%3d\n' % (2 * JWSL, 2 * JWSR, NPARL, NPARR, 2 * JWSLM,
+                                   2 * MULM2)
+    # NZKL,NZKR,NZKPL,NZKPR
+    s += '%3d%3d  0  0\n' % (1, 1)
+
+    # uecof
+    s += '%3d\n' % (len(BUECO) + 1)
+    for c in BUECO:
+        s += '%12.6f\n' % c
+    s += '+1.0\n'
+
+    #          [QBV nbr. relW]
+
+    s += '%3d%3d\n%3d\n' % (1, KSTREU[0], len(BUECO) + 1)
+    s += '%s  1\n' % (' ' * int(3 * (KSTREU[1] - 1)))
+
+    nueco = 1
+    if bnd != '':
+        print('reading %s' % bnd)
+        bdginen = [line for line in open(bnd)]  #[8:]
+
+        for n in range(int(bdginen[7][4:8])):
+
+            tr = np.nonzero(np.array(
+                bdginen[9 + 2 * n].split()).astype(int))[0]
+
+            for m in range(len(tr)):
+                s += '  1%3d\n' % int(bdginen[8 + 2 * n][4:8])
+                s += '%3d\n' % nueco
+                nueco += 1
+                s += '  0' * tr[m]
+                s += '  1\n'
+    #else:
+    #    print('INEN w/o 3He structure.')
+
+    with open(outfile, 'w') as outfi:
+        outfi.write(s)
+    outfi.close()
+    return
+
+
+def retrieve_D_M(inqua):
+
+    relw = []
+    frgm = []
+    inq = [line for line in open(inqua)]
+
+    lineNR = 0
+    while lineNR < len(inq):
+        if ((re.search('Z', inq[lineNR]) != None) |
+            (re.search('z', inq[lineNR]) != None)):
+            break
+        lineNR += 1
+    if lineNR == len(inq):
+        print('no <Z> qualifier found in <INQUA>!')
+        exit()
+
+    while ((lineNR < len(inq)) & (inq[lineNR][0] != '/')):
+        try:
+            anziw = int(inq[lineNR].split()[0])
+        except:
+            break
+        if (anziw != 1):
+            print(
+                'Two-body caclulation admits only 1, trivial internal width set.'
+            )
+            exit()
+
+        anzrw = int(inq[lineNR + 1].split()[1])
+
+        frgm.append([anziw, anzrw])
+
+        relwtmp = []
+        relwtmp.append([float(rrw) for rrw in inq[lineNR + 3].split()])
+        relw += relwtmp
+
+        lineNR += 2 + 2 + 2
+        if (lineNR >= len(inq)):
+            break
+
+    rw = relw
+
+    with open('intwD.dat', 'wb') as f:
+        for ws in rw:
+            np.savetxt(f, [ws], fmt='%12.4f', delimiter=' ; ')
+    f.close()
+
+    return rw, frgm
 
 
 def non_zero_couplings(j1, j2, j3):
@@ -465,7 +784,7 @@ def h2_inen_bs(relw,
                nfrag=1,
                withhead=True):
     s = ''
-    s += ' 10  2 12%3d  1  1%3d  0  1 -1  0  1\n' % (int(anzo), nzz)
+    s += ' 10  2 12%3d  1  0%3d  0  0 -1  0  1\n' % (int(anzo), nzz)
     #       N  T Co CD^2 LS  T
     s += '  1  1  1  1  1  1  1  1  1  1  1  1  1  1\n'
 

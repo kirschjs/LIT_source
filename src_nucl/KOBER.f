@@ -682,7 +682,8 @@ C        LOOP UEBER OPERATOREN
       NDELK=MS(KFL,MFL)-MS(KFR,MFR)
       FAKTOR(KFL, KFR)=0.
       Y=CLG(MS(KFR,MFR),ITEN,MS(KFL,MFL),MS(KFR,MFR),NDELK)
-      IF(Y.NE.0.) THEN 
+      IF(Y.NE.0.) THEN
+C clebsch in wigner-eckart to obtain reduced me; the (-1)**(2Rank(op))=1 and not explicit
                  FAKTOR(KFL,KFR)=SQRT( MS(KFL,MFL) + 1.)/Y
                  ICALCU=1
       ENDIF

@@ -1,5 +1,5 @@
       PROGRAM ENEMB
-C     ENPON FUER QUAL
+C      ENPON FUER QUAL
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
 C  
 C      ELEKTROMAGNETISCHE UEBERGAENGE ZWISCHEN BOUND STATES OHNE
@@ -127,7 +127,7 @@ c      OPEN(UNIT=5,FILE='INEN',STATUS='OLD')
 c      OPEN(UNIT=6,FILE='outi')      
       
       call getarg(3,FORMFAout)
-c      OPEN(UNIT=15,FILE=FORMFAout,STATUS='UNKNOWN',FORM='FORMATTED')
+      OPEN(UNIT=19,FILE='MATOUT',STATUS='UNKNOWN',FORM='FORMATTED')
       OPEN(UNIT=15,FILE=FORMFAout,FORM='UNFORMATTED',
      *     STATUS='REPLACE')
       OPEN(UNIT=10,FILE='QUAOUT',STATUS='OLD',FORM='UNFORMATTED')
@@ -308,7 +308,7 @@ C     EINLESEN DER GESAMTDREHIMPULSE UND DER PARITAETEN
 C     1 = -  und  2 = +    only deltaPi is relevant
 C               2*( Jl   Jr              m_jl m_L )  
       READ(5,1002)JWSL,JWSR,NPARL,NPARR,JWSLM,MULM
-      IF (JWSL.NE.JWSR) MREG(1)=0
+C      IF (JWSL.NE.JWSR) MREG(1)=0
 C     BEI NORM MUESSEN GESAMTDREHIMPULSE LI UND RE UEBEREINSTIMMEN
 C
 C     BESTIMMUNG DER CLEBSCH DES RED. MATR.-EL.
@@ -399,39 +399,42 @@ c      write(6,'(A13,3I3)')'Zl,Zr - MKC: ',MFL,MFR,MKC
 C 
 C     LOOP BASISVEKTOR-MATRIZEN
 C      DO 40 NLES=1,MLES
+C                   LINKS
       DO 401 NBVL=1,IRHO
+C                     RECHTS        
         DO 402 NBVR=1,JRHO
 C
-      IF (MFL.ne.MFR) THEN
+c      IF (MFL.ne.MFR) THEN
 C        NTI = 1 if 1<=MKC<=11        
-         READ (NBAND) NUML,NUMR,IK1,JK1,LL1,
+      READ (NBAND) NUML,NUMR,IK1,JK1,LL1,
      *       ((FGN(K,L),
-     * (IDUMMY,DNN(K,L,J),J=1,LL1),L=1,JK1),K=1,IK1)
+     * (IDUMMY,DNN(K,L,J),J=1,LL1),K=1,IK1),L=1,JK1)
+C     * (IDUMMY,DNN(K,L,J),J=1,LL1),L=1,JK1),K=1,IK1)     
+
           NZREL(MFL) = IK1
           NZREL(MFR) = JK1
 C 
-      write(6,'(A13,5I4)') '(from qual): ',NUML,NUMR,IK1,JK1,LL1
-      write(6,'(2F18.8)') 
-     *     ((FGN(K,L),DNN(K,L,1),L=1,JK1),K=1,IK1)
+c      write(6,'(A13,5I4)') '(from qual): ',NUML,NUMR,IK1,JK1,LL1
+c      write(6,'(2F18.8)') 
+c     *     ((FGN(K,L),DNN(K,L,1),L=1,JK1),K=1,IK1)
 
 c     
-      ELSE
-        IF (NBVL.le.NBVR) THEN
-C          
-         READ (NBAND) NUML,NUMR,IK1,JK1,LL1,
-     *       ((FGN(K,L),
-     * (IDUMMY,DNN(K,L,J),J=1,LL1),L=1,JK1),K=1,IK1)
+c      ELSE
+c        IF (NBVL.le.NBVR) THEN
+cC          
+c         READ (NBAND) NUML,NUMR,IK1,JK1,LL1,
+c     *       ((FGN(K,L),
+c     * (IDUMMY,DNN(K,L,J),J=1,LL1),L=1,JK1),K=1,IK1)
+cC
+c      write(6,'(A13,5I4)') '(from qual): ',NUML,NUMR,IK1,JK1,LL1
+c      write(6,'(A28,E12.4,I3,E12.4)')
+c     * 'FGN(1,1),IDUMMY,DNN(1,1,1): ',FGN(1,1),IDUMMY,DNN(1,1,1)
+cC
+c         NZREL(MFL) = IK1
+c         NZREL(MFR) = JK1
+c        ENDIF
 C
-      write(6,'(A13,5I4)') '(from qual): ',NUML,NUMR,IK1,JK1,LL1
-      write(6,'(A28,E12.4,I3,E12.4)')
-     * 'FGN(1,1),IDUMMY,DNN(1,1,1): ',FGN(1,1),IDUMMY,DNN(1,1,1)
-C
-         IF (MFL.ne.MFR) stop 23
-         NZREL(MFL) = IK1
-C         NZREL(MFR) = JK1
-        ENDIF
-C
-      ENDIF
+c      ENDIF
 c      if(nzero.ne.2) goto 142
       LBL=MLWERT(5,NUML)
       LBL2=2*LBL
@@ -442,10 +445,6 @@ c      if(nzero.ne.2) goto 142
       MR=MMS(3,NUMR)
       SPR=.5* REAL(MR)
 C      F=YG(GJR,AK,GJL,GJR,AKM)
-      F=CLG(INT(2*AK), INT(2*GJR),INT(2*GJL),
-     1      INT(2*AKM),INT(2*(GJLM-AKM)))
-      if(F.NE.CL) STOP 89
-c      WRITE (6,1204) AK,AKM,GJR,(GJLM-AKM),GJL,GJLM,F
 C           1  2- SPIN -5  6- BAHN -9 Sp Sn
       GOTO(99,92,92,92,92,91,91,91,91,91,91), MKC
 89    STOP 11
@@ -465,6 +464,19 @@ C    this is the reduced matrix element
       FK1new = (-1)**(AK-GJR+GJL)*SQRT(JWSR+1.)*SQRT(MUL2+1.)
      1        *F9J(LBL2,LBR2,IORANK2,ML,MR,ISRANK2,JWSL,JWSR,MUL2)
 C
+      FK1old=(-1)**((MUL2+LBL2+ML+JWSR)/2) 
+      FK1old=FK1*SQRT(AJRD*AJLD/(2.*SPR+1.)) 
+      FK1old=FK1*F6J(LBL2,LBR2,MUL2,JWSR,JWSL,MR)
+C
+      F=CLG(INT(2*AK), INT(2*GJR),INT(2*GJL),
+     1      INT(2*AKM),INT(2*(GJLM-AKM)))
+c      F=CLG(INT(2*GJL),INT(2*GJR),INT(2*AK),INT(2*GJL),-INT(2*GJR))
+c clg from wigner-eckart reduced ME
+c this factor is absent for "ordinary" operators whose
+c spin and spatial rank couple to 0;      
+c
+c
+      WRITE (6,1204) AK,AKM,GJR,(GJLM-AKM),GJL,GJLM,F
 c      write(6,'(9I3)')LBL2,LBR2,IORANK2,ML,MR,ISRANK2,JWSL,JWSR,MUL2
 c      write(6,'(2F8.4)')FK1new,CL
       GOTO 100
@@ -519,19 +531,21 @@ C     NORM
       IF (ML.NE.MR) THEN
         WRITE (6,1200) MKC, ML, MR
 c        STOP 13
-      ENDIF 
-      FK1=(-1)**((LBL2+ML+JWSR)/2)
+      ENDIF
+      FK1=(-1)**((LBR2+2*MR-ML+JWSR)/2)       
+C      FK1=(-1)**((LBL2+ML+JWSR)/2)
 c      FK1=FK1*SQRT(AJRD/(2.*SPR+1))
 C     HIER WIRD  DER FUER DIE NORM FALSCHE CLEBSCH-GORDAN-KOEFFIZIENT
 C     DES RED. MATR.-ELEMENTS HERAUSGEKUERZT.
-      FK1=FK1*F6J(LBL2,LBR2,0,JWSL,JWSR,ML)
-c      stop 666
-c      FK1=FK1*F6J(LBR2,MR,JWSR,ML,LBL2,0)
-      FK1new=FK1/CL
+c      FK1=FK1*F6J(LBL2,LBR2,0,JWSL,JWSR,ML)
+      F=1.
+c      CLG(0, INT(2*GJR),INT(2*GJL),0,INT(2*GJLM))
+
+      FK1new=FK1*F6J(LBR2,MR,JWSR,ML,LBL2,0)
+      
 C
   100 CONTINUE
 C  for F1 <J'|L|J> + F2 <J|L|J'>
-      F=CL
       IF (MREG(MKC).eq.0) THEN
       F = 0.
       write(6,*) '(ecce) MKC = ',MKC
@@ -540,8 +554,8 @@ c      stop 100
 C     ALLE OPERATOREN
 C                 = hbarc/mn for siegert proton      
       F1=F*FK1new*GEFAK(MKC)*FPAR
-      write(6,'(A30,5F12.8,/)')'F1=F*FK1new*GEFAK(MKC)*FPAR = ',
-     *           F1,F,FK1new,GEFAK(MKC),FPAR
+c      write(6,'(A30,5F12.8,/)')'F1=F*FK1new*GEFAK(MKC)*FPAR = ',
+c     *           F1,F,FK1new,GEFAK(MKC),FPAR
 
       KANL=1
       KANR=1
@@ -580,11 +594,11 @@ C
      *    (EK(1)**JQ)*
      *    EXP((EK(1)**2)*FGN(K,L))
       ELSE
-      DNN(K,L,JJ) = DNN(K,L,JJ)
+      DNN(K,L,JJ) = 0.5*F1*DNN(K,L,JJ)
       endif
 C     AUSDRUCK DER OP-WERTE UND DER K-POTENZ LAMBDA
 c      write(nout,'(A13,F8.4,3I3)')'(ecce) DNN = ',DNN(K,L,JJ),K,L,JJ
-      IF(IQUAK.ge.0.and.ABS(FGN(K,L)).gt.0) then
+      IF(IQUAK.gt.5.and.ABS(FGN(K,L)).gt.0) then
       WRITE(6,'(A42,7I3,3F12.8)') 
      *         'MFL,MFR,MKC,NBVL,NBVR,K,L,FGN(K,L),F1,DNN: ',
      *           MFL,MFR,MKC,NBVL,NBVR,K,L,
@@ -606,10 +620,12 @@ C
 C
       NROWOz = 1
       NCOLOz = 1
+
       DO 221 nr=1,MFL-1
   221  NROWOz = NROWOz + NZRHO(nr)*NZREL(nr)
       DO 222 nc=1,MFR-1
   222  NCOLOz = NCOLOz + NZRHO(nc)*NZREL(nc)
+c      write(nout,*)MFL,MFR,NCOLOz,NROWOz
 C
 c      write(nout,'(A20,2I5)') '(ecce): row0, col0: ',NROWOz,NCOLOz  
       NROWOv=NROWOz
@@ -625,8 +641,11 @@ c      write(nout,'(A20,2I5)') '(ecce): row0, col0: ',NROWOz,NCOLOz
       DO 468 L=1,JK1
       if(ABS(DN(K,L)).lt.1E-20) DN(K,L)=0
       DM(NROW,NCOL,MKC) = DN(K,L)
-c      write(nout,'(A11,I4,A1,I4,A1,I4,A4,E18.8)')'(ecce): DM(',
-c     *   NROW,',',NCOL,',',MKC,') = ',DN(K,L)
+c      if(MKC.eq.10) then
+c      write(6,'(2I2,A11,I2,A1,I2,A1,I2,A4,2E18.8)')K,L,
+c     *   '(ecce): DM(',NROW,',',NCOL,',',MKC,') = ',
+c     *   DN(K,L),DN(L,K)
+c      endif
       NCOL = NCOL + 1
   468 CONTINUE
       NROW = NROW + 1
@@ -650,14 +669,17 @@ C     BESTIMMUNG VON SIEGERT OPWERT = op10 + op11
 c      WRITE(NBAND2,1638)
 1638  FORMAT('      E [fm]   JL  MUL   JR   JM', 
      * ' MULM   <JL,JM|MUL|JR>')
-      DO 143 K=1,NROW-1
-      DO 143 L=1,NCOL-1
-  143 WRITE(6,'(A32,4E12.4)') 
-     *      'DM(L,L,1),DM(K,K,1),DM(K,L,10),DM(K,L,11):',
-     *       DM(L,L,1),DM(K,K,1),DM(K,L,10),DM(K,L,11)
+c      DO 143 K=1,NROW-1
+c      DO 143 L=1,NCOL-1
+c  143 WRITE(19,'(A38,2I3,3E12.4)') 
+c     *      '(K,L) DM(K,L,1),DM(K,L,10),DM(K,L,11):',
+c     *       K,L,DM(K,L,1),DM(K,L,10),DM(K,L,11)
+c  143 WRITE(19,'(3F20.12)') 
+c     *       DM(K,L,1),DM(K,L,10),DM(K,L,11)     
       WRITE(NBAND2)
+c     * (( DM(K,L,10),L=1,NCOL-1 ),K=1,NROW-1 )
      * (( (DM(K,L,10)+DM(K,L,11))/SQRT(DM(L,L,1)*DM(K,K,1))
-     *   ,L=1,NCOL-1 ),K=1,NROW-1 )
+     *   ,L=1,NCOL-1 ),K=1,NROW-1 )     
 C
 1637  FORMAT(E12.4,5I5,'     ',E20.14)      
 C

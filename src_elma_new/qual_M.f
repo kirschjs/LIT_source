@@ -1,6 +1,6 @@
       PROGRAM QUAL
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
-C
+C 
 C      FUER ELEKTROMAGNETISCHE OPERATOREN OHNE LANGWELLE
 C
 C                KEINE POLYNOME
@@ -347,7 +347,7 @@ C                              BV RV Z
       WRITE(NOUT,*)' WEITE ',N,' FALSCH'
       STOP 'INTERNE WEITE FALSCH'
   124 CONTINUE
- 1003 FORMAT(30E12.4)
+ 1003 FORMAT(50E12.4)
       DO 125 N=1,KM
       IF(RPAR(L,N,K).GT.1.E-8) GOTO 125
       WRITE(NOUT,*) ' IN ZERLEGUNG ',K,' IST DIE RELATIVWEITE ',L,
@@ -598,7 +598,7 @@ C     EINLESEN DER SPIN-ISOSPINMATRIXELEMENTE AUS OBER
       NR = MZG(MFR)
       IF(NREG(MKC).LE.0) GOTO 440
       READ(NBAND2) NTE,NTE,NTE
-      write(6,*) '<> NTE,NTE,NTE',NTE,NTE,NTE
+c      write(6,*) '<> NTE,NTE,NTE',NTE,NTE,NTE
       NTEH=NTE
       IF (LREG(MKC).EQ.0) GOTO 425
       IF (KOM(MKC,MFL,MFR)) 421,422,423
@@ -876,7 +876,7 @@ C
       PORR(N,M)=POR(N,M)+RPAR(LPAR,LPARR,MFR)*QFCR(N,M,MD2)
       QOR(N,M)=PORR(N,M)
 77    QO(N,M)=POLL(N,M)+PORR(N,M)
-      write(6,*)'enter BEGRI with MTE=',MTE,'/',NTE
+c      write(6,*)'enter BEGRI with MTE=',MTE,'/',NTE
       CALL BEGRI
 C
 C     ENDE LOOP RADIALWEITEN RECHTS
@@ -917,15 +917,15 @@ C
       N2=N*JK1
       II1 = 1
       A = 0.
-      DO 510 K=M1,M2
-      DO 510 L=N1,N2
       DO 510 J=1,LL1
+      DO 510 L=N1,N2
+      DO 510 K=M1,M2
       A = A + ABS(DM(K,L,J))
   510 CONTINUE
       IF (A.GT.0) GOTO 512
       WRITE (NBAND1) NUML, NUMR, IK1, JK1, LL1,
-     *               ((F(K,L),(J-1,DM(K,L,J),J=1,LL1),K=1,IK1),
-     *                                                L=1,JK1)
+     *               ((F(K,L),(J-1,DM(K,L,J),J=1,LL1),K=M1,M2),
+     *                                                L=N1,N2)
       IF(NAUS.LT.2) GOTO 482
       WRITE (nout,'(A19,5I3)') '(nband1-nullreco): ',
      * NUML, NUMR, IK1, JK1, LL1
@@ -935,10 +935,10 @@ C
 512   WRITE (NBAND1) NUML, NUMR, IK1, JK1, LL1,
      *               ((F(K,L),(J-1,DM(K,L,J),J=1,LL1),K=M1,M2),
      *                                                L=N1,N2)
-      IF(NAUS.LT.1) GOTO 482
+      IF(NAUS.LT.-1) GOTO 482
       WRITE (6,'(A10,5I3)') '(nband1): ',NUML, NUMR, IK1, JK1, LL1
-      WRITE (6,*) '(nband1): ',
-     * ((F(K,L),(J-1,DM(K,L,J),J=1,LL1),K=M1,M2),L=N1,N2)
+      WRITE (6,'(A10)') '(nband1): '
+      WRITE (6,'(1E12.6)') (((DM(K,L,J),J=1,LL1),K=M1,M2),L=N1,N2)
 c      DO 520 K=M1,M2
 c      DO 520 L=N1,N2
 c 520   WRITE(NOUT,1051) F(K,L),(J-1,DM(K,L,J),J=1,LL1)
@@ -1401,8 +1401,8 @@ c        IF (C.EQ.0.) GOTO 100
         I1 = NSH1(M) + I0
         FGG(I1) = FG
 C ?why has sh*wertt not been added to DMM before? -------------
-        DMM(I1,K) = DMM(I1,K) + SH(M) * WERTT(I2,K)
-        IF(NBAUS.ge.1) GOTO 100
+        DMM(I1,K) = DMM(I1,K) + C
+        IF(NBAUS.le.1) GOTO 100
         write(6,50) I1,NSH,K,LL1,SH(M),WERTT(I2,K),DMM(I1,K),FG
 c        PRINT 50,M,NSH,K,LL1,SH(M),WERTT(I2,K),DMM(I1,K),FG
    50 FORMAT(' BEGRI: I1, NSH, K, LL1, SH(M), WERTT, DMM, FG:',

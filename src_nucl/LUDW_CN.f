@@ -306,6 +306,7 @@ C     MAXIMAL COUPLING
       WRITE (NOUT,1010) LW(N9,LR,MFR),IDL,LW(N8,LL,MFL)
 1010  FORMAT(' KOPPLUNG LIEFERT NULL',3I5)
       GOTO 790
+C clebsch in wigner-eckart to obtain reduced me; the (-1)**(2Rank(op))=1 and not explicit      
 192   F=F*SQRT(2.*LW(N8,LL,MFL)+1.)/Y
 C
 C     DETERMINE ANGULAR MOMENTA AND FACTOR

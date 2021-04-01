@@ -8,21 +8,16 @@ import numpy as np
 from scipy.optimize import fmin
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
-from bridge import *
+from bridgeA2 import *
 from rrgm_functions import *
-from three_particle_functions import *
-from triton_width_gen import *
-from readLITsource_3body import *
-from BasisVisualization import visbas
-from plot_spectrum import plotHspec
+from two_particle_functions import *
 
-#import PSI_parallel_M_newMesh
-import PSI_parallel_M
+import PSI_parallel_M2
 
 RHSofBV = {}
 RHSofmJ = {}
 
-os.chdir(litpath3He)
+os.chdir(litpathD)
 
 if os.path.isfile(respath + 'kRange.dat') == True:
     os.system('rm ' + respath + 'kRange.dat')
@@ -32,41 +27,24 @@ with open(respath + 'kRange.dat', 'wb') as f:
 f.close()
 
 siffux = '_ref'
-he_iw, he_rw, he_frgs = retrieve_he3_M(helionpath + 'INQUA_V18%s' % siffux)
+D_iw, he_frgs = retrieve_D_M(deuteronpath + 'INQUA_V18%s' % siffux)
 
-if 'construe_fresh_helion' in cal:
+if 'construe_fresh_deuteron' in cal:
 
-    os.chdir(helionpath)
-    print('(working dir) %s' % helionpath)
+    os.chdir(deuteronpath)
+    print('(working dir) %s' % deuteronpath)
 
     os.system('cp INLUCN%s INLUCN' % siffux)
     os.system(BINBDGpath + 'LUDW_CN.exe')
-    os.system('cp INLU%s INLU' % siffux)
-    os.system(BINBDGpath + 'DRLUD.exe')
     os.system('cp INOB%s INOB' % siffux)
     os.system(BINBDGpath + 'KOBER.exe')
-    os.system('cp DRINOB%s INOB' % siffux)
-    os.system(BINBDGpath + 'DROBER.exe')
     os.system('cp INQUA_V18%s INQUA_M' % siffux)
     repl_line('INQUA_M', 1, potnn + '\n')
 
-    subprocess.run(
-        ['mpirun', '-np',
-         '%d' % anzproc, BINBDGpath + 'V18_PAR/mpi_quaf_v7'])
-    subprocess.run([BINBDGpath + 'V18_PAR/sammel'])
-    #os.system(BINBDGpath + 'QUAFL_N.exe')
-
-    os.system('cp INQUA_UIX%s INQUA_M' % siffux)
-
-    subprocess.run(
-        ['mpirun', '-np',
-         '%d' % anzproc, BINBDGpath + 'UIX_PAR/mpi_drqua_v7'])
-    subprocess.run([BINBDGpath + 'UIX_PAR/SAMMEL-uix'])
-    #os.system(BINBDGpath + 'DRQUA_AK_N.exe')
+    os.system(BINBDGpath + 'QUAFL_M.exe')
 
     os.system('cp INEN%s INEN' % siffux)
-    subprocess.run([BINBDGpath + 'TDR2END_NORMAL.exe'])
-    #os.system(BINBDGpath + 'DR2END_AK.exe')
+    os.system(BINBDGpath + 'DR2END_NORMAL.exe')
 
     if 'coeff' in cal:
         EBDG = get_h_ev()[0]
@@ -86,17 +64,9 @@ if 'construe_fresh_helion' in cal:
 
     subprocess.call('rm *QUAOUT*', shell=True)
 
-    os.chdir(litpath3He)
-    os.system('find . -name \"T*OUT.*\" -print0 | xargs -0 rm')
-    os.system('find . -name \"D*OUT.*\" -print0 | xargs -0 rm')
-    os.system('find . -name \"T*OUT.*\" -print0 | xargs -0 rm')
-    os.system('find . -name \"OUTPUT\" -print0 | xargs -0 rm')
-    os.system('find . -name \"MATOUT\" -print0 | xargs -0 rm')
-    os.system('find . -name \"*OUT*\" -print0 | xargs -0 rm')
-
 if 'rhs' in cal:
 
-    os.chdir(litpath3He)
+    os.chdir(litpathD)
 
     for streukanal in streukas:
 
@@ -108,20 +78,20 @@ if 'rhs' in cal:
 
         # ECCE
         #parse_ev_coeffs(
-        #    mult=0, infil=helionpath + 'OUTPUT', outf=helionpath + 'COEFF')
-        #parse_ev_coeffs_normiert(infil=helionpath + 'OUTPUT', )
+        #    mult=0, infil=deuteronpath + 'OUTPUT', outf=deuteronpath + 'COEFF')
+        #parse_ev_coeffs_normiert(infil=deuteronpath + 'OUTPUT', )
 
         try:
             BUECO = np.array(
-                [float(cof.strip()) for cof in open(helionpath + 'COEFF')])
-            EBDG = get_h_ev(ifi=helionpath + 'end_out_b')[0]
-            EVSPECT = get_h_ev(n=4, ifi=helionpath + 'end_out_b')
+                [float(cof.strip()) for cof in open(deuteronpath + 'COEFF')])
+            EBDG = get_h_ev(ifi=deuteronpath + 'end_out_b')[0]
+            EVSPECT = get_h_ev(n=4, ifi=deuteronpath + 'end_out_b')
         except:
             BUECO = [1.0]
-            EBDG = -7.718058
+            EBDG = -2.22
             EVSPECT = [0., 0., 0., 0.]
         #BUECO = (10**-4) * np.array(
-        #    [float(cof.strip()) for cof in open(helionpath + 'COEFF_NORMAL')])
+        #    [float(cof.strip()) for cof in open(deuteronpath + 'COEFF_NORMAL')])
 
         print('(iv)    LS-scheme: B(2,%s) = %4.4f MeV [' %
               (boundstatekanal, EBDG), EVSPECT, ']')
@@ -129,15 +99,15 @@ if 'rhs' in cal:
 
         if 'rhs_lu-ob-qua' in cal:
 
-            #            he_iw = [
+            #            D = [
             #                np.array(ln.split(';')).astype(float).tolist() for ln in open(
-            #                    litpath3He + 'basis_struct/intw3heLIT_J%s_%s.dat' %
+            #                    litpathD + 'basis_struct/intw3heLIT_J%s_%s.dat' %
             #                    (Jstreustring, boundstatekanal))
             #            ]
             #
             #            he_rw = [
             #                np.array(ln.split(';')).astype(float).tolist() for ln in open(
-            #                    litpath3He + 'basis_struct/relw3heLIT_J%s_%s.dat' %
+            #                    litpathD + 'basis_struct/relw3heLIT_J%s_%s.dat' %
             #                    (Jstreustring, boundstatekanal))
             #            ]
 
@@ -149,9 +119,9 @@ if 'rhs' in cal:
             #    for scfg in channels[boundstatekanal][lcfg][1]:
             #        lfrags = lfrags + [channels[boundstatekanal][lcfg][0]]
             fragfile = [
-                ln for ln in
-                open(litpath3He + 'basis_struct/frags_LIT_J%s_%s.dat' %
-                     (J0, boundstatekanal))
+                ln
+                for ln in open(litpathD + 'basis_struct/frags_LIT_J%s_%s.dat' %
+                               (J0, boundstatekanal))
             ]
             lfrags = [fr.split(' ')[1].strip() for fr in fragfile]
             sfrags = [fr.split(' ')[0] for fr in fragfile]
@@ -159,38 +129,31 @@ if 'rhs' in cal:
             # read widths and frags of the LIT basis as determined via
             # v18uix_LITbasis.py
             fragfile = [
-                ln for ln in
-                open(litpath3He + 'basis_struct/frags_LIT_J%s_%s.dat' %
-                     (Jstreustring, streukanal))
+                ln
+                for ln in open(litpathD + 'basis_struct/frags_LIT_J%s_%s.dat' %
+                               (Jstreustring, streukanal))
             ]
             lfrags2 = [fr.split(' ')[1].strip() for fr in fragfile]
             sfrags2 = [fr.split(' ')[0] for fr in fragfile]
 
-            intwLIT = [
-                np.array(ln.split(';')).astype(float).tolist() for ln in open(
-                    litpath3He + 'basis_struct/intw3heLIT_J%s_%s.dat' %
-                    (Jstreustring, streukanal))
-            ]
-
             relwLIT = [
-                np.array(ln.split(';')).astype(float).tolist() for ln in open(
-                    litpath3He + 'basis_struct/relw3heLIT_J%s_%s.dat' %
-                    (Jstreustring, streukanal))
+                np.array(ln.split(';')).astype(float).tolist()
+                for ln in open(litpathD + 'basis_struct/intwDLIT_J%s_%s.dat' %
+                               (Jstreustring, streukanal))
             ]
 
             if 'dbg' in cal:
-                print(
-                    '\n3He components (full) + LIT-basis components (bare):\n',
-                    len(lfrags))
+                print('\nD components (full) + LIT-basis components (bare):\n',
+                      len(lfrags))
                 print(sfrags)
                 print('\nLIT-basis components (full):\n', len(lfrags2))
                 print(sfrags2)
 
             for lit_zerl in range(len(lfrags2)):
 
-                if os.path.isdir(litpath3He + 'tmp_%d' % lit_zerl) == False:
-                    os.mkdir(litpath3He + 'tmp_%d' % lit_zerl)
-                os.chdir(litpath3He + 'tmp_%d' % lit_zerl)
+                if os.path.isdir(litpathD + 'tmp_%d' % lit_zerl) == False:
+                    os.mkdir(litpathD + 'tmp_%d' % lit_zerl)
+                os.chdir(litpathD + 'tmp_%d' % lit_zerl)
 
                 for file in os.listdir(os.getcwd()):
                     if fnmatch.fnmatch(file, '*J%s*.log' % Jstreu):
@@ -199,32 +162,31 @@ if 'rhs' in cal:
                         os.system('rm *.log')
                         break
 
-                rwtttmp = he_rw + [
-                    relwLIT[sum([len(fgg) for fgg in intwLIT[:lit_zerl]]):
-                            sum([len(fgg) for fgg in intwLIT[:lit_zerl]]) +
-                            len(intwLIT[lit_zerl])]
+                rwtttmp = D_iw + [
+                    relwLIT[sum([len(fgg) for fgg in relwLIT[:lit_zerl]]):
+                            sum([len(fgg) for fgg in relwLIT[:lit_zerl]]) +
+                            len(relwLIT[lit_zerl])]
                 ]
-                lit_3inqua_M(
-                    intwi=he_iw + [intwLIT[lit_zerl]],
+                lit_2inqua_M(
+                    intwi=D_iw + [relwLIT[lit_zerl]],
                     relwi=rwtttmp,
                     anzo=11,
-                    LREG='  0  0  0  0  0  0  0  0  0  1  1',
-                    outfile=litpath3He + 'tmp_%d/INQUA' % (lit_zerl))
-                lit_3inlu(
+                    LREG='  1  0  0  0  0  0  0  0  0  1  1',
+                    outfile=litpathD + 'tmp_%d/INQUA' % (lit_zerl))
+                lit_2inlu(
                     mul=multipolarity,
                     frag=lfrags + [lfrags2[lit_zerl]],
-                    fn=litpath3He + 'tmp_%d/INLU' % (lit_zerl))
-                lit_3inob(
+                    fn=litpathD + 'tmp_%d/INLU' % (lit_zerl))
+                lit_2inob(
                     fr=sfrags + [sfrags2[lit_zerl]],
-                    fn=litpath3He + 'tmp_%d/INOB' % (lit_zerl))
+                    fn=litpathD + 'tmp_%d/INOB' % (lit_zerl))
 
-        leftpar = int(1 + 0.5 * (1 + (-1)**
-                                 (int(channels[streukanal][0][0][0]
-                                      ) + int(channels[streukanal][0][0][1]))))
+        leftpar = int(1 + 0.5 * (1 +
+                                 (-1)**(int(channels[streukanal][0][0][0]))))
 
         def cal_rhs_lu_ob_qua(para, procnbr):
 
-            slave_pit = litpath3He + 'tmp_%d' % para
+            slave_pit = litpathD + 'tmp_%d' % para
             cmdlu = BINLITpath + 'luise.exe > dump'
             cmdob = BINLITpath + 'obem.exe > dump'
             cmdqu = BINLITpath + 'qual_M.exe'
@@ -257,7 +219,7 @@ if 'rhs' in cal:
 
         def cal_rhs_end(para, procnbr):
 
-            slave_pit = litpath3He + 'tmp_%d/' % para[3]
+            slave_pit = litpathD + 'tmp_%d/' % para[3]
 
             inenf = 'inenlit%d-%d_J%3.1f_mJ%3.1f-mL%d.log' % (para[1], para[2],
                                                               Jstreu,
@@ -270,17 +232,19 @@ if 'rhs' in cal:
                 para[0][1],
                 para[0][0],
             )
-            outfsbare = '%d_inhomo%d-%d_J%3.1f_mJ%3.1f-mL%d.log' % (
+            # rhs matrix (LMJ0m-M|Jm)*<J_lit m|LM|J0 m-M>
+            #  <component>_S_<J>_<mJ>_<M>
+            outfsbare = '%d_S_%d_%d_%d.lit' % (
                 para[3],
-                para[1],
-                para[2],
+                #para[1],
+                #para[2],
                 Jstreu,
                 para[0][1],
                 para[0][0],
             )
 
-            lit_3inen(
-                MREG='  0  0  0  0  0  0  0  0  0  1  1',
+            lit_2inen(
+                MREG='  1  0  0  0  0  0  0  0  0  1  1',
                 #                   (shifted) QBV                     nr.rw
                 KSTREU=[para[1], para[2]],
                 JWSL=Jstreu,
@@ -294,7 +258,7 @@ if 'rhs' in cal:
                 NZE=anz_phot_e,
                 EK0=phot_e_0,
                 EKDIFF=phot_e_d,
-                #bnd=helionpath + 'INEN',
+                #bnd=deuteronpath + 'INEN',
                 bnd='',
                 outfile=slave_pit + inenf)
 
@@ -313,25 +277,25 @@ if 'rhs' in cal:
         parameter_set_lu_ob_qua = range(len(lfrags2))
         parameter_set_end = []
 
-        wfn = litpath3He + 'basis_struct/LITbas_full_J%s_%s.dat' % (
-            Jstreustring, streukanal)
+        wfn = litpathD + 'basis_struct/LITbas_full_J%s_%s.dat' % (Jstreustring,
+                                                                  streukanal)
 
         print('[...] reading BV-rw tupel from %s' % wfn)
         litbas = [np.loadtxt(wfn).astype(int)[0]]
 
         for lit_zerl in range(len(lfrags2)):
-            bsbv = sum([len(b) for b in he_iw])
+            bsbv = sum([len(b) for b in D_iw])
             parameter_set = []
             bvrange = range(
-                sum([len(z) for z in intwLIT[:lit_zerl]]) + 1,
-                sum([len(z) for z in intwLIT[:lit_zerl]]) + 1 +
-                len(intwLIT[lit_zerl]))
+                sum([len(z) for z in relwLIT[:lit_zerl]]) + 1,
+                sum([len(z) for z in relwLIT[:lit_zerl]]) + 1 +
+                len(relwLIT[lit_zerl]))
 
             litbas3 = []
             for bv in filter(lambda x: (x[0] in bvrange), litbas):
                 litbas3.append([int(bv[0] - (bvrange[0] - 1) + bsbv), bv[1]])
 
-            with open(litpath3He + 'tmp_%d/LITbas_full_J%s.dat' %
+            with open(litpathD + 'tmp_%d/LITbas_full_J%s.dat' %
                       (lit_zerl, Jstreustring), 'wb') as f:
                 np.savetxt(f, [[jj[0], jj[1]] for jj in litbas3], fmt='%d')
             f.close()
@@ -361,17 +325,17 @@ if 'rhs' in cal:
             pool.join()
 
             for lit_zerl in range(len(lfrags2)):
-                os.system('mv ' + litpath3He + 'tmp_%d/QUAOUT ' % lit_zerl +
-                          litpath3He + 'tmp_%d/QUAOUT_J%3.1f' % (lit_zerl,
-                                                                 Jstreu))
+                os.system('mv ' + litpathD + 'tmp_%d/QUAOUT ' % lit_zerl +
+                          litpathD + 'tmp_%d/QUAOUT_J%3.1f' % (lit_zerl,
+                                                               Jstreu))
 
         if 'rhs-end' in cal:
             for lit_zerl in range(len(lfrags2)):
                 print('(J=%s)  werkle in %d' % (Jstreu, lit_zerl))
                 try:
-                    os.system('cp ' + litpath3He + 'tmp_%d/QUAOUT_J%3.1f ' % (
+                    os.system('cp ' + litpathD + 'tmp_%d/QUAOUT_J%3.1f ' % (
                         lit_zerl,
-                        Jstreu) + litpath3He + 'tmp_%d/QUAOUT' % (lit_zerl))
+                        Jstreu) + litpathD + 'tmp_%d/QUAOUT' % (lit_zerl))
                 except:
                     print('<QUAOUT> na for this channel.')
                     exit()
@@ -397,9 +361,9 @@ if 'lhs' in cal:
 
     print('(ii)    calculating norm/ham in scattering-channel basis')
 
-    if os.path.isdir(litpath3He + 'lit_bas_lhs/') == False:
-        os.mkdir(litpath3He + 'lit_bas_lhs/')
-    os.chdir(litpath3He + 'lit_bas_lhs/')
+    if os.path.isdir(litpathD + 'lit_bas_lhs/') == False:
+        os.mkdir(litpathD + 'lit_bas_lhs/')
+    os.chdir(litpathD + 'lit_bas_lhs/')
 
     for streukanal in streukas:
 
@@ -407,32 +371,25 @@ if 'lhs' in cal:
         Jstreustring = '%s' % str(Jstreu)[:3]
 
         fragfile = [
-            ln
-            for ln in open(litpath3He + 'basis_struct/frags_LIT_J%s_%s.dat' %
-                           (Jstreustring, streukanal))
+            ln for ln in open(litpathD + 'basis_struct/frags_LIT_J%s_%s.dat' %
+                              (Jstreustring, streukanal))
         ]
 
         lfrags = [fr.split(' ')[1].strip() for fr in fragfile]
         sfrags = [fr.split(' ')[0] for fr in fragfile]
 
-        intwLIT = [
+        relwLIT = [
             np.array(ln.split(';')).astype(float)
-            for ln in open(litpath3He + 'basis_struct/intw3heLIT_J%s_%s.dat' %
+            for ln in open(litpathD + 'basis_struct/intwDLIT_J%s_%s.dat' %
                            (Jstreustring, streukanal))
         ]
 
-        anzLITbv = sum([len(frgm) for frgm in intwLIT])
+        anzLITbv = sum([len(frgm) for frgm in relwLIT])
 
-        if (len([len(frgm) for frgm in intwLIT]) != (len(fragfile))):
+        if (len([len(frgm) for frgm in relwLIT]) != (len(fragfile))):
             print('LIT-basis fragments inconcistent!',
                   len([len(frgm) for frgm in intwLIT]), (len(fragfile)))
             exit()
-
-        relwLIT = [
-            np.array(ln.split(';')).astype(float)
-            for ln in open(litpath3He + 'basis_struct/relw3heLIT_J%s_%s.dat' %
-                           (Jstreustring, streukanal))
-        ]
 
         if 'dbg' in cal:
             print(lfrags, sfrags)
@@ -442,99 +399,30 @@ if 'lhs' in cal:
 
         if 'lhs_lu-ob-qua' in cal:
 
-            os.chdir(pathbase + '/data/eob/')
-            n3_inob(
-                [
-                    'he_no1', 'he_no1i', 'he_no2', 'he_no2i', 'he_no6',
-                    'he_no6i', 'he_no3i', 'he_no5i'
-                ],
-                8,
-                fn='INOB',
-                indep=+1)
-            os.system(BINBDGpath + 'KOBER.exe')
-            os.chdir(pathbase + '/data/eob-tni/')
-            n3_inob(
-                [
-                    'he_no1', 'he_no1i', 'he_no2', 'he_no2i', 'he_no6',
-                    'he_no6i', 'he_no3i', 'he_no5i'
-                ],
-                15,
-                fn='INOB',
-                indep=+1)
-            os.system(BINBDGpath + 'DROBER.exe')
+            os.chdir(litpathD + 'lit_bas_lhs/')
 
-            os.chdir(pathbase + '/data/elu/')
-            n3_inlu(
-                8,
-                fn='INLUCN',
-                fr=[
-                    '000', '202', '022', '110', '101', '011', '111', '112',
-                    '211', '121', '122', '212', '222', '221', '220'
-                ],
-                indep=+1)
-            os.system(BINBDGpath + 'LUDW_CN.exe')
-            os.chdir(pathbase + '/data/elu-tni/')
-            n3_inlu(
-                8,
-                fn='INLU',
-                fr=[
-                    '000', '202', '022', '110', '101', '011', '111', '112',
-                    '211', '121', '122', '212', '222', '221', '220'
-                ],
-                indep=+1)
-            os.system(BINBDGpath + 'DRLUD.exe')
-
-            os.chdir(litpath3He + 'lit_bas_lhs/')
-
-            n3_inlu(8, fn='INLU', fr=lfrags, indep=-0)
-            os.system(BINBDGpath + 'DRLUD.exe')
-            n3_inlu(8, fn='INLUCN', fr=lfrags, indep=-0)
+            n2_inlu(8, fn='INLUCN', fr=lfrags, indep=-0)
             os.system(BINBDGpath + 'LUDW_CN.exe')
 
-            n3_inob(sfrags, 8, fn='INOB', indep=-0)
+            n2_inob(sfrags, 8, fn='INOB', indep=-0)
             os.system(BINBDGpath + 'KOBER.exe')
-            n3_inob(sfrags, 15, fn='INOB', indep=-0)
-            os.system(BINBDGpath + 'DROBER.exe')
 
-            insam(len(lfrags))
+            #rwtttmp = []
+            #for zerle in range(len(lfrags)):
+            #    rwtttmp.append(
+            #        relwLIT[sum([len(fgg) for fgg in intwLIT[:zerle]]):sum(
+            #            [len(fgg)
+            #             for fgg in intwLIT[:zerle]]) + len(intwLIT[zerle])])
+            #relwLIT = rwtttmp
 
-            rwtttmp = []
-            for zerle in range(len(lfrags)):
-                rwtttmp.append(
-                    relwLIT[sum([len(fgg) for fgg in intwLIT[:zerle]]):sum(
-                        [len(fgg)
-                         for fgg in intwLIT[:zerle]]) + len(intwLIT[zerle])])
-            relwLIT = rwtttmp
-
-            he3inquaBS(intwi=intwLIT, relwi=relwLIT, potf=potnn)
+            DinquaBS(intwi=relwLIT, potf=potnn)
 
             os.system('cp INQUA_M INQUA_M%s' % boundstatekanal)
 
-            parallel_mod_of_3inqua(
-                lfrags, sfrags, infile='INQUA_M', outfile='INQUA_M')
+            subprocess.run([BINBDGpath + 'QUAFL_M.exe'])
 
-            subprocess.run([
-                'mpirun', '-np',
-                '%d' % anzproc, BINBDGpath + 'V18_PAR/mpi_quaf_v7'
-            ])
-
-            subprocess.run([BINBDGpath + 'V18_PAR/sammel'])
-
-            he3inquaBS(intwi=intwLIT, relwi=relwLIT, potf=potnnn)
-
-            parallel_mod_of_3inqua(
-                lfrags, sfrags, infile='INQUA_M', outfile='INQUA_M', tni=1)
-
-            subprocess.run([
-                'mpirun', '-np',
-                '%d' % anzproc, BINBDGpath + 'UIX_PAR/mpi_drqua_v7'
-            ])
-
-            subprocess.run([BINBDGpath + 'UIX_PAR/SAMMEL-uix'])
-
-        litbas = np.loadtxt(
-            litpath3He + 'basis_struct/LITbas_full_J%s_%s.dat' %
-            (Jstreustring, streukanal)).astype(int)
+        litbas = np.loadtxt(litpathD + 'basis_struct/LITbas_full_J%s_%s.dat' %
+                            (Jstreustring, streukanal)).astype(int)
         litbas = [bv for bv in np.unique(litbas, axis=0) if bv[1] != 0]
 
         anzbs = []
@@ -543,7 +431,7 @@ if 'lhs' in cal:
             bvmax = 0
             ntmp = 0
             for mm in range(lit_zerl + 1):
-                bvmax += len(intwLIT[mm])
+                bvmax += len(relwLIT[mm])
 
             for bv in litbas:
                 if bv[0] <= bvmax:
@@ -560,32 +448,32 @@ if 'lhs' in cal:
 
         for anzbtmp in anzbs:
 
-            mypath = litpath3He + 'tmp_%d/' % lit_zerl
+            mypath = litpathD + 'tmp_%d/' % lit_zerl
             lit_zerl += 1
-            n3_inen_rhs(
+            n2_inen_rhs(
                 litbas,
                 Jstreu,
                 costr,
                 np.ones(len(relwLIT[0])),
                 fn='INEN',
                 pari=0,
-                nzop=31,
-                tni=11,
+                nzop=14,
+                tni=10,
                 anzb=anzbtmp)
             os.system('cp INEN ' + mypath + 'inen-lit-%s_1-%d' % (streukanal,
                                                                   anzbtmp))
             #if anzbtmp==anzbs[-1]:
             #    subprocess.run([BINBDGpath + 'TDR2END_NORMAL.exe'])
-            #    os.system('cp %s/MATOUT ' % (litpath3He + 'lit_bas_lhs/') + respath
+            #    os.system('cp %s/MATOUT ' % (litpathD + 'lit_bas_lhs/') + respath
             #          + 'norm-ham-litME-%s_1-%d' % (streukanal, anzbtmp))
             #os.system('cp ' + v18uixpath + 'mat_* ' + respath)
-            os.system('cp ' + litpath3He + 'tmp_*/*_inhomo* ' + respath)
+            os.system('cp ' + litpathD + 'tmp_*/*_S_* ' + respath)
 
         #plotHspec(Jstreustring)
 
 if 'couple' in cal:
 
-    os.system('cp ' + helionpath + 'E0.dat ' + litpath3He)
+    os.system('cp ' + deuteronpath + 'E0.dat ' + litpathD)
 
     for streukanal in streukas:
 
@@ -594,7 +482,7 @@ if 'couple' in cal:
 
         intwLIT = [
             np.array(ln.split(';')).astype(float).tolist()
-            for ln in open(litpath3He + 'basis_struct/intw3heLIT_J%s_%s.dat' %
+            for ln in open(litpathD + 'basis_struct/intw3heLIT_J%s_%s.dat' %
                            (Jstreustring, streukanal))
         ]
 
@@ -605,21 +493,19 @@ if 'couple' in cal:
 
         relwLIT = [
             np.array(ln.split(';')).astype(float).tolist()
-            for ln in open(litpath3He + 'basis_struct/relw3heLIT_J%s_%s.dat' %
+            for ln in open(litpathD + 'basis_struct/relw3heLIT_J%s_%s.dat' %
                            (Jstreustring, streukanal))
         ]
 
         fragfile = [
-            ln
-            for ln in open(litpath3He + 'basis_struct/frags_LIT_J%s_%s.dat' %
-                           (Jstreustring, streukanal))
+            ln for ln in open(litpathD + 'basis_struct/frags_LIT_J%s_%s.dat' %
+                              (Jstreustring, streukanal))
         ]
 
         lfrags = [fr.split(' ')[1].strip() for fr in fragfile]
 
-        litbas = np.loadtxt(
-            litpath3He + 'basis_struct/LITbas_full_J%s_%s.dat' %
-            (Jstreustring, streukanal)).astype(int)
+        litbas = np.loadtxt(litpathD + 'basis_struct/LITbas_full_J%s_%s.dat' %
+                            (Jstreustring, streukanal)).astype(int)
         litbas = [bv for bv in np.unique(litbas, axis=0) if bv[1] != 0]
 
         print('He3 structure: anz[int,rel]weiten:', np.sum(he_frgs, axis=0))
@@ -632,10 +518,10 @@ if 'couple' in cal:
         for lit_zerl in range(len(lfrags)):
 
             # read uncoupled source ME's
-            os.chdir(litpath3He + 'tmp_%d' % lit_zerl)
+            os.chdir(litpathD + 'tmp_%d' % lit_zerl)
 
             litbas = np.loadtxt(
-                litpath3He + 'basis_struct/LITbas_full_J%s_%s.dat' %
+                litpathD + 'basis_struct/LITbas_full_J%s_%s.dat' %
                 (Jstreustring, streukanal)).astype(int)
             litbas = [bv for bv in np.unique(litbas, axis=0) if bv[1] != 0]
 
@@ -680,8 +566,6 @@ if 'couple' in cal:
 
             bv_offset += len(zerl_bas)
 
-        os.system('rm -rf ' + litpath3He + '/tmp*')
+        os.system('rm -rf ' + litpathD + '/tmp*')
 
-os.chdir(litpath3He)
-
-os.system('find . -name \"T*OUT.*\" -print0 | xargs -0 rm')
+os.chdir(litpathD)

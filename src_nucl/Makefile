@@ -1,5 +1,5 @@
 F77     =       mpif77
-FFLAGS  =       -Ofast -ffpe-summary=none  -mcmodel=large
+FFLAGS  =       -Ofast -ffpe-summary=none  -mcmodel=medium
 #-ffpe-trap=denormal -pg -funroll-loops -g -fdefault-real-8 -fconvert=native -frecord-marker=4
 
 # hexpresso
