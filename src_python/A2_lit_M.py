@@ -27,7 +27,7 @@ with open(respath + 'kRange.dat', 'wb') as f:
 f.close()
 
 siffux = '_ref'
-D_iw, he_frgs = retrieve_D_M(deuteronpath + 'INQUA_V18%s' % siffux)
+D_iw, he_frgs = retrieve_D_M(deuteronpath + 'INQUA_V18%s' % siffux, npoli)
 
 if 'construe_fresh_deuteron' in cal:
 
@@ -172,11 +172,13 @@ if 'rhs' in cal:
                     relwi=rwtttmp,
                     anzo=11,
                     LREG='  1  0  0  0  0  0  0  0  0  1  1',
-                    outfile=litpathD + 'tmp_%d/INQUA' % (lit_zerl))
+                    outfile=litpathD + 'tmp_%d/INQUA' % (lit_zerl),
+                    npol=npoli)
                 lit_2inlu(
                     mul=multipolarity,
                     frag=lfrags + [lfrags2[lit_zerl]],
-                    fn=litpathD + 'tmp_%d/INLU' % (lit_zerl))
+                    fn=litpathD + 'tmp_%d/INLU' % (lit_zerl),
+                    npol=npoli)
                 lit_2inob(
                     fr=sfrags + [sfrags2[lit_zerl]],
                     fn=litpathD + 'tmp_%d/INOB' % (lit_zerl))
@@ -187,9 +189,12 @@ if 'rhs' in cal:
         def cal_rhs_lu_ob_qua(para, procnbr):
 
             slave_pit = litpathD + 'tmp_%d' % para
-            cmdlu = BINLITpath + 'luise.exe > dump'
-            cmdob = BINLITpath + 'obem.exe > dump'
-            cmdqu = BINLITpath + 'qual_M.exe'
+            #cmdlu = BINLITpath + 'luise.exe > dump'
+            #cmdob = BINLITpath + 'obem.exe > dump'
+            #cmdqu = BINLITpath + 'qual_M.exe'
+            cmdlu = BINLITpathPOL + 'juelma.exe'
+            cmdob = BINLITpathPOL + 'jobelma.exe'
+            cmdqu = BINLITpathPOL + 'jquelma.exe'
             print('%s in %s' % (cmdlu, slave_pit))
             plu = subprocess.Popen(
                 shlex.split(cmdlu),
@@ -243,27 +248,37 @@ if 'rhs' in cal:
                 para[0][0],
             )
 
-            lit_2inen(
+            lit_2inen_bare(
                 MREG='  1  0  0  0  0  0  0  0  0  1  1',
-                #                   (shifted) QBV                     nr.rw
-                KSTREU=[para[1], para[2]],
                 JWSL=Jstreu,
                 JWSLM=para[0][1],
                 MULM2=para[0][0],
-                NPARL=leftpar,
                 JWSR=J0,
-                NPARR=2,
-                EB=EBDG,
-                BUECO=BUECO,
-                NZE=anz_phot_e,
-                EK0=phot_e_0,
-                EKDIFF=phot_e_d,
-                #bnd=deuteronpath + 'INEN',
-                bnd='',
                 outfile=slave_pit + inenf)
 
-            cmdend = BINLITpath + 'enemb.exe %s %s %s' % (inenf, outfseli,
-                                                          outfsbare)
+            #lit_2inen(
+            #    MREG='  1  0  0  0  0  0  0  0  0  1  1',
+            #    #                   (shifted) QBV                     nr.rw
+            #    KSTREU=[para[1], para[2]],
+            #    JWSL=Jstreu,
+            #    JWSLM=para[0][1],
+            #    MULM2=para[0][0],
+            #    NPARL=leftpar,
+            #    JWSR=J0,
+            #    NPARR=2,
+            #    EB=EBDG,
+            #    BUECO=BUECO,
+            #    NZE=anz_phot_e,
+            #    EK0=phot_e_0,
+            #    EKDIFF=phot_e_d,
+            #    #bnd=deuteronpath + 'INEN',
+            #    bnd='',
+            #    outfile=slave_pit + inenf)
+
+            #cmdend = BINLITpath + 'enemb.exe %s %s %s' % (inenf, outfseli,
+            #                                              outfsbare)
+            cmdend = BINLITpathPOL + 'jenelmas.exe %s %s %s' % (
+                inenf, outfseli, outfsbare)
 
             pend = subprocess.Popen(
                 shlex.split(cmdend),
@@ -401,7 +416,7 @@ if 'lhs' in cal:
 
             os.chdir(litpathD + 'lit_bas_lhs/')
 
-            n2_inlu(8, fn='INLUCN', fr=lfrags, indep=-0)
+            n2_inlu(8, fn='INLUCN', fr=lfrags, indep=-0, npol=npoli)
             os.system(BINBDGpath + 'LUDW_CN.exe')
 
             n2_inob(sfrags, 8, fn='INOB', indep=-0)
@@ -415,7 +430,7 @@ if 'lhs' in cal:
             #             for fgg in intwLIT[:zerle]]) + len(intwLIT[zerle])])
             #relwLIT = rwtttmp
 
-            DinquaBS(intwi=relwLIT, potf=potnn)
+            DinquaBS(intwi=relwLIT, potf=potnn, npol=npoli)
 
             os.system('cp INQUA_M INQUA_M%s' % boundstatekanal)
 

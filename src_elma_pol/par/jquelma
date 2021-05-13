@@ -1,9 +1,8 @@
-      PARAMETER (NZOPER=13, NZOPOB=13, NZOPLU=7,  NZTMAX=12,
-     *           NZFMAX=50, NZCMAX=6,  MZGMAX=12,  NZLWMA=14,
-     *           NZRHOM=50, MZPARM=50, NZPARM=50, NZBMAX=1240,
-     *           NZPOMA=10, NZIQMA=7,  NDIM=1040, NDIM1=1040,
-     *           NDIM2=32, NDIM5=140)
-
+      PARAMETER (NZOPER=11, NZOPOB=5, NZOPLU=5, NZTMAX=12, 
+     *           NZFMAX=580,  NZCMAX=6, MZGMAX=9, NZLWMA=12, 
+     *           NZRHOM=50, MZPARM=30, NZPARM=20,
+     *           NZPOMA=6, NZIQMA=12, NDIM=140, NDIMR=170, LWMAX=6,
+     *           NDIM1=117500, NDIM5=1600, NOUT=6, NPDC=1000)
 C     NZOPER: ANZAHL DER OPERATOREN IN QUAL
 C     NZOPOB:   "     "       "      " OBEM
 C     NZOPLU:   "     "       "      " LUISE
@@ -17,5 +16,5 @@ C     MZPARM:    "       "     "  RADIALPARAMETER
 C     NZPARM:    "       "     "  SAETZE INNERER WEITEN
 C     NZBMAX:    "       "     "  BASISVEKTOREN UEBER ALLE ZERLEGUNGEN
 C     NZPOMA:    "       "     "  POLYNOMSTRUKTUREN
-C     NDIM  :    "       "    BASISVEKTOREN * RADIALPARAMETER
-C             NDIM .LE. NZBMAX * MZPARM
+C     NDIML/R:   "       "    BASISVEKTOREN * RADIALPARAMETER LI/RE
+C             NDIM .LE. NZRHOM * MZPARM

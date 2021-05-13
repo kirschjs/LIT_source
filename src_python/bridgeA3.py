@@ -111,8 +111,8 @@ J0 = float(boundstatekanal.split('^')[0][-3:])
 multipolarity = 1
 
 anz_phot_e = 1
-phot_e_0 = 1.0  #  enems_e converts to fm^-1, but HERE the value is in MeV
-phot_e_d = 1000.0  #  delta E
+phot_e_0 = 0.1  #  enems_e converts to fm^-1, but HERE the value is in MeV
+phot_e_d = 1.0  #  delta E
 
 opME_th_low = 10**(-24)
 opME_th_up = 10**24

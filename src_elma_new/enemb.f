@@ -324,7 +324,7 @@ c      AKM=GJL-GJR
       
       CL=CLG(INT(2*AK), INT(2*GJR),INT(2*GJL),
      1      INT(2*AKM),INT(2*(GJLM-AKM)))
-c      WRITE (6,1204) AK,AKM,GJR,(GJLM-AKM),GJL,GJLM,CL
+      WRITE (6,1204) AK,AKM,GJR,(GJLM-AKM),GJL,GJLM,CL
 C      CL=YG(GJR,AK,GJL,GJR,AKM)
       IF(CL.EQ.0.) STOP 4
 C
@@ -447,7 +447,6 @@ c      if(nzero.ne.2) goto 142
 C      F=YG(GJR,AK,GJL,GJR,AKM)
 C           1  2- SPIN -5  6- BAHN -9 Sp Sn
       GOTO(99,92,92,92,92,91,91,91,91,91,91), MKC
-89    STOP 11
 C
 91    CONTINUE
 C     BAHNOPERATOREN, SIEGERT UND KORREKTUROPERATOR
@@ -477,8 +476,9 @@ c spin and spatial rank couple to 0;
 c
 c
       WRITE (6,1204) AK,AKM,GJR,(GJLM-AKM),GJL,GJLM,F
-c      write(6,'(9I3)')LBL2,LBR2,IORANK2,ML,MR,ISRANK2,JWSL,JWSR,MUL2
-c      write(6,'(2F8.4)')FK1new,CL
+      write(6,'(9I3)')LBL2,LBR2,IORANK2,ML,MR,ISRANK2,JWSL,JWSR,MUL2
+      write(6,'(A30,5F12.8,I3/)')'F1,F,FK1new,GEFAK(MKC),FPAR,MKC',
+     *           F1,F,FK1new,GEFAK(MKC),FPAR,MKC
       GOTO 100
 C
   92  CONTINUE

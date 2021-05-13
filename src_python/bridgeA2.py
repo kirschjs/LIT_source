@@ -33,7 +33,10 @@ litpathD = pathbase + '/systems/mul_deuteron_' + suffix + '/'
 
 if os.path.isdir(litpathD) != False:
     os.system('rm -rf ' + litpathD)
-os.mkdir(litpathD)
+    os.mkdir(litpathD)
+    #pass
+else:
+    os.mkdir(litpathD)
 
 deuteronpath = litpathD + 'D/'
 if os.path.isdir(deuteronpath) == False:
@@ -45,9 +48,11 @@ if os.path.isdir(respath) == False:
 
 BINBDGpath = pathbase + '/source/src_nucl/'
 BINLITpath = pathbase + '/source/src_elma_new/'
+BINLITpathPOL = pathbase + '/source/src_elma_pol/'
 
 mpii = '137'
-potnn = pathbase + '/data/AV18'
+potnn = pathbase + '/data/AV18'  # '/data/BONN'  #'/data/AV4.14'  #
+
 potnnn = pathbase + '/data/urbana9_AK_neu'
 
 # penta+ -------------------------------------------
@@ -89,6 +94,7 @@ channels = {
     ],
 }
 
+streukas = ['1^-']
 streukas = ['0^-', '1^-', '2^-']
 
 #                  realistic    L>0 (only)         deuteron
@@ -98,8 +104,10 @@ J0 = float(boundstatekanal.split('^')[0][-1])
 
 multipolarity = 1
 
+npoli = 0
+
 anz_phot_e = 1
-phot_e_0 = 0.01  #  enems_e converts to fm^-1, but HERE the value is in MeV
+phot_e_0 = 0.1  #  enems_e converts to fm^-1, but HERE the value is in MeV
 phot_e_d = 1.0  #  delta E
 
 opME_th_low = 10**(-24)
@@ -114,7 +122,7 @@ eps_low = [0.2, 0.1]
 # -- here, I allowed for an enhancement of certain operators, to bind an S-wave triton with v18/uix
 costr = ''
 for nn in range(1, 14):
-    cf = 1.0 if (nn < 28) else 0.0
+    cf = 1.0 if (nn < 28) & (nn != 91) else 0.0
     cf = 1.0 if (nn == 2) else cf
     costr += '%12.7f' % cf if (nn % 7 != 0) else '%12.7f\n' % cf
 

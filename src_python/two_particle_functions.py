@@ -41,22 +41,25 @@ def lit_2inob(anzo=13, fr=[], fn='INOB'):
     return
 
 
-def n2_inlu(anzO, fn='INLUCN', fr=[], indep=0):
+def n2_inlu(anzO, fn='INLUCN', fr=[], indep=0, npol=0):
     out = '  0  0  0  0  0%3d\n' % indep
     for n in range(anzO):
         out += '  1'
     out += '\n%d\n' % len(fr)
     for n in range(0, len(fr)):
-        out += '  1  2\n'
+        out += '  1  2%3d\n' % int(npol)
 
     for n in fr:
         out += '%3d\n' % (int(n[0]))
+        if npol != 0:
+            for npo in range(npol):
+                out += '%3d\n' % int(2 * npo)
 
     with open(fn, 'w') as outfile:
         outfile.write(out)
 
 
-def lit_2inlu(mul=0, anzo=7, frag=[], fn='INLU'):
+def lit_2inlu(mul=0, anzo=7, frag=[], fn='INLU', npol=0):
     s = ''
     #   NBAND1,NBAND2,LAUS,KAUS,MKAUS,LALL
     s += '  9  2  0  0  0\n'
@@ -64,16 +67,20 @@ def lit_2inlu(mul=0, anzo=7, frag=[], fn='INLU'):
         s += '  1'
     s += '\n%3d%3d\n' % (len(frag), mul)
     for n in range(len(frag)):
-        s += '  1  2\n'
+        s += '  1  2%3d\n' % int(npol)
+
     for n in range(len(frag)):
         s += '%3d\n' % int(frag[n])
+        if npol != 0:
+            for npo in range(npol):
+                s += '%3d\n' % int(2 * npo)
 
     with open(fn, 'w') as outfile:
         outfile.write(s)
     return
 
 
-def DinquaBS(intwi=[], potf=''):
+def DinquaBS(intwi=[], potf='', npol=0):
     s = ''
     # NBAND1,NBAND2,NBAND3,NBAND4,NBAND5,NAUS,MOBAUS,LUPAUS,NBAUS
     s += ' 10  8  9  3 00  0  0  0  0\n%s\n' % potf
@@ -82,7 +89,8 @@ def DinquaBS(intwi=[], potf=''):
     for n in range(len(intwi)):
         zerl_counter += 1
         nrel = len(intwi[n])
-        s += '%3d%60s%s\n%3d%3d\n' % (1, '', 'Z%d  BVs %d - %d' %
+        s += '%3d%60s%s\n%3d%3d\n' % (int(np.amax([1, npol])), '',
+                                      'Z%d  BVs %d - %d' %
                                       (zerl_counter, bv_counter,
                                        bv_counter - 1 + len(intwi[n])), 1,
                                       nrel)
@@ -91,7 +99,8 @@ def DinquaBS(intwi=[], potf=''):
         for rw in range(0, len(intwi[n])):
             s += '%12.8f' % float(intwi[n][rw])
         s += '\n'
-        s += '  1  1\n1.\n'
+        for npo in range(1, int(np.amax([1, npol]) + 1)):
+            s += '  1  1%3d\n1.\n' % npo
 
     with open('INQUA_M', 'w') as outfile:
         outfile.write(s)
@@ -127,7 +136,8 @@ def n2_inen_rhs(bas, jay, co, rw, fn='INEN', pari=0, nzop=14, tni=10, anzb=0):
         outfile.write(head + out)
 
 
-def lit_2inqua_M(intwi=[], relwi=[], LREG='', anzo=13, outfile='INQUA'):
+def lit_2inqua_M(intwi=[], relwi=[], LREG='', anzo=13, outfile='INQUA',
+                 npol=0):
     s = ''
 
     # NBAND1,NBAND2,NBAND3,NBAND4,NBAND5,NAUS,MOBAUS,LUPAUS,NBAUS
@@ -143,7 +153,8 @@ def lit_2inqua_M(intwi=[], relwi=[], LREG='', anzo=13, outfile='INQUA'):
     for n in range(len(intwi)):
         zerl_counter += 1
         nrel = len(intwi[n])
-        s += '%3d%60s%s\n%3d%3d\n' % (1, '', 'Z%d  BVs %d - %d' %
+        s += '%3d%60s%s\n%3d%3d\n' % (int(np.amax([1, npol])), '',
+                                      'Z%d  BVs %d - %d' %
                                       (zerl_counter, bv_counter,
                                        bv_counter - 1 + len(intwi[n])), 1,
                                       nrel)
@@ -152,12 +163,75 @@ def lit_2inqua_M(intwi=[], relwi=[], LREG='', anzo=13, outfile='INQUA'):
         for rw in range(0, len(intwi[n])):
             s += '%12.8f' % float(intwi[n][rw])
         s += '\n'
-        s += '  1  1\n1.\n'
+        for npo in range(1, int(np.amax([1, npol]) + 1)):
+            s += '  1  1%3d\n1.\n' % npo
 
     appe = 'w'
     with open(outfile, appe) as outfi:
         outfi.write(s)
     return
+
+
+def n2_inen_pol(bas,
+                jay,
+                co,
+                fn='INEN',
+                pari=0,
+                nzop=14,
+                tni=10,
+                idum=2,
+                npol=0):
+    # idum=2 -> I4 for all other idum's -> I3
+    head = '%3d%3d 12%3d  1  0 +2  0  0 -1  0  1\n' % (tni, idum, nzop)
+    head += '  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1\n'
+
+    head += co + '\n'
+
+    npol = int(np.max([1, npol]))
+    out = ''
+    if idum == 2:
+        out += '%4d%4d   1   0%4d   0%4d\n' % (int(2 * jay), len(bas) * (npol),
+                                               pari, npol)
+
+    else:
+        out += '%3d%3d  1  0%3d  0%3d\n' % (int(2 * jay), len(bas) * (npol),
+                                            pari, npol)
+
+    relset = False
+
+    for bv in bas:
+
+        # polstr only needed if BV of type 1+p**2+p**4+... is wanted
+        #out += polstr
+        if idum == 2:
+            polstr = '%4d' % int(np.amax([1, npol]))
+            for pol in range(npol):
+                polstr += '%4d' % int(1 + pol + (bv[0] - 1) * npol)
+
+        else:
+            polstr = '%3d' % int(np.amax([1, npol]))
+            for pol in range(npol + 1):
+                polstr += '%3d' % int(1 + pol + (bv[0] - 1) * npol)
+        polstr += '\n'
+
+        for pol in range(1, 1 + npol):
+            if idum == 2:
+                out += '%4d%4d\n' % (1, int(pol + (bv[0] - 1) * npol))
+            else:
+                out += '%3d%3d\n' % (1, int(pol + (bv[0] - 1) * npol))
+
+            tmp = ''
+            for n in range(1, max(1, 1 + max(bv[1]))):
+                if n in bv[1]:
+                    tmp += '%3d' % int(1)
+                else:
+                    tmp += '%3d' % int(0)
+
+            tmp += '\n'
+            out += tmp
+
+    with open(fn, 'w') as outfile:
+        outfile.write(head + out)
 
 
 def n2_inen_bdg(bas, jay, co, fn='INEN', pari=0, nzop=14, tni=10, idum=2):
@@ -169,14 +243,16 @@ def n2_inen_bdg(bas, jay, co, fn='INEN', pari=0, nzop=14, tni=10, idum=2):
 
     out = ''
     if idum == 2:
-        out += '%4d%4d   1   0%4d\n' % (int(2 * jay), len(bas), pari)
+        out += '%4d%4d   1   0%4d   0   0\n' % (int(2 * jay), len(bas), pari)
+
     else:
-        out += '%3d%3d  1  0%3d\n' % (int(2 * jay), len(bas), pari)
+        out += '%3d%3d  1  0%3d  0  0\n' % (int(2 * jay), len(bas), pari)
 
     relset = False
 
     for bv in bas:
         if idum == 2:
+
             out += '%4d%4d\n' % (1, bv[0])
         else:
             out += '%3d%3d\n' % (1, bv[0])
@@ -193,6 +269,31 @@ def n2_inen_bdg(bas, jay, co, fn='INEN', pari=0, nzop=14, tni=10, idum=2):
 
     with open(fn, 'w') as outfile:
         outfile.write(head + out)
+
+
+def lit_2inen_bare(JWSL, JWSLM, MULM2, JWSR, MREG='', anzo=11, outfile='INEN'):
+    s = ''
+    # NBAND1,IGAK,KAUSD,KEIND ,IDUM
+    s += ' 10  0  0  0\n'
+    # 1-11 Einteilchen
+    # 10,11: r^LY_LM fuer p,n
+    if MREG == '':
+        s += '  1'
+        for n in range(anzo - 3):
+            s += '  0'
+        s += '  1  1'
+    else:
+        s += MREG
+
+    s += '\n'
+    #    g_s(p)       g_s(n)   g_l(p)     g_l(n)
+    s += '5.586       -3.826      1.          0.\n'
+    s += '%3d%3d%3d%3d\n' % (2 * JWSL, 2 * JWSR, 2 * JWSLM, 2 * MULM2)
+
+    with open(outfile, 'w') as outfi:
+        outfi.write(s)
+    outfi.close()
+    return
 
 
 def lit_2inen(BUECO,
@@ -275,7 +376,7 @@ def lit_2inen(BUECO,
     return
 
 
-def retrieve_D_M(inqua):
+def retrieve_D_M(inqua, npoli):
 
     relw = []
     frgm = []
@@ -296,10 +397,10 @@ def retrieve_D_M(inqua):
             anziw = int(inq[lineNR].split()[0])
         except:
             break
-        if (anziw != 1):
-            print(
-                'Two-body caclulation admits only 1, trivial internal width set.'
-            )
+        print('Two-body caclulation with %d polynoms per width set.' % anziw)
+        if anziw != int(np.max([1, npoli])):
+            print('Number of polynoms inconsistent with deuteron INPUT.')
+            print('anziw = %d != npoli = %d' % (anziw, npoli))
             exit()
 
         anzrw = int(inq[lineNR + 1].split()[1])
@@ -310,7 +411,7 @@ def retrieve_D_M(inqua):
         relwtmp.append([float(rrw) for rrw in inq[lineNR + 3].split()])
         relw += relwtmp
 
-        lineNR += 2 + 2 + 2
+        lineNR += 2 + 2 + 2 * anziw
         if (lineNR >= len(inq)):
             break
 
@@ -604,7 +705,7 @@ def h2_spole(nzen=20,
     return
 
 
-def h2_inlu(anzo=9, nfrag=1):
+def h2_inlu(anzo=9, nfrag=1, npol=0):
     s = ''
     s += '  9\n'
     for n in range(anzo):
@@ -614,6 +715,8 @@ def h2_inlu(anzo=9, nfrag=1):
         s += '  4  2\n'
     for n in range(nfrag):
         s += '  0\n  1\n  2\n  3\n'
+    for p in range(0, npol - 1):
+        s += '%3d\n' % (int(2 * p))
     with open('INLUCN', 'w') as outfile:
         outfile.write(s)
     return

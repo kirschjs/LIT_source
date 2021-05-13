@@ -3,8 +3,8 @@ from two_particle_functions import *
 from parameters_and_constants import *
 import operator
 
-bastypes = [boundstatekanal]
 bastypes = streukas
+bastypes = [boundstatekanal]
 bastypes = [boundstatekanal] + streukas
 
 for bastype in bastypes:
@@ -37,20 +37,21 @@ for bastype in bastypes:
     wli = 'lin'
 
     he_iw = he_rw = he_frgs = ob_stru = lu_stru = sbas = []
-    bvma = 20
 
-    inv_scale = 0.25
-    nwadd = 0
+    ew_threshold = 10**(-10)
 
-    nw = 16
-    mindist_int = 0.001
+    bvma = 6
+
     if bastype == boundstatekanal:
 
-        wi, wf = 0.005, 24.5
+        ngeosets = 1
+        nw = 20
+        wi, wf = 0.002, 4.5
 
     else:
-        nw = 46
-        wi, wf = 0.002, 23.5
+        ngeosets = 1
+        nw = 80
+        wi, wf = 0.0002, 15.15
 
     # to include all reference basis states in the augmented basis
     #lit_rw_sparse = np.empty(max(len(sfrags), len(ob_stru)), dtype=list)
@@ -58,25 +59,32 @@ for bastype in bastypes:
     lit_rw_sparse = np.empty(len(sfrags), dtype=list)
 
     #  -- internal widths --------------------------------------------------
-    lit_w_tmp = np.abs(
-        np.geomspace(start=wi, stop=wf, num=nw, endpoint=True, dtype=None))
-    lit_w_tmp_add = np.abs(
-        np.linspace(
-            start=wf + (wf - wi),
-            stop=inv_scale * (2 * wf - wi),
-            num=nwadd,
-            endpoint=True,
-            dtype=None))
-    lit_w[0] = [
-        float(x)
-        for x in np.sort(np.concatenate((lit_w_tmp, lit_w_tmp_add), axis=0))
-    ] if nwadd != 0 else lit_w_tmp
+    lit_w_tmp = [
+        np.abs(
+            np.geomspace(
+                start=wi,  # * (1 + 1 * n / (ngeosets)),
+                stop=wf,  # * (1 + n / ngeosets),
+                num=nw,
+                endpoint=True,
+                dtype=None)) for n in range(ngeosets)
+    ]
+    lit_w_tmp = [np.array([vv for vv in lit_w_tmp[0] if vv < 100])]
+
+    lit_w[0] = np.reshape(lit_w_tmp, (1, -1))[0]
+
+    #    lit_w_tmp_add = np.abs(
+    #        np.geomspace(
+    #            start=wf, stop=2 * wf, num=nwadd, endpoint=True, dtype=None))
+    #    lit_w[0] = [
+    #        float(x)
+    #        for x in np.sort(np.concatenate((lit_w_tmp, lit_w_tmp_add), axis=0))
+    #    ] if nwadd != 0 else lit_w_tmp
 
     #        lit_w[frg] = sparse(lit_w[frg], mindist=mindist_int)
     for frg in range(1, len(lfrags)):
         lit_w_tmp = [
             frg * (lit_w[0][n + 1] - lit_w[0][n]) / len(lfrags)
-            for n in range(nw - 1)
+            for n in range(ngeosets * nw - 1)
         ] + [lit_w[0][-1]]
         lit_w[frg] = lit_w_tmp + lit_w[0]
 
@@ -146,17 +154,22 @@ for bastype in bastypes:
 
     os.chdir(v18uixpath)
     print('Calculating in %s' % v18uixpath)
-    n2_inlu(8, fn='INLUCN', fr=lfrags2)
+    n2_inlu(8, fn='INLUCN', fr=lfrags2, npol=npoli)
     os.system(BINBDGpath + 'LUDW_CN.exe')
     n2_inob(sfrags2, 8, fn='INOB')
     os.system(BINBDGpath + 'KOBER.exe')
 
-    DinquaBS(intwi=widi, potf=potnn)
-
-    n2_inen_bdg(sbas, Jstreu, costr, fn='INEN', pari=0)
+    DinquaBS(intwi=widi, potf=potnn, npol=npoli)
+    #n2_inen_bdg(sbas, Jstreu, costr, fn='INEN', pari=0)
+    n2_inen_pol(sbas, Jstreu, costr, fn='INEN', pari=0, npol=npoli)
 
     if bastype == boundstatekanal:
-        n2_inlu(8, fn=deuteronpath + 'INLUCN_ref', fr=lfrags2, indep=-1)
+        n2_inlu(
+            8,
+            fn=deuteronpath + 'INLUCN_ref',
+            fr=lfrags2,
+            indep=-1,
+            npol=npoli)
         n2_inob(sfrags2, 8, fn=deuteronpath + 'INOB_ref', indep=-1)
         os.system('cp INQUA_M ' + deuteronpath + 'INQUA_V18_ref')
         os.system('cp INEN ' + deuteronpath + 'INEN_ref')
@@ -166,8 +179,6 @@ for bastype in bastypes:
     subprocess.run([BINBDGpath + 'DR2END_NORMAL.exe'])
 
     suche_fehler()
-
-    ew_threshold = 10**(-12)
 
     subprocess.call('cp MATOUTB %smat_%s' % (respath, bastype), shell=True)
     #matout = [line for line in open('MATOUTB')]

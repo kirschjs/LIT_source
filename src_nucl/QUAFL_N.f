@@ -1544,6 +1544,7 @@ C
       WRITE(NOUT,*) ' S ',(S(N),N=1,12)
       ENDIF
       DO 1 N=NU,NN
+      write(nout,*)'N,NN,KZHV(2,N)=',N,NN,KZHV(2,N),H(N)
       K3ZAHL = KZHV(2,N)
       IF(K3ZAHL.EQ.0) GOTO 1
       K1ZAHL = KZHV(1,N) + 1
