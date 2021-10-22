@@ -6,7 +6,7 @@ import matplotlib.animation as animation
 import shutil
 import re
 
-from bridge import *
+from bridgeA3 import *
 # CG(j1, m1, j2, m2, j3, m3)
 from sympy.physics.quantum.cg import CG
 

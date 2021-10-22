@@ -1,7 +1,8 @@
 CC          = mpicc
 F77         = mpif77
 
-FOPTS  =       -Ofast -ffpe-summary=none  -mcmodel=large
+FOPTS  =       -Ofast -ffpe-summary=none 
+# -mcmodel=large
 
 #COPTS       = -O2 -Wall -ggdb3
 #COPTS       = -O2

@@ -397,7 +397,7 @@ def retrieve_D_M(inqua, npoli):
             anziw = int(inq[lineNR].split()[0])
         except:
             break
-        print('Two-body caclulation with %d polynoms per width set.' % anziw)
+        #print('Two-body caclulation with %d polynoms per width set.' % anziw)
         if anziw != int(np.max([1, npoli])):
             print('Number of polynoms inconsistent with deuteron INPUT.')
             print('anziw = %d != npoli = %d' % (anziw, npoli))
@@ -423,24 +423,6 @@ def retrieve_D_M(inqua, npoli):
     f.close()
 
     return rw, frgm
-
-
-def non_zero_couplings(j1, j2, j3):
-    # we are interested in viable m1,m3 combinations
-    # (L ml,J_deut mJd|J_lit mlit)
-    # ECCE: CG takes J *NOT* 2J, i.e., also fractional angular momenta
-    m1m3 = []
-    m1 = np.arange(-j1, j1 + 1)
-    m3 = np.arange(-j3, j3 + 1)
-
-    for mM in np.array(np.meshgrid(m1, m3)).T.reshape(-1, 2):
-        clg = CG(j1, mM[0], j2, mM[1] - mM[0], j3, mM[1]).doit()
-        cg = 0 if ((clg == 0) | np.iscomplex(clg)) else float(clg.evalf())
-        if (cg == 0):
-            continue
-        m1m3.append(mM)
-
-    return m1m3, m1, m3
 
 
 def purge_basis(max_coeff=11000,

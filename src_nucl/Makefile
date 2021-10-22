@@ -4,7 +4,8 @@ FFLAGS  =       -g -O2 -ffpe-summary='none'  -mcmodel=medium
 #-ffpe-trap=denormal -pg -funroll-loops -g -fdefault-real-8 -fconvert=native -frecord-marker=4
 
 # hexpresso
-LIBS    = -L${MKLROOT} -llapack -lblas  -lm -ldl
+LIBS    = -L -lgfortran -L/usr/lib/x86_64-linux-gnu/lapack -llapack -lblas
+#LIBS    = -L${MKLROOT} -llapack -lblas  -lm -ldl
 #theogate
 #LIBS    = -L${MKLROOT} -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5
 

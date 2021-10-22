@@ -46,12 +46,12 @@ for bastype in bastypes:
 
         ngeosets = 1
         nw = 20
-        wi, wf = 0.002, 4.5
+        wi, wf = 0.0002, 8.5
 
     else:
         ngeosets = 1
-        nw = 80
-        wi, wf = 0.0002, 15.15
+        nw = 36
+        wi, wf = 0.0002, 5.15
 
     # to include all reference basis states in the augmented basis
     #lit_rw_sparse = np.empty(max(len(sfrags), len(ob_stru)), dtype=list)

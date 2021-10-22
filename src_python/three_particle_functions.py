@@ -4,45 +4,37 @@ import os, re
 import numpy as np
 import random
 import rrgm_functions, parameters_and_constants
-from bridge import *
+from bridgeA3 import *
+
+NEWLINE_SIZE_IN_BYTES = -1
 
 elem_spin_prods_3 = {
-    #'he_no1':
-    #'  3  3  1  2            No1: t=0, S=1/2, l=even\n  1  1  1\n  1  3  2\n  1  4  1\n  2  3  1\n  2  3\n -1  6\n -1  6\n',
-    #'he_no1':
-    #'  3  6  1  2            No1: t=0, S=1/2, l=even\n  1  1  1\n  1  3  2\n  1  4  1\n  2  3  1\n  3  1  2\n  3  2  1\n  4  1  1\n  1  3\n -1 12\n -1 12\n -1  3\n  1 12\n  1 12\n',
     'he_no1':
-    '  3  9  3  2            he_no1: s12=1, S=1/2                         \n  1  1  1\n  3  2  1\n  4  1  1\n  3  1  2\n  1  4  1\n  2  3  1\n  1  3  2\n  1  2  3\n  2  1  3\n  1  1  4\n -1  6\n -1  6\n  2  3\n  0  0 -1  6\n  0  0 -1  6\n  0  0  2  3\n  0  0  0  0 -1  6\n  0  0  0  0 -1  6\n  0  0  0  0  2  3\n',
-    'he_no1i':
-    '  3  6  1  2            he_no1i: s12=1, t12=0, S=1/2, T=1/2, l12=even\n  1  1  1\n  1  3  2\n  1  4  1\n  2  3  1\n  3  1  2\n  3  2  1\n  4  1  1\n  1  3\n -1 12\n -1 12\n -1  3\n  1 12\n  1 12\n',
-    #
-    #'he_no2':
-    #'  3  2  1  2            No2: t=0, S=3/2, l=even                      \n  1  1  1\n  1  3  1\n  3  1  1\n  1  2\n -1  2\n',
-    'he_no2i':
-    '  3  2  1  2            he_no2i: s12=1, t12=0, S=3/2, T=1/2, l12=even\n  1  1  1\n  1  3  1\n  3  1  1\n  1  2\n -1  2\n',
-    #'he_no2':
-    #'  3  9  1  2            he_no2t: s12=1, S=3/2                        \n  1  1  1\n  3  2  1\n  4  1  1\n  3  1  2\n  1  4  1\n  2  3  1\n  1  3  2\n  1  2  3\n  2  1  3\n  1  1  4\n  1  3\n  1  3\n  1  3\n  0  1  1  3\n  0  1  1  3\n  0  1  1  3\n  0  1  0  1  1  3\n  0  1  0  1  1  3\n  0  1  0  1  1  3\n',
-    #'he_no2':
-    #'  3  1  1  2            he_no2: s12=1, S=3/2\n  1  1  1\n  1  3  1\n  1  1\n',
+    '  3  6  1  2            No1: t=0,T=1/2;s=1,S=1/2, l=even\n  1  1  1\n  1  3  2\n  1  4  1\n  2  3  1\n  3  1  2\n  3  2  1\n  4  1  1\n  1  3\n -1 12\n -1 12\n -1  3\n +1 12\n +1 12\n',
+    'he_no1y':
+    '  3  6  1  1            No1: t=0,T=1/2;s=1,S=1/2, l=even\n  1  1  1\n  1  3  2\n  1  4  1\n  2  3  1\n  3  1  2\n  3  2  1\n  4  1  1\n  1  3\n -1 12\n -1 12\n -1  3\n +1 12\n +1 12\n',
     'he_no2':
-    '  3  2  2  2            he_no2: s12=1, S=3/2\n  1  1  1\n  1  3  1\n  2  4  2\n  1  1\n  0  1  1  1\n',
-    #
+    '  3  2  1  2            No2: t=0, S=3/2, l=even\n  1  1  1\n  1  3  1\n  3  1  1\n  1  2\n -1  2\n',
+    'he_no2y':
+    '  3  2  1  1            No2: t=0, S=3/2, l=even\n  1  1  1\n  1  3  1\n  3  1  1\n  1  2\n -1  2\n',
     'he_no3':
-    '  3  4  1  2            No3: t=0, S=1/2, l=odd                      \n  1  1  1\n  1  4  1\n  2  3  1\n  3  2  1\n  4  1  1\n  1  4\n -1  4\n -1  4\n  1  4\n',
-    'he_no3i':
-    '  3  4  1  2            he_no3i: s12=0, t12=0, S=1/2, T=1/2, l12=odd\n  1  1  1\n  1  4  1\n  2  3  1\n  3  2  1\n  4  1  1\n  1  4\n -1  4\n -1  4\n  1  4\n',
+    '  3  4  1  2            No3: t=0,T=1/2;s=0,S=1/2, l=odd\n  1  1  1\n  1  4  1\n  2  3  1\n  3  2  1\n  4  1  1\n  1  4\n -1  4\n -1  4\n  1  4\n',
+    'he_no3y':
+    '  3  4  1  1            No3: t=0,T=1/2;s=0,S=1/2, l=odd\n  1  1  1\n  1  4  1\n  2  3  1\n  3  2  1\n  4  1  1\n  1  4\n -1  4\n -1  4\n  1  4\n',
+    'he_no3ii':
+    '  3  9  1  2            No1: t=1,T=3/2;s=1,S=1/2, l=odd\n  1  1  1\n  1  1  4\n  1  2  3\n  2  1  3\n  1  3  2\n  1  4  1\n  2  3  1\n  3  1  2\n  3  2  1\n  4  1  1\n  2  9\n -1 18\n -1 18\n  2  9\n -1 18\n -1 18\n  2  9\n -1 18\n -1 18\n',
     'he_no5':
-    '  3  3  1  2            No5: t=1, S=3/2, l=odd\n  1  1  1\n  3  1  1\n  1  3  1\n  1  1  3\n -1  6\n -1  6\n  2  3\n',
-    'he_no5i':
-    '  3  3  1  2            he_no5i: s12=1, t12=1, S=3/2, T=1/2, l12=odd\n  1  1  1\n  3  1  1\n  1  3  1\n  1  1  3\n -1  6\n -1  6\n  2  3\n',
+    '  3  3  1  2            No5: t=1,T=1/2 S=3/2, l=odd\n  1  1  1\n  3  1  1\n  1  3  1\n  1  1  3\n -1  6\n -1  6\n  2  3\n',
+    'he_no5y':
+    '  3  3  1  2            No5: t=1,T=1/2 S=3/2, l=odd\n  1  1  1\n  3  1  1\n  1  3  1\n  1  1  3\n -1  6\n -1  6\n  2  3\n',
+    'he_no5ii':
+    '  3  3  1  2            No5: t=1,T=3/2 S=3/2, l=odd\n  1  1  1\n  3  1  1\n  1  3  1\n  1  1  3\n  1  3\n  1  3\n  1  3\n',
     'he_no6':
-    '  3  6  1  2            No6: t=1, S=1/2, l=even                      \n  1  1  1\n  4  1  1\n  2  3  1\n  2  1  3\n  3  2  1\n  1  4  1\n  1  2  3\n  1 12\n  1 12\n -1  3\n -1 12\n -1 12\n  1  3\n',
-    'he_no6i':
-    '  3  6  1  2            he_no6i: s12=0, t12=1, S=1/2, T=1/2, l12=even\n  1  1  1\n  4  1  1\n  2  3  1\n  2  1  3\n  3  2  1\n  1  4  1\n  1  2  3\n  1 12\n  1 12\n -1  3\n -1 12\n -1 12\n  1  3\n',
-    #'he_no6':
-    #'  3  4  1  2            he_no6: s12=0, S=1/2\n  1  1  1\n  1  4  1\n  3  2  1\n  2  3  1\n  4  1  1\n  1  2\n  1  2\n -1  2\n -1  2\n',
-    'he_no4i':
-    '  3  6  1  2            no_no4i: s12=1, t12=1, S=1/2, T=1/2, l12=odd\n  1  1  1\n  1  1  4\n  1  2  3\n  2  1  3\n  1  3  2\n  1  4  1\n  2  3  1\n  4  9\n -1  9\n -1  9\n -1  9\n  1 36\n  1 36\n',
+    '  3  6  1  2            No6: t=1,T=1/2;s=0,S=1/2, l=even\n  1  1  1\n  1  2  3\n  2  1  3\n  1  4  1\n  2  3  1\n  3  2  1\n  4  1  1\n  1  3\n -1  3\n -1 12\n  1 12\n -1 12\n  1 12\n',
+    'he_no6y':
+    '  3  6  1  1            No6: t=1,T=1/2;s=0,S=1/2, l=even\n  1  1  1\n  1  2  3\n  2  1  3\n  1  4  1\n  2  3  1\n  3  2  1\n  4  1  1\n  1  3\n -1  3\n -1 12\n  1 12\n -1 12\n  1 12\n',
+    'he_no6ii':
+    '  3  6  1  2            No6: t=1,T=3/2;s=0,S=1/2, l=even\n  1  1  1\n  1  2  3\n  2  1  3\n  1  4  1\n  2  3  1\n  3  2  1\n  4  1  1\n  1  6\n -1  6\n  1  6\n -1  6\n  1  6\n -1  6\n',
 }
 
 
@@ -245,17 +237,16 @@ def reduce_3n(ch='612-05m',
     cons_red = 1
 
     while cons_red:
-        tmp = red_mod_3(
-            typ=ch,
-            max_coeff=maxc3,
-            min_coeff=minc3,
-            target_size=size3,
-            nbr_cycles=ncycl,
-            max_diff=maxd,
-            ord=0,
-            tniii=tnii,
-            delpred=delpredd,
-            dr2executable=exe)
+        tmp = red_mod_3(typ=ch,
+                        max_coeff=maxc3,
+                        min_coeff=minc3,
+                        target_size=size3,
+                        nbr_cycles=ncycl,
+                        max_diff=maxd,
+                        ord=0,
+                        tniii=tnii,
+                        delpred=delpredd,
+                        dr2executable=exe)
 
         cons_red = (size3 <= tmp[1])
         #minc3 += 2
@@ -312,8 +303,8 @@ def dn_inqua_21(basis3,
         # read list of fragment basis vectors bvs = {[BV,rel]}
         bvs = []
         for anz in range(bnr_bv):
-            nr = 1 if bnr_bv == 1 else int(
-                lines_inen[4 + offss + 2 * anz].split()[1])
+            nr = 1 if bnr_bv == 1 else int(lines_inen[4 + offss +
+                                                      2 * anz].split()[1])
 
             for bv in range(0, anzr):
                 try:
@@ -348,8 +339,9 @@ def dn_inqua_21(basis3,
                     if maxbv >= bv[0]:
                         rell = []
                         [[
-                            rell.append(float(a)) for a in lines_inqua[
-                                lie + bvinz + 1 + n].rstrip().split()
+                            rell.append(float(a))
+                            for a in lines_inqua[lie + bvinz + 1 +
+                                                 n].rstrip().split()
                         ] for n in range(0, nl)]
                         bbv.append([
                             float(lines_inqua[lie + bvinz - maxbv +
@@ -399,8 +391,9 @@ def dn_inqua_21(basis3,
             outs += '%3d%60s%s\n%3d%3d\n' % (zerlegungs_struct_3[n], '',
                                              'Z%d' % zerl_counter,
                                              zerlegungs_struct_3[n], len(relw))
-            for bv in width_blocks[label3][sum(zerlegungs_struct_3[:n]):sum(
-                    zerlegungs_struct_3[:n + 1])]:
+            for bv in width_blocks[label3][sum(zerlegungs_struct_3[:n]
+                                               ):sum(zerlegungs_struct_3[:n +
+                                                                         1])]:
                 outs += '%36s%-12.6f\n' % ('', float(bv[1]))
             for rw in range(0, len(relw)):
                 outs += '%12.6f' % float(relw[rw])
@@ -469,8 +462,8 @@ def lit_3inlu_parallel(mul=0, anzo=7, indep=1, frag=[]):
     for n in range(len(frag)):
         s += '  1  3\n'
     for n in range(len(frag)):
-        s += '%3d%3d\n%3d\n' % (int(frag[n][0]), int(frag[n][1]),
-                                int(frag[n][2]))
+        s += '%3d%3d\n%3d\n' % (int(frag[n][0]), int(
+            frag[n][1]), int(frag[n][2]))
     for n in range(len(frag)):
         for m in range(len(frag)):
             s += '%s_%s\n' % (frag[n], frag[m])
@@ -571,8 +564,8 @@ def lit_3inlu(mul=0, anzo=7, frag=[], fn='INLU'):
     for n in range(len(frag)):
         s += '  1  3\n'
     for n in range(len(frag)):
-        s += '%3d%3d\n%3d\n' % (int(frag[n][0]), int(frag[n][1]),
-                                int(frag[n][2]))
+        s += '%3d%3d\n%3d\n' % (int(frag[n][0]), int(
+            frag[n][1]), int(frag[n][2]))
 
     with open(fn, 'w') as outfile:
         outfile.write(s)
@@ -671,11 +664,10 @@ def lit_3inqua(intwi=[],
         bv_counter = 1
         for n in range(len(relwi)):
             zerl_counter += 1
-            s += '%3d%60s%s\n%3d%3d\n' % (len(intwi[n]), '',
-                                          'Z%d BVs %d - %d' %
-                                          (zerl_counter, bv_counter,
-                                           bv_counter - 1 + len(intwi[n])),
-                                          len(intwi[n]), len(relwi[n]))
+            s += '%3d%60s%s\n%3d%3d\n' % (
+                len(intwi[n]), '', 'Z%d BVs %d - %d' %
+                (zerl_counter, bv_counter, bv_counter - 1 + len(intwi[n])),
+                len(intwi[n]), len(relwi[n]))
             bv_counter += len(intwi[n])
             for bv in intwi[n]:
                 s += '%36s%-12.6f\n' % ('', float(bv))
@@ -705,6 +697,31 @@ def lit_3inqua(intwi=[],
     # r7 c2:   S  L           S_c
     #  1   :   0  0  1S0         0
     #  2   :   1  0  3S1         2
+
+
+def lit_3inen_bare(JWSL, JWSLM, MULM2, JWSR, MREG='', anzo=11, outfile='INEN'):
+    s = ''
+    # NBAND1,IGAK,KAUSD,KEIND ,IDUM
+    s += ' 10  0  0  0\n'
+    # 1-11 Einteilchen
+    # 10,11: r^LY_LM fuer p,n
+    if MREG == '':
+        s += '  1'
+        for n in range(anzo - 3):
+            s += '  0'
+        s += '  1  1'
+    else:
+        s += MREG
+
+    s += '\n'
+    #    g_s(p)       g_s(n)   g_l(p)     g_l(n)
+    s += '5.586       -3.826      1.          0.\n'
+    s += '%3d%3d%3d%3d\n' % (2 * JWSL, 2 * JWSR, 2 * JWSLM, 2 * MULM2)
+
+    with open(outfile, 'w') as outfi:
+        outfi.write(s)
+    outfi.close()
+    return
 
 
 def lit_3inen(BUECO,
@@ -768,8 +785,8 @@ def lit_3inen(BUECO,
 
         for n in range(int(bdginen[7][4:8])):
 
-            tr = np.nonzero(np.array(
-                bdginen[9 + 2 * n].split()).astype(int))[0]
+            tr = np.nonzero(np.array(bdginen[9 +
+                                             2 * n].split()).astype(int))[0]
 
             for m in range(len(tr)):
                 s += '  1%3d\n' % int(bdginen[8 + 2 * n][4:8])
@@ -795,10 +812,10 @@ def he3inqua(intwi=[], relwi=[], potf=''):
     bv_counter = 1
     for n in range(len(relwi)):
         zerl_counter += 1
-        s += '%3d%60s%s\n%3d%3d\n' % (len(intwi[n]), '', 'Z%d  BVs %d - %d' %
-                                      (zerl_counter, bv_counter,
-                                       bv_counter - 1 + len(intwi[n])),
-                                      len(intwi[n]), len(relwi[n]))
+        s += '%3d%60s%s\n%3d%3d\n' % (
+            len(intwi[n]), '', 'Z%d  BVs %d - %d' %
+            (zerl_counter, bv_counter, bv_counter - 1 + len(intwi[n])),
+            len(intwi[n]), len(relwi[n]))
 
         bv_counter += len(intwi[n])
         for bv in intwi[n]:
@@ -835,9 +852,8 @@ def he3inquaBS(intwi=[], relwi=[], potf=''):
         zerl_counter += 1
         nrel = min([len(re) for re in relwi[n]])
         s += '%3d%60s%s\n%3d%3d\n' % (len(intwi[n]), '', 'Z%d  BVs %d - %d' %
-                                      (zerl_counter, bv_counter,
-                                       bv_counter - 1 + len(intwi[n])),
-                                      len(intwi[n]), nrel)
+                                      (zerl_counter, bv_counter, bv_counter -
+                                       1 + len(intwi[n])), len(intwi[n]), nrel)
 
         bv_counter += len(intwi[n])
         for bv in range(len(intwi[n])):
@@ -880,9 +896,8 @@ def lit_3inqua_M(intwi=[], relwi=[], LREG='', anzo=13, outfile='INQUA'):
         zerl_counter += 1
         nrel = min([len(re) for re in relwi[n]])
         s += '%3d%60s%s\n%3d%3d\n' % (len(intwi[n]), '', 'Z%d  BVs %d - %d' %
-                                      (zerl_counter, bv_counter,
-                                       bv_counter - 1 + len(intwi[n])),
-                                      len(intwi[n]), nrel)
+                                      (zerl_counter, bv_counter, bv_counter -
+                                       1 + len(intwi[n])), len(intwi[n]), nrel)
 
         bv_counter += len(intwi[n])
         for bv in range(len(intwi[n])):
@@ -926,10 +941,10 @@ def lit_3inqua_seq(intwi=[], relwi=[], LREG='', anzo=13, outfile='INQUA'):
     bv_counter = 1
     for n in range(len(relwi)):
         zerl_counter += 1
-        s += '%3d%60s%s\n%3d%3d\n' % (len(intwi[n]), '', 'Z%d BVs %d - %d' %
-                                      (zerl_counter, bv_counter,
-                                       bv_counter - 1 + len(intwi[n])),
-                                      len(intwi[n]), len(relwi[n]))
+        s += '%3d%60s%s\n%3d%3d\n' % (
+            len(intwi[n]), '', 'Z%d BVs %d - %d' %
+            (zerl_counter, bv_counter, bv_counter - 1 + len(intwi[n])),
+            len(intwi[n]), len(relwi[n]))
         bv_counter += len(intwi[n])
         for bv in intwi[n]:
             s += '%36s%-12.6f\n' % ('', float(bv))
@@ -1021,11 +1036,11 @@ def retrieve_he3_M(inqua):
     iw = intw
     rw = relw
 
-    with open('intw3he.dat', 'wb') as f:
+    with open('intw3he.dat', 'w') as f:
         for ws in iw:
             np.savetxt(f, [ws], fmt='%12.4f', delimiter=' ; ')
     f.close()
-    with open('relw3he.dat', 'wb') as f:
+    with open('relw3he.dat', 'w') as f:
         for wss in rw:
             for ws in wss:
                 np.savetxt(f, [ws], fmt='%12.4f', delimiter=' ; ')

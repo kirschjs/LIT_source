@@ -1,4 +1,4 @@
-from bridge import *
+from bridgeA3 import *
 from three_particle_functions import *
 from triton_width_gen import *
 import operator

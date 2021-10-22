@@ -1,5 +1,5 @@
       PROGRAM QUAF_S
-C     FUER SMIN STATTDESSEN
+C      FUER SMIN STATTDESSEN
 CC    SUBROUTINE QUAF
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       include 'mpif.h'
@@ -578,9 +578,9 @@ C
       DO 124 N=NZC(K)+1,M
       IF(CPAR(N,L,K).GT.0.)  GOTO 124
       WRITE(NOUT,*)' WEITE ',N,' FALSCH'
-      STOP 'INTERNE WEITE FALSCH'
+      STOP 'INTERNE WEITE FALSCH; QUA reads 50 relw max.!'
   124 CONTINUE
- 1003 FORMAT(30E12.4)
+ 1003 FORMAT(50E12.4)
       DO 125 N=1,KM                                             
       IF(RPAR(L,N,K).GT.1.E-8) GOTO 125                                   
       WRITE(NOUT,*) ' IN ZERLEGUNG ',K,' IST DIE RELATIVWEITE ',L,     

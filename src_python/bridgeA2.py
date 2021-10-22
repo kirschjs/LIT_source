@@ -21,9 +21,36 @@ def cartesian_coord(*arrays):
     #a = np.arange(2)  # fake data
     #print(cartesian_coord(*3 * [a]))
 
+# float16 : Half   precision float: sign bit,  5 bits exponent, 10 bits mantissa
+# float32 : Single precision float: sign bit,  8 bits exponent, 23 bits mantissa
+# float64 : Double precision float: sign bit, 11 bits exponent, 52 bits mantissa   
+#
+dt = 'float32'
+
 
 suffix = 'miwchan'
 anzproc = 6  #int(len(os.sched_getaffinity(0)) / 1)
+
+# penta+ -------------------------------------------
+#1 run <PSI_parallel.py> for boundsatekanal und streukas
+#2 1st <A3_lit_par.py>   run
+#3 2nd <A3_lit_par.py>   run
+cal = [
+    #'construe_fresh_deuteron',
+    #'reduce',
+    #'coeff',
+    #'lhs',
+    #'lhs_lu-ob-qua',
+    #
+    'reset',
+    'dbg',
+    'einzel',
+    'rhs_lu-ob-qua',
+    'rhs-qual',
+    'rhs-end',
+    'rhs',
+    'rhs-couple',
+]
 
 home = os.getenv("HOME")
 
@@ -32,9 +59,11 @@ pathbase = home + '/kette_repo/ComptonLIT'
 litpathD = pathbase + '/systems/mul_deuteron_' + suffix + '/'
 
 if os.path.isdir(litpathD) != False:
-    os.system('rm -rf ' + litpathD)
-    os.mkdir(litpathD)
-    #pass
+    if 'reset' in cal:
+        os.system('rm -rf ' + litpathD)
+        os.mkdir(litpathD)
+    else:
+        pass
 else:
     os.mkdir(litpathD)
 
@@ -55,24 +84,6 @@ potnn = pathbase + '/data/AV18'  # '/data/BONN'  #'/data/AV4.14'  #
 
 potnnn = pathbase + '/data/urbana9_AK_neu'
 
-# penta+ -------------------------------------------
-#1 run <PSI_parallel.py> for boundsatekanal und streukas
-#2 1st <A3_lit_par.py>   run
-#3 2nd <A3_lit_par.py>   run
-cal = [
-    'dbg',
-    'einzel',
-    #'construe_fresh_deuteron',
-    #'reduce',
-    #'coeff',
-    'rhs',
-    'rhs_lu-ob-qua',
-    'rhs-qual',
-    'rhs-end',
-    'lhs',
-    'lhs_lu-ob-qua',
-    #'couple',
-]
 new_deuteron = True
 # convention: bound-state-expanding BVs: (1-8), i.e., 8 states per rw set => nzf0*8
 channels = {
@@ -94,8 +105,7 @@ channels = {
     ],
 }
 
-streukas = ['1^-']
-streukas = ['0^-', '1^-', '2^-']
+streukas = ['0^-', '1^-', '2^-']#
 
 #                  realistic    L>0 (only)         deuteron
 boundstatekanal = 'np1^+'

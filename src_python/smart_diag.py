@@ -16,8 +16,8 @@ def smart_ev(matout, threshold=10**-7):
     nm = np.dot(np.dot(np.transpose(umnorm), normat), umnorm)
     hm = np.dot(np.dot(np.transpose(umnorm), hammat), umnorm)
 
-    # diagonalize normalized norm
-    ew, ev = LA.eig(nm)
+    # diagonalize normalized norm (using "eigh(ermitian)" to speed-up the computation)
+    ew, ev = LA.eigh(nm)
     idx = ew.argsort()[::-1]
     ew = [eww for eww in ew[idx]]
 
@@ -29,9 +29,9 @@ def smart_ev(matout, threshold=10**-7):
     # transormation matric for (H-E*N)PSI=0 such that N->id
     Omat = np.dot(ev, np.diag(1. / np.sqrt(ew)))
 
-    # diagonalize the projected Hamiltonian
+    # diagonalize the projected Hamiltonian (using "eigh(ermitian)" to speed-up the computation)
     Hgood = np.dot(np.dot(np.transpose(Omat), hm), Omat)
-    ewGood, evGood = LA.eig(Hgood)
+    ewGood, evGood = LA.eigh(Hgood)
 
     idx = ewGood.argsort()[::-1]
     ewGood = [eww for eww in ewGood[idx]]

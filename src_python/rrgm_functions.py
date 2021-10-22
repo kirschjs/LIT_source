@@ -5,6 +5,33 @@ import numpy as np
 import random
 from parameters_and_constants import *
 from sklearn.cluster import KMeans
+from sympy.physics.quantum.cg import CG
+
+
+def polyWidths(wmin=10**-2, wmax=10, nbrw=10, npoly=4):
+
+    wds = np.flip([(2. / x)**npoly * (wmin - wmax) / (1 - 2**npoly) + wmax +
+                   (wmax - wmin) / (-1. + 1. / 2**npoly)
+                   for x in np.linspace(1, 2, nbrw + 2)])
+    return wds[1:-1]
+
+
+def non_zero_couplings(j1, j2, j3):
+    # we are interested in viable m1,m3 combinations
+    # (L ml,J_deut mJd|J_lit mlit)
+    # ECCE: CG takes J *NOT* 2J, i.e., also fractional angular momenta
+    m1m3 = []
+    m1 = np.arange(-j1, j1 + 1)
+    m3 = np.arange(-j3, j3 + 1)
+
+    for mM in np.array(np.meshgrid(m1, m3)).T.reshape(-1, 2):
+        clg = CG(j1, mM[0], j2, mM[1] - mM[0], j3, mM[1]).doit()
+        cg = 0 if ((clg == 0) | np.iscomplex(clg)) else float(clg.evalf())
+        if (cg == 0):
+            continue
+        m1m3.append(mM)
+
+    return m1m3, m1, m3
 
 
 def nearest(list1, list2):
@@ -100,8 +127,8 @@ def overlap(bipa, chh, Lo=6.0, pair='singel', mpi='137'):
     os.system('cp inen_b INEN')
 
     repl_line('INEN', 0, ' 10  2 12  9  1  1 -1  0  0 -1\n')
-    repl_line('INEN', 2, '%12.6f%12.6f%12.6f\n' % (float(1.), float(1.),
-                                                   float(0.)))
+    repl_line('INEN', 2,
+              '%12.6f%12.6f%12.6f\n' % (float(1.), float(1.), float(0.)))
 
     with open('INEN', 'a') as outfile:
         outfile.write(s)
@@ -294,24 +321,20 @@ def prep_pot_files_pdp(lam, wiC, baC, wir2, bar2, ls, ten, ps2):
                                            int(ls != 0), int(ten != 0))
     # central LO Cs and Ct and LOp p*p' C_1-4
     if int((wiC != 0) | (baC != 0)):
-        s += '%-20.4f%-20.6f%-20.4f%-20.4f%-20.4f\n' % (1.0,
-                                                        float(lam)**2 / 4.0,
-                                                        wiC, 0.0, baC)
+        s += '%-20.4f%-20.6f%-20.4f%-20.4f%-20.4f\n' % (1.0, float(lam)**2 /
+                                                        4.0, wiC, 0.0, baC)
     # r**2
     if int((wir2 != 0) | (bar2 != 0)):
-        s += '%-20.4f%-20.6f%-20.4f%-20.4f%-20.4f\n' % (1.0,
-                                                        float(lam)**2 / 4.0,
-                                                        wir2, 0.0, bar2)
+        s += '%-20.4f%-20.6f%-20.4f%-20.4f%-20.4f\n' % (1.0, float(lam)**2 /
+                                                        4.0, wir2, 0.0, bar2)
     # SPIN-BAHN
     if int(ls != 0):
-        s += '%-20.4f%-20.6f%-20.4f%-20.4f%-20.4f\n' % (1.0,
-                                                        float(lam)**2 / 4.0,
-                                                        ls, 0.0, 0.0)
+        s += '%-20.4f%-20.6f%-20.4f%-20.4f%-20.4f\n' % (1.0, float(lam)**2 /
+                                                        4.0, ls, 0.0, 0.0)
     # TENSOR
     if int(ten != 0):
-        s += '%-20.4f%-20.6f%-20.4f%-20.4f%-20.4f\n' % (1.0,
-                                                        float(lam)**2 / 4.0,
-                                                        ten, 0.0, 0.0)
+        s += '%-20.4f%-20.6f%-20.4f%-20.4f%-20.4f\n' % (1.0, float(lam)**2 /
+                                                        4.0, ten, 0.0, 0.0)
     with open(ps2, 'w') as outfile:
         outfile.write(s)
     return
@@ -321,13 +344,11 @@ def prep_pot_file_3N(lam3, ps3='', d10=0.0):
     s = ''
     s += '  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1\n  1  1\n'
     # pure central, no (iso)spin dependence
-    s += '%-20.4f%-20.4f%-20.4f%-20.4f\n' % (d10, float(lam3)**2 / 4.0,
-                                             float(lam3)**2 / 4.0,
-                                             float(lam3)**2 / 4.0)
+    s += '%-20.4f%-20.4f%-20.4f%-20.4f\n' % (
+        d10, float(lam3)**2 / 4.0, float(lam3)**2 / 4.0, float(lam3)**2 / 4.0)
     # central, (s_j s_k)(t_j t_k) to project, set INEN factors +/- 4
-    s += '%-20.4f%-20.4f%-20.4f%-20.4f' % (d10, float(lam3)**2 / 4.0,
-                                           float(lam3)**2 / 4.0,
-                                           float(lam3)**2 / 4.0)
+    s += '%-20.4f%-20.4f%-20.4f%-20.4f' % (
+        d10, float(lam3)**2 / 4.0, float(lam3)**2 / 4.0, float(lam3)**2 / 4.0)
 
     with open(ps3, 'w') as outfile:
         outfile.write(s)
@@ -349,8 +370,8 @@ def parse_ev_coeffs(mult=0, infil='OUTPUT', outf='COEFF', plti=''):
         if re.search('ENTWICKLUNG DES  1 TEN EIGENVEKTORS', out[line]):
             for bvl in range(line + 2, len(out)):
                 if ((out[bvl][:3] == ' KO') | (out[bvl][:3] == '\n')):
-                    bvc = int(
-                        out[bvl - 1].strip().split('/')[-1].split(')')[0])
+                    bvc = int(out[bvl -
+                                  1].strip().split('/')[-1].split(')')[0])
                     break
                 coeffp += [
                     float(coo.split('/')[0])
@@ -502,9 +523,9 @@ def write_phases(ph_array, filename='tmp.dat', append=0, comment=''):
     elif append == 0:
         outs = '#% -10s  %12s %12s' % ('E_tot', 'E_tot-Eth', 'Phase(s)\n')
         for line in range(len(ph_array)):
-            outs += '%12.8f %12.8f %12.8f' % (float(ph_array[line][0]),
-                                              float(ph_array[line][1]),
-                                              float(ph_array[line][2]))
+            outs += '%12.8f %12.8f %12.8f' % (float(
+                ph_array[line][0]), float(
+                    ph_array[line][1]), float(ph_array[line][2]))
             outs += '\n'
 
     if comment != '': outs += comment + '\n'
@@ -540,13 +561,12 @@ def plot_phases(phase_file,
     for n in range(2, 2 + nbr_of_phases):
 
         curcol = pltcols[[l for l in open(phase_file)
-                          ][-nbr_of_phases + n - 2].split('=')[1].split('fm')[
-                              0][:-1]] if n != nbr_of_phases + 1 else 'red'
+                          ][-nbr_of_phases + n - 2].split('=')[1].split('fm')
+                         [0][:-1]] if n != nbr_of_phases + 1 else 'red'
 
-        ax1.plot(
-            [float(en.split()[0]) for en in en_ph_1_to_N],
-            [float(ph.split()[n]) for ph in en_ph_1_to_N],
-            color=curcol)
+        ax1.plot([float(en.split()[0]) for en in en_ph_1_to_N],
+                 [float(ph.split()[n]) for ph in en_ph_1_to_N],
+                 color=curcol)
 
     plt.title(r'%s' % legend_entry, fontsize=16)
 
@@ -605,8 +625,8 @@ def determine_struct(inqua='INQUA_N'):
 
         bv_in_scheme += bvinz
 
-        wr1_oldblock = float(
-            lines_inqua[block_head + 1 + bvinz].strip().split()[0])
+        wr1_oldblock = float(lines_inqua[block_head + 1 +
+                                         bvinz].strip().split()[0])
 
         if bvinz < 7:
             block_head = block_head + 2 + bvinz + nl + 2 * bvinz

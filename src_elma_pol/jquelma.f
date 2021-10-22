@@ -1,6 +1,6 @@
       PROGRAM QUELMA
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
-C                                                                        
+C                                                                          
 C      PROGRAMM QUAFORM                                                 
 C      FUER ELEKTROMAGNETISCHE UEBERGAENGE
 C
@@ -191,7 +191,7 @@ C      KONSTRUKTION DER BASISVEKTOREN
       DO 22  K = 1,NZF                                                  
       NZPAR(K) = 0                                                      
       MZPAR(K) = 0                                                      
-       READ(INPUT,1002) NZRHO(K)                                        
+       READ(INPUT,1002) NZRHO(K)
       KK=NZRHO(K)                                                       
       IF(KK.LT.NZRHOM) GOTO 388
       N1=8
@@ -215,31 +215,32 @@ C      KONSTRUKTION DER BASISVEKTOREN
       GOTO 6040
 c
 390   DO 24  L = 1,LM                                                   
- 1003 FORMAT(50E12.4)                                                    
 c
       READ(INPUT,1003)  (CPAR(N,L,K),N=1,M)                            
- 1004 FORMAT(/I3,25H TER SATZ INNERER WEITEN  /8F12.6)           
 c
       READ(INPUT,1003)  (RPAR(L,N,K),N=1,KM)                              
- 1005 FORMAT(/22H SATZ RADIALPARAMETER   /3(8F12.6/))
 c
-      WRITE(NOUT,1005)  (RPAR(L, N, K),N=1,KM)                             
-   24 WRITE (NOUT,1004)L,(  CPAR(N,L,K),N=1,M)                          
+      WRITE(NOUT,1005)  (RPAR(L,N,K),N=1,KM)                             
+   24 WRITE(NOUT,1004)L,(CPAR(N,L,K),N=1, M)                          
 c 
       DO 240 N=1,KK                                                     
       READ(INPUT,1002) NUM(1,N,K),NUM(2,N,K),NUM(4,N,K)
       NUM(4,N,K)=MAX(1,NUM(4,N,K))
       NUM(3,N,K)=IVEK(K)+N                                              
-      READ(INPUT,1003) (COF(L,N,K),L=1,LM)                              
-      WRITE(NOUT,1050) NUM(3,N,K),K,NUM(1,N,K),NUM(2,N,K),NUM(4,N,K),
-     1  (COF(L,N,K),L=1,LM)
+      READ(INPUT,'(6E12.4)') (COF(L,N,K),L=1,LM)                              
+      WRITE(NOUT,1050) NUM(3,N,K),K,NUM(1,N,K),NUM(2,N,K),
+     1  NUM(4,N,K),(COF(L,N,K),L=1,LM)
+
+ 1003 FORMAT(50E12.4)                                                    
+ 1004 FORMAT(/I3,25H TER SATZ INNERER WEITEN  /8F12.6)           
+ 1005 FORMAT(/22H SATZ RADIALPARAMETER   /3(8F12.6/))
  1050 FORMAT(//15H DEFINITION DER,I3,22H TEN BASISFUNKTION IST/         
      1 I3,13H TE ZERLEGUNG,I3,23H TE SPINISOSPINFUNKTION/I3,
      2 26H TE BAHNDREHIMPULSFUNKTION,I3,' TES POLYNOM',/,
-     3 ' SUMMATION UEBER INNERE WEITEN MIT KOEFFIZIENTEN',/,1P8E12.4)
+     3 ' SUMMATION UEBER INNERE WEITEN MIT KOEFF',/,(1P20E12.4))
   240 CONTINUE                                                          
       I=I+KK                                                            
-   22 CONTINUE                                                          
+   22 CONTINUE                                             
 C     ENDE DEFINITION BASISVEKTOREN
 2011  FORMAT(////18H BERECHNET WERDEN )                                 
       WRITE (NOUT,2011)                                                 
@@ -300,6 +301,8 @@ C ECCE: 9 = NZOPER - 2
       STOP                                                              
   800 CONTINUE                                                          
       WRITE(NBAND1) NZF,MUL,(LREG(K),K=1,NZOPER),I,(NZRHO(K),K=1,NZF)
+      WRITE(nout,*) 'ECCE:'
+      WRITE(nout,*) NZF,MUL,(LREG(K),K=1,NZOPER),I,(NZRHO(K),K=1,NZF)
       DO 950  K = 1,NZF                                                 
       M=MZG(K)                                                          
       N3=MZPAR(K)
@@ -316,7 +319,7 @@ c assumed to have identical widths; they differ in the order of the polynomial!
      1 MLAD(2,N1,K),MSS(1,N1,K),MSS(2,N1,K),MS(N1,K),
      2 (LZWERT(L,N2,K),L=1,5),(RPAR(1,L,K),L=1,N3),KP(MC1,N4,K)
  4536 CONTINUE                                                          
-      IF(NBAND5.LE.0) GOTO810
+      IF(NBAND5.LE.0) GOTO 810
        IF(K.GT.NZF1)GOTO 810
        KK1=NZRHO1(K)
       DO 813 N=1,KK1                                                    

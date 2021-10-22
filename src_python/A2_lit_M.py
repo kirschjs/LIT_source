@@ -2,15 +2,20 @@ import os, sys
 import multiprocessing
 import subprocess
 import shlex
+import glob
 from multiprocessing.pool import ThreadPool
 
 import numpy as np
 from scipy.optimize import fmin
+from scipy.io import FortranFile
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 from bridgeA2 import *
 from rrgm_functions import *
 from two_particle_functions import *
+
+# CG(j1, m1, j2, m2, j3, m3)
+from sympy.physics.quantum.cg import CG
 
 import PSI_parallel_M2
 
@@ -25,6 +30,10 @@ if os.path.isfile(respath + 'kRange.dat') == True:
 with open(respath + 'kRange.dat', 'wb') as f:
     np.savetxt(f, [anz_phot_e, phot_e_0, phot_e_d], fmt='%f')
 f.close()
+
+with open(respath + 'dtype.dat', 'a') as outf:
+    outf.write(dt)
+outf.close()
 
 siffux = '_ref'
 D_iw, he_frgs = retrieve_D_M(deuteronpath + 'INQUA_V18%s' % siffux, npoli)
@@ -97,13 +106,11 @@ if 'rhs' in cal:
               (boundstatekanal, EBDG), EVSPECT, ']')
         print('        dim(B_0)   = %d' % len(BUECO))
 
-        if 'rhs_lu-ob-qua' in cal:
 
-            #            D = [
-            #                np.array(ln.split(';')).astype(float).tolist() for ln in open(
-            #                    litpathD + 'basis_struct/intw3heLIT_J%s_%s.dat' %
-            #                    (Jstreustring, boundstatekanal))
-            #            ]
+        DeuBasDim = len([ln for ln in open(
+                litpathD + 'basis_struct/LITbas_full_J%s_%s.dat' %
+                (J0, boundstatekanal))
+        ])
             #
             #            he_rw = [
             #                np.array(ln.split(';')).astype(float).tolist() for ln in open(
@@ -111,43 +118,45 @@ if 'rhs' in cal:
             #                    (Jstreustring, boundstatekanal))
             #            ]
 
-            lfrags = []
-            sfrags = []
+        lfrags = []
+        sfrags = []
 
             #for lcfg in range(len(channels[boundstatekanal])):
             #    sfrags = sfrags + channels[boundstatekanal][lcfg][1]
             #    for scfg in channels[boundstatekanal][lcfg][1]:
             #        lfrags = lfrags + [channels[boundstatekanal][lcfg][0]]
-            fragfile = [
-                ln
-                for ln in open(litpathD + 'basis_struct/frags_LIT_J%s_%s.dat' %
-                               (J0, boundstatekanal))
-            ]
-            lfrags = [fr.split(' ')[1].strip() for fr in fragfile]
-            sfrags = [fr.split(' ')[0] for fr in fragfile]
+        fragfile = [
+            ln
+            for ln in open(litpathD + 'basis_struct/frags_LIT_J%s_%s.dat' %
+                           (J0, boundstatekanal))
+        ]
+        lfrags = [fr.split(' ')[1].strip() for fr in fragfile]
+        sfrags = [fr.split(' ')[0] for fr in fragfile]
 
-            # read widths and frags of the LIT basis as determined via
-            # v18uix_LITbasis.py
-            fragfile = [
-                ln
-                for ln in open(litpathD + 'basis_struct/frags_LIT_J%s_%s.dat' %
-                               (Jstreustring, streukanal))
-            ]
-            lfrags2 = [fr.split(' ')[1].strip() for fr in fragfile]
-            sfrags2 = [fr.split(' ')[0] for fr in fragfile]
+        # read widths and frags of the LIT basis as determined via
+        # v18uix_LITbasis.py
+        fragfile = [
+            ln
+            for ln in open(litpathD + 'basis_struct/frags_LIT_J%s_%s.dat' %
+                           (Jstreustring, streukanal))
+        ]
+        lfrags2 = [fr.split(' ')[1].strip() for fr in fragfile]
+        sfrags2 = [fr.split(' ')[0] for fr in fragfile]
 
-            relwLIT = [
-                np.array(ln.split(';')).astype(float).tolist()
-                for ln in open(litpathD + 'basis_struct/intwDLIT_J%s_%s.dat' %
-                               (Jstreustring, streukanal))
-            ]
+        relwLIT = [
+            np.array(ln.split(';')).astype(float).tolist()
+            for ln in open(litpathD + 'basis_struct/intwDLIT_J%s_%s.dat' %
+                           (Jstreustring, streukanal))
+        ]
+        if 'dbg' in cal:
+            print('\nD components (full) + LIT-basis components (bare):\n',
+                  len(lfrags))
+            print(sfrags)
+            print('\nLIT-basis components (full):\n', len(lfrags2))
+            print(sfrags2)
 
-            if 'dbg' in cal:
-                print('\nD components (full) + LIT-basis components (bare):\n',
-                      len(lfrags))
-                print(sfrags)
-                print('\nLIT-basis components (full):\n', len(lfrags2))
-                print(sfrags2)
+
+        if 'rhs_lu-ob-qua' in cal:
 
             for lit_zerl in range(len(lfrags2)):
 
@@ -371,6 +380,57 @@ if 'rhs' in cal:
 
                 pool.close()
                 pool.join()
+            os.system('mv ' + litpathD + 'tmp_*/*_S_* ' + respath)
+
+    if 'rhs-couple' in cal:
+        os.chdir(respath)
+        rhs = []
+    
+        for nch in range(len(streukas)):
+            streukanal = streukas[nch]
+            In = int(streukanal.split('^')[0])
+            mLmJl, mLrange, mJlrange = non_zero_couplings(multipolarity, J0,
+                                                  In)
+            for mJ in mJlrange:
+                rhsInMIn = 0.
+                for mL in mLrange:
+                    clebsch = CG(multipolarity, mL, J0, mJ-mL, In, mJ).doit()
+                    if np.abs(clebsch)!=0:
+                        #print(multipolarity, mL, J0, mJ-mL, In, mJ,': ',clebsch)
+                    
+                        rhstmp = []
+                        for lit_zerl in range(len(lfrags2)):
+                        
+                            kompo_vects_bare = [f for f in glob.glob("%d_S_%d_%d_%d.lit"%(lit_zerl,In,mJ,mL))]
+                        
+                            if ((kompo_vects_bare==[])&(np.abs(clebsch)>0)):
+                                print('RHS component missing: Z,In,MIn,ML:%d,%d,%d,%d'%(lit_zerl,In,mJ,mL))
+                                print('Clebsch = ',CG(multipolarity, mL, J0, mJ-mL, In, mJ).doit())
+                                exit()
+                            
+                            fortranIn = FortranFile(kompo_vects_bare[0], 'r').read_reals(float)
+                            
+                            tDim=int(np.sqrt(np.shape(fortranIn)[0]))
+                            OutBasDim=int(tDim-DeuBasDim)
+                            
+                            subIndices = [ range((DeuBasDim+ni)*tDim,(DeuBasDim+ni)*tDim+DeuBasDim) for ni in range(OutBasDim)]
+                            
+                            test = np.take(fortranIn,subIndices)
+                            test= np.reshape(test,(1,-1))
+                            #print(test[0])
+                            rhstmp=np.concatenate((rhstmp,test[0]))
+                        #rhstmp = np.array(rhstmp).reshape(-1)
+                        #print(rhstmp)
+                        
+                        rhsInMIn += clebsch * rhstmp
+                    
+                outstr = "InMIn_%d_%d.%s"%(In,mJ,dt)
+                fortranOut = open(outstr, 'wb+')
+                rhsInMInF = np.asfortranarray(rhsInMIn,dt)
+                rhsInMInF.tofile(fortranOut)
+                fortranOut.close()
+                    
+
 
 if 'lhs' in cal:
 
@@ -482,11 +542,14 @@ if 'lhs' in cal:
             #    os.system('cp %s/MATOUT ' % (litpathD + 'lit_bas_lhs/') + respath
             #          + 'norm-ham-litME-%s_1-%d' % (streukanal, anzbtmp))
             #os.system('cp ' + v18uixpath + 'mat_* ' + respath)
-            os.system('cp ' + litpathD + 'tmp_*/*_S_* ' + respath)
+            
 
         #plotHspec(Jstreustring)
 
 if 'couple' in cal:
+
+
+
 
     os.system('cp ' + deuteronpath + 'E0.dat ' + litpathD)
 

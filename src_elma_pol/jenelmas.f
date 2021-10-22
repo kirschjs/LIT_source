@@ -2,7 +2,7 @@
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
 C     ENPON FUER QUELMA 
 C     ELEKTROMAGNETISCHE UEBERGANGSOPERATOREN FUER REAKTIONEN 
-C 
+C  
 C    
 C
 C    ES WERDEN PHOTONENERGIEUNABHAENGIGE MATRIXELEMENTE BERECHNET
@@ -215,6 +215,8 @@ C        NTI = 1 if 1<=MKC<=11
       READ (NBAND) NUML,NUMR,IK1,JK1,
      *       ((DNN(K,L),K=1,IK1),L=1,JK1)
 C     * (IDUMMY,DNN(K,L,J),J=1,LL1),L=1,JK1),K=1,IK1)     
+c      write(6,'(A13,5I4)') '(from qual): ',NUML,NUMR,IK1,JK1
+c      write(6,'(2E24.8)') ((DNN(K,L),K=1,IK1),L=1,JK1)
 
           NZREL(MFL) = IK1
           NZREL(MFR) = JK1
@@ -234,7 +236,7 @@ c      F=CLG(JWSL,JWSR,2*MUL,JWSL,-JWSR)
 91    CONTINUE
 C     BAHNOPERATOREN, SIEGERT UND KORREKTUROPERATOR
       IF(ML.NE.MR) THEN
-         WRITE (6,1200) MKC, ML, MR
+c         WRITE (6,1200) MKC, ML, MR
          FPAR = 0.
       ENDIF
 C
@@ -247,7 +249,7 @@ C      FK1new = (-1)**(AK-GJR+GJL)*SQRT(JWSR+1.)*SQRT(MUL2+1.)
 C     1        *F9J(LBL2,LBR2,IORANK2,ML,MR,ISRANK2,JWSL,JWSR,MUL2)
       FK1new = SQRT(JWSR+1.)*SQRT(MUL2+1.)
      1        *F9J(LBL2,LBR2,IORANK2,ML,MR,ISRANK2,JWSL,JWSR,MUL2)      
-      write(nout,*) 'FK1new = ', FK1new,MFL,MFR
+c      write(nout,*) 'FK1new = ', FK1new,MFL,MFR
 C
       FK1old=(-1)**((MUL2+LBL2+ML+JWSR)/2) 
       FK1old=FK1*SQRT(AJRD*AJLD/(2.*SPR+1.)) 
@@ -261,7 +263,7 @@ c this factor is absent for "ordinary" operators whose
 c spin and spatial rank couple to 0;      
 c
 c
-c      WRITE (6,1204) AK,AKM,GJR,(GJLM-AKM),GJL,GJLM,F
+c      WRITE(6,1204) AK,AKM,GJR,(GJLM-AKM),GJL,GJLM,F
 c      write(6,'(9I3)')LBL2,LBR2,IORANK2,ML,MR,ISRANK2,JWSL,JWSR,MUL2
 c      write(6,'(2F8.4)')FK1new,CL
       GOTO 100
@@ -291,21 +293,22 @@ C     DES RED. MATR.-ELEMENTS HERAUSGEKUERZT.
 c      FK1=FK1*F6J(LBL2,LBR2,0,JWSL,JWSR,ML)
       F=1.
 c      CLG(0, INT(2*GJR),INT(2*GJL),0,INT(2*GJLM))
-
-      FK1new=FK1*F6J(LBR2,MR,JWSR,ML,LBL2,0)
+c      
+      FK1new=1.
+c      FK1new=FK1*F6J(LBR2,MR,JWSR,ML,LBL2,0)      
 C
 100   CONTINUE
 C  for F1 <J'|L|J> + F2 <J|L|J'>
       IF (MREG(MKC).eq.0) THEN
       F = 0.
-      write(6,*) '(ecce) MKC = ',MKC
+c      write(6,*) '(ecce) MKC = ',MKC
 c      stop 100
       ENDIF
 C     ALLE OPERATOREN
 C                 = hbarc/mn for siegert proton      
       F1=F*FK1new*GEFAK(MKC)*FPAR
-      write(6,'(A30,5F12.8,I3/)')'F1,F,FK1new,GEFAK(MKC),FPAR,MKC',
-     *           F1,F,FK1new,GEFAK(MKC),FPAR,MKC
+c      write(6,'(A30,5F12.8,I3/)')'F1,F,FK1new,GEFAK(MKC),FPAR,MKC',
+c     *           F1,F,FK1new,GEFAK(MKC),FPAR,MKC
       DO 458 K=1,IK1
       DO 458 L=1,JK1
       if(MKC.ne.1) then        
@@ -324,7 +327,7 @@ c      write(nout,'(A13,F8.4,3I3)')'(ecce) DNN = ',DNN(K,L,JJ),K,L,JJ
      *           F1
       endif
   458 CONTINUE
-C
+C 
       DO 459 K=1,IK1
       DO 459 L=1,JK1        
       DN(K,L) = DN(K,L) + DNN(K,L)
@@ -354,9 +357,9 @@ c      write(nout,'(A20,2I5)') '(ecce): row0, col0: ',NROWOz,NCOLOz
       if(ABS(DN(K,L)).lt.1E-20) DN(K,L)=0
       DM(NROW,NCOL,MKC) = DN(K,L)
 c      if(MKC.eq.10) then
-      write(6,'(2I2,A11,I2,A1,I2,A1,I2,A4,2E18.8)')K,L,
-     *   '(ecce): DM(',NROW,',',NCOL,',',MKC,') = ',
-     *   DN(K,L),DN(L,K)
+c      write(6,'(2I2,A11,I2,A1,I2,A1,I2,A4,2E18.8)')K,L,
+c     *   '(ecce): DM(',NROW,',',NCOL,',',MKC,') = ',
+c     *   DN(K,L),DN(L,K)
 c      endif
       NCOL = NCOL + 1
   468 CONTINUE
@@ -377,9 +380,18 @@ C     ENDE LOOP ZERLEGUNGEN LINKS
   140 CONTINUE
 
       WRITE(NBAND2)
-c     *   (( (DM(K,L,1)+DM(K,L,10)+DM(K,L,11))
+c     *   (( DM(K,L,10)+DM(K,L,11)
+c     *   ,L=1,NCOL-1 ),K=1,NROW-1 )
      * (( (DM(K,L,10)+DM(K,L,11))/SQRT(DM(L,L,1)*DM(K,K,1))
      *   ,L=1,NCOL-1 ),K=1,NROW-1 )
+c
+C      DO 143 K=1,NROW-1
+C      DO 143 L=1,NCOL-1
+C      WRITE(19,'(A38,2I3,3E12.4)') 
+C     *      '(K,L) DM(K,L,1),DM(K,L,10),DM(K,L,11):',
+C     *       K,L,DM(K,L,1),DM(K,L,10),DM(K,L,11)
+C  143 WRITE(19,'(F20.12)') 
+C     *  (DM(K,L,10)+DM(K,L,11))/SQRT(DM(L,L,1)*DM(K,K,1))     
 c       DO 42 KANL=1,NZKL
 c       DO 142 KANR=NZKL1,NZKA
 c       FAK1 = UMKOF(KANL,NUML)*UMKOF(KANR,NUMR)
