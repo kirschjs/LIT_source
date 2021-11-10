@@ -160,12 +160,12 @@ if 'rhs' in cal:
         lfrags2 = [fr.split(' ')[1].strip() for fr in fragfile]
         sfrags2 = [fr.split(' ')[0] for fr in fragfile]
         intwLIT = [
-            np.array(ln.split(';')).astype(float).tolist()
+            np.array(ln.split()).astype(float).tolist()
             for ln in open(litpath3He + 'basis_struct/intw3heLIT_J%s_%s.dat' %
                            (Jstreustring, streukanal))
         ]
         relwLIT = [
-            np.array(ln.split(';')).astype(float).tolist()
+            np.array(ln.split()).astype(float).tolist()
             for ln in open(litpath3He + 'basis_struct/relw3heLIT_J%s_%s.dat' %
                            (Jstreustring, streukanal))
         ]

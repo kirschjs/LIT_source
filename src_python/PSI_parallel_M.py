@@ -11,8 +11,8 @@ with open(respath + 'dtype.dat', 'w') as outf:
 outf.close()
 
 bastypes = streukas
-bastypes = [boundstatekanal]
 bastypes = [boundstatekanal] + streukas
+bastypes = [boundstatekanal]
 
 for bastype in bastypes:
     angu = channels[bastype]
@@ -44,14 +44,25 @@ for bastype in bastypes:
 
     he_iw = he_rw = he_frgs = ob_stru = lu_stru = sbas = []
 
-    bvma = 12
-
     inv_scale_i = 0.25
     inv_scale_r = 5.1
     nwadd = 0
+    nGrd = 14
 
-    nwint = 18
-    nwrel = 14
+    nwint = 3
+    nwrel = 3
+
+    wscu = 0.80
+    wsco = 4.0
+
+    cent1 = np.linspace(0.2 * wscu, 3.9 * wscu, len(lfrags) + 1)
+    cent2 = np.linspace(0.9 * wsco, 1.9 * wsco, len(lfrags) + 1)
+    sig1 = .25 * np.ones(len(lfrags) + 1)
+    sig2 = np.ones(len(lfrags) + 1)
+
+    grd_type = 'geo'  #'cum'  #'poly'  #
+
+    cal += ['diag']
 
     mindist_int = 0.001
 
@@ -60,16 +71,21 @@ for bastype in bastypes:
     if bastype == boundstatekanal:
 
         rel_scale = 1.
-        wi, wf, nw = 0.01, 28.5, [nwint
+        wi, wf, nw = 0.01, 12.5, [nwint
                                   for n in lfrags]  # for lit-state continuum
 
     else:
 
         #nwint = 14
         #nwrel = 6
-        rel_scale = 0.4
-        wi, wf, nw = 0.001, 31.5, [nwint
+        rel_scale = 0.04
+        wi, wf, nw = 0.001, 11.5, [nwint
                                    for n in lfrags]  # for lit-state continuum
+
+    cumWi = cumWidths(anza=len(lfrags) * nwint, centers=[2.1], widths=[1.0])
+    cumWr = cumWidths(anza=len(lfrags) * nwint * nwrel,
+                      centers=[1.0],
+                      widths=[1.0])
 
     # to include all reference basis states in the augmented basis
     #lit_rw_sparse = np.empty(max(len(sfrags), len(ob_stru)), dtype=list)
@@ -87,28 +103,41 @@ for bastype in bastypes:
 
         wii = wi * offset
         wff = wf * offset
-        lit_w_tmp_g = np.abs(
-            np.geomspace(
-                #lit_w_tmp = np.abs(np.linspace(
-                start=wii,
-                stop=wff,
-                num=nw[frg],
-                endpoint=True,
-                dtype=None))
-        lit_w_tmp_p = polyWidths(wmin=wii, wmax=wff, nbrw=nw[frg], npoly=9)
-        lit_w_tmp = lit_w_tmp_g
 
-        lit_w_tmp_add_g = np.abs(
-            np.geomspace(start=wf + offset,
-                         stop=inv_scale_i * (2 * wf - wi) + offset,
-                         num=nwadd,
-                         endpoint=True,
-                         dtype=None))
-        lit_w_tmp_add_p = polyWidths(wmin=wf + offset,
-                                     wmax=inv_scale_i * (2 * wf - wi) + offset,
-                                     nbrw=nwadd,
-                                     npoly=9)
-        lit_w_tmp_add = lit_w_tmp_add_g
+        if grd_type == 'geo':
+            lit_w_tmp = np.abs(
+                np.geomspace(
+                    #lit_w_tmp = np.abs(np.linspace(
+                    start=wii,
+                    stop=wff,
+                    num=nw[frg],
+                    endpoint=True,
+                    dtype=None))
+            lit_w_tmp_add = np.abs(
+                np.geomspace(start=wf + offset,
+                             stop=inv_scale_i * (2 * wf - wi) + offset,
+                             num=nwadd,
+                             endpoint=True,
+                             dtype=None))
+        elif grd_type == 'poly':
+            lit_w_tmp = polyWidths(wmin=wii,
+                                   wmax=wff,
+                                   nbrw=nw[frg],
+                                   npoly=nGrd)
+            lit_w_tmp_add = polyWidths(wmin=wf + offset,
+                                       wmax=inv_scale_i * (2 * wf - wi) +
+                                       offset,
+                                       nbrw=nwadd,
+                                       npoly=nGrd)
+        elif grd_type == 'cum':
+            lit_w_tmp = cumWi[frg::len(lfrags)]
+
+#            lit_w_tmp = cumWidths(anza=nw[frg],
+#                                  centers=[cent1[frg]],
+#                                  widths=[sig1[frg]])
+#            lit_w_tmp_add = cumWidths(anza=nwadd,
+#                                      centers=[2 * cent1[frg]],
+#                                      widths=[sig1[frg]])
 
         lit_w[frg] = [
             float(x)
@@ -132,28 +161,35 @@ for bastype in bastypes:
 
         wiir = wir * offset
         wffr = wfr * offset
-        #print(wir,wfr,offset)
-        #exit()
-        lit_w_tmp_g = np.geomspace(
-            #lit_w_tmp = np.linspace(
-            start=wiir,
-            stop=wffr,
-            num=nwr,
-            endpoint=True,
-            dtype=None)
-        lit_w_tmp_p = polyWidths(wmin=wiir, wmax=wffr, nbrw=nwr, npoly=9)
-        lit_w_tmp = lit_w_tmp_p
 
-        lit_w_add_g = np.geomspace(start=wfr + offset,
-                                   stop=inv_scale_r * (2 * wfr - wir) + offset,
-                                   num=nwadd * len(lit_w[frg]),
-                                   endpoint=True,
-                                   dtype=None)
-        lit_w_add_p = polyWidths(wmin=wfr + offset,
-                                 wmax=inv_scale_r * (2 * wfr - wir) + offset,
-                                 nbrw=nwadd * len(lit_w[frg]),
-                                 npoly=9)
-        lit_w_add = lit_w_add_p
+        if grd_type == 'geo':
+            lit_w_tmp = np.geomspace(
+                #lit_w_tmp = np.linspace(
+                start=wiir,
+                stop=wffr,
+                num=nwr,
+                endpoint=True,
+                dtype=None)
+            lit_w_add = np.geomspace(start=wfr + offset,
+                                     stop=inv_scale_r * (2 * wfr - wir) +
+                                     offset,
+                                     num=nwadd * len(lit_w[frg]),
+                                     endpoint=True,
+                                     dtype=None)
+        elif grd_type == 'poly':
+            lit_w_tmp = polyWidths(wmin=wiir, wmax=wffr, nbrw=nwr, npoly=nGrd)
+            lit_w_add = polyWidths(wmin=wfr + offset,
+                                   wmax=inv_scale_r * (2 * wfr - wir) + offset,
+                                   nbrw=nwadd * len(lit_w[frg]),
+                                   npoly=nGrd)
+        elif grd_type == 'cum':
+            lit_w_tmp = cumWr[frg::len(lfrags)]
+#            lit_w_tmp = cumWidths(anza=nwr,
+#                                  centers=[0.95 * cent1[frg]],
+#                                  widths=[sig1[frg]])
+#            lit_w_tmp_add = cumWidths(anza=nwadd,
+#                                      centers=[1.95 * cent1[frg]],
+#                                      widths=[sig1[frg]])
 
         lit_w_tmp = [
             float(x)
@@ -200,7 +236,7 @@ for bastype in bastypes:
 
     anzBV = sum([len(zer) for zer in widi])
     print('# Basisvektoren = %d' % anzBV)
-    print(lfrags2)
+    print(lfrags2, sfrags2)
 
     if ((bastype != boundstatekanal) | (new_helion)):
         sbas = []
@@ -208,16 +244,18 @@ for bastype in bastypes:
         for n in range(len(lfrags2)):
             bvv = 0
             for m in range(len(widi[n])):
-                #sbas += [[bv, rwind[1][m][::-1][:-2]]]
-                sbas += [[
-                    bv,
-                    [
-                        x
-                        for x in range(1, 1 +
-                                       max([len(wid) for wid in widr[n]]), 1)
-                    ]
-                ]]
+                bvv += 1
+                sbas += [[bv, [(bvv) % (1 + len(widr[n][m]))]]]
+                #sbas += [[
+                #    bv,
+                #    [
+                #        x
+                #        for x in range(1, 1 +
+                #                       max([len(wid) for wid in widr[n]]), 1)
+                #    ]
+                #]]
                 bv += 1
+
     else:
         sfrags2 = ob_stru
         lfrags2 = lu_stru
@@ -236,11 +274,19 @@ for bastype in bastypes:
     if os.path.exists(path_bas_int_rel_pairs):
         os.remove(path_bas_int_rel_pairs)
 
-    with open(path_bas_int_rel_pairs, 'wb') as f:
-        np.savetxt(f, [[jj[0], kk] for jj in sbas for kk in jj[1]], fmt='%d')
-        f.seek(NEWLINE_SIZE_IN_BYTES, 2)
-        f.truncate()
-    f.close()
+    with open(path_bas_int_rel_pairs, 'w') as oof:
+        #np.savetxt(f, [[jj[0], kk] for jj in sbas for kk in jj[1]], fmt='%d')
+        #f.seek(NEWLINE_SIZE_IN_BYTES, 2)
+        #f.truncate()
+        so = ''
+        for bv in sbas:
+            so += '%4s' % str(bv[0])
+            for rww in bv[1]:
+                so += '%4s' % str(rww)
+            so += '\n'
+        oof.write(so)
+
+    oof.close()
 
     path_frag_stru = litpath3He + 'basis_struct/frags_LIT_J%s_%s.dat' % (
         Jstreustring, bastype)
@@ -260,7 +306,7 @@ for bastype in bastypes:
     if os.path.exists(path_intw): os.remove(path_intw)
     with open(path_intw, 'wb') as f:
         for ws in widi:
-            np.savetxt(f, [ws], fmt='%12.6f', delimiter=' ; ')
+            np.savetxt(f, [ws], fmt='%12.6f', delimiter=' ')
         f.seek(NEWLINE_SIZE_IN_BYTES, 2)
         f.truncate()
     f.close()
@@ -271,7 +317,7 @@ for bastype in bastypes:
     with open(path_relw, 'wb') as f:
         for wss in widr:
             for ws in wss:
-                np.savetxt(f, [ws], fmt='%12.6f', delimiter=' ; ')
+                np.savetxt(f, [ws], fmt='%12.6f', delimiter=' ')
         f.seek(NEWLINE_SIZE_IN_BYTES, 2)
         f.truncate()
     f.close()
@@ -370,6 +416,7 @@ for bastype in bastypes:
 
     os.chdir(v18uixpath)
     print('Calculating in %s' % v18uixpath)
+    print(lfrags2)
     n3_inlu(8, fn='INLU', fr=lfrags2, indep=parall)
     os.system(BINBDGpath + 'DRLUD.exe')
     n3_inlu(8, fn='INLUCN', fr=lfrags2, indep=parall)

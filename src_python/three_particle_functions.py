@@ -841,7 +841,7 @@ def he3inqua(intwi=[], relwi=[], potf=''):
     return
 
 
-def he3inquaBS(intwi=[], relwi=[], potf=''):
+def he3inquaBS(intwi=[], relwi=[], potf='', inquaout='INQUA_M'):
     s = ''
     # NBAND1,NBAND2,NBAND3,NBAND4,NBAND5,NAUS,MOBAUS,LUPAUS,NBAUS
     s += ' 10  8  9  3 00  0  0  0  0\n%s\n' % potf
@@ -872,7 +872,7 @@ def he3inquaBS(intwi=[], relwi=[], potf=''):
             for ii in range(int(tmpln - int(bb / 6))):
                 s += '\n'
 
-    with open('INQUA_M', 'w') as outfile:
+    with open(inquaout, 'w') as outfile:
         outfile.write(s)
 
     return

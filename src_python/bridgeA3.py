@@ -38,7 +38,7 @@ cal = [
     #'reduce',
     #'coeff',
     #'diag',
-    'reset',
+    #'reset',
     'dbg',
     'einzel',
     'rhs_lu-ob-qua',
@@ -166,54 +166,10 @@ rw0 = sparsify(rw0, min_spacing)
 
 nzf0 = int(np.ceil(len(rw0) / 20.0))
 
-#LIT basis ---------------------------------------------------------------
+# basis ------------------------------------------------------------------
 
-basisdimLITint = 10
-basisdimLITrel = 10
-LD = 20
-
-basisdimLIT = 40
-wli = 'wd'
-
-if wli == 'wd':
-    #scale deuteron
-    winiLIT = [ww for ww in 1.1 * rw0 if ((ww < 10) & (ww > 0.01))] + [10.01]
-
-if wli == 'lin':
-    #linspace
-    w0l, dw = 0.035, 1.4
-    winiLIT = np.linspace(start=w0l,
-                          stop=w0l + basisdimLIT * dw,
-                          num=basisdimLIT,
-                          endpoint=True,
-                          dtype=None)
-if wli == 'log':
-    #logspace
-    exp0log, expmaxlog = -1, 1
-    winiLIT = np.logspace(start=exp0log,
-                          stop=expmaxlog,
-                          num=basisdimLIT,
-                          endpoint=True,
-                          dtype=None)
-if wli == 'geom':
-    #geomspace
-    wminl, wmaxl = 0.01, 20
-    winiLIT = np.geomspace(start=wminl,
-                           stop=wmaxl,
-                           num=basisdimLIT,
-                           endpoint=True,
-                           dtype=None)
-if wli == 'lap':
-    #laplace space
-    laplace_loc, laplace_scale = .9, .4
-    winiLITlaplace = np.sort(
-        np.abs(np.random.laplace(laplace_loc, laplace_scale, basisdimLIT)))
-    winiLITlaplace = wid_gen(add=addw,
-                             addtype=addwt,
-                             w0=winiLITlaplace[::-1],
-                             ths=[1e-5, 2e2, 0.2],
-                             sca=scale)
-    winiLIT = sparsify(winiLITlaplace, min_spacing)
+bvma = 12
+rwma = 45
 
 # -- here, I allowed for an enhancement of certain operators, to bind an S-wave triton with v18/uix
 costr = ''
@@ -222,13 +178,12 @@ zop = 31 if tnni == 11 else 14
 
 for nn in range(1, zop):
     cf = 1.0 if (nn < 28) else 0.0
-    cf = 1.0 if (nn == 2) else cf
+    cf = 0.0 if (nn == 1) else cf
     costr += '%12.7f' % cf if (nn % 7 != 0) else '%12.7f\n' % cf
 
 #print('costr = ', costr)
 
 # for the cleaner --------------------------------------------------------
-streukanalweiten = range(1, len(winiLIT) + 1)
 
 maxCoef = 10000
 minCoef = 1200

@@ -1,5 +1,5 @@
 F77     =       gfortran
-FFLAGS  =       -g -O2 -ffpe-summary='none'  -mcmodel=medium
+FFLAGS  =       -g -O2 -ffpe-summary='none'  -mcmodel=large
 #F77     =       mpif77
 #-ffpe-trap=denormal -pg -funroll-loops -g -fdefault-real-8 -fconvert=native -frecord-marker=4
 
