@@ -73,6 +73,82 @@ def rectify_basis(basis):
     return rectbas
 
 
+def condense_Basis(inputBasis, independentCfgs, bvsPERcfg=12):
+
+    bounds = np.add.accumulate([len(iws) for iws in inputBasis[1]])
+
+    D0s = [[], [], [], []]
+
+    for spinCFG in independentCfgs:
+
+        D0s[0].append(spinCFG)
+        D0s[1].append([])
+        D0s[2].append([])
+
+        for bv in range(len(inputBasis[3])):
+
+            cfgOFbv = sum([bound < inputBasis[3][bv][0] for bound in bounds])
+
+            if inputBasis[0][cfgOFbv] == spinCFG:
+
+                D0s[1][-1].append(
+                    sum(inputBasis[1], [])[inputBasis[3][bv][0] - 1])
+                D0s[2][-1].append(
+                    np.array(sum(inputBasis[2],
+                                 [])[inputBasis[3][bv][0] -
+                                     1])[np.array(inputBasis[3][bv][1]) -
+                                         1].tolist())
+
+    D0st = [[], [], [], []]
+
+    for cfg in range(len(D0s[0])):
+
+        for anzrelw in range(1,
+                             1 + np.max([len(relws)
+                                         for relws in D0s[2][cfg]])):
+            newZerl = True
+            for bvn in range(len(D0s[1][cfg])):
+
+                if len(D0s[2][cfg][bvn]) == anzrelw:
+                    if newZerl:
+                        D0st[0].append(D0s[0][cfg])
+                        D0st[1].append([])
+                        D0st[2].append([])
+                        newZerl = False
+
+                    D0st[1][-1].append(D0s[1][cfg][bvn])
+                    D0st[2][-1].append(D0s[2][cfg][bvn])
+
+    D0ss = [[], [], [], []]
+
+    for nCFG in range(len(D0st[0])):
+        anzfrg = int(np.ceil(len(D0st[1][nCFG]) / bvsPERcfg))
+        D0ss[0] += anzfrg * [D0st[0][nCFG]]
+        D0ss[1] += [
+            D0st[1][nCFG][n * bvsPERcfg:min((n + 1) *
+                                            bvsPERcfg, len(D0st[1][nCFG]))]
+            for n in range(anzfrg)
+        ]
+        D0ss[2] += [
+            D0st[2][nCFG][n * bvsPERcfg:min((n + 1) *
+                                            bvsPERcfg, len(D0st[2][nCFG]))]
+            for n in range(anzfrg)
+        ]
+
+    nbv = 0
+    for cfg in range(len(D0ss[0])):
+        nbvc = 0
+        for bv in D0ss[1][cfg]:
+            nbv += 1
+            nbvc += 1
+            D0ss[3] += [[
+                nbv,
+                np.array(range(1, 1 + len(D0ss[2][cfg][nbvc - 1]))).tolist()
+            ]]
+
+    return D0ss
+
+
 def basisDim(bas=[]):
     dim = 0
     for bv in bas:
@@ -113,7 +189,7 @@ def bin_to_float(binary):
     return struct.unpack('!f', struct.pack('!I', int(binary, 2)))[0]
 
 
-def intertwining(p1, p2, mutation_rate=0.0, wMin=0.0001, wMax=120., dbg=False):
+def intertwining(p1, p2, mutation_rate=0.0, wMin=0.001, wMax=20., dbg=False):
 
     Bp1 = float_to_bin(p1)
     Bp2 = float_to_bin(p2)
@@ -140,7 +216,8 @@ def intertwining(p1, p2, mutation_rate=0.0, wMin=0.0001, wMax=120., dbg=False):
 
     if (np.isnan(Fc1) | np.isnan(Fc2) | (Fc1 < wMin) | (Fc1 > wMax) |
         (Fc2 < wMin) | (Fc2 > wMax)):
-        Fc1 = Fc2 = 42.1
+        Fc1 = np.random.random() * 12.1
+        Fc2 = np.random.random() * 10.1
 
     if (dbg | np.isnan(Fc1) | np.isnan(Fc2)):
         print('parents (binary)        :%12.4f%12.4f' % (p1, p2))

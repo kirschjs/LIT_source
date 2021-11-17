@@ -1,5 +1,5 @@
 import subprocess
-import os, fnmatch
+import os, fnmatch, copy
 import numpy as np
 import sympy as sy
 # CG(j1, m1, j2, m2, j3, m3)
@@ -182,7 +182,7 @@ for nn in range(1, zop):
     costr += '%12.7f' % cf if (nn % 7 != 0) else '%12.7f\n' % cf
 
 #print('costr = ', costr)
-
+#print(BINBDGpath)
 # for the cleaner --------------------------------------------------------
 
 maxCoef = 10000

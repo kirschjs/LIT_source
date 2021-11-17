@@ -45,22 +45,21 @@ minDiffwidthsINT = 10**-2
 minDiffwidthsREL = 10**-3
 mDiff = 10**-5
 minCond = 10**-6
-nGenMax = 12
+nGenMax = 2
 # nRaces := |i|
 nRaces = 12
 # nBasisSamples := |j|
 nBasisSamples = 4
-nbrOff = 10
+nbrOff = 2
 targetDimfac0 = 0.95
+
+Civilizations = []
 
 # 3) breed the first offspring generation
 # each pair of basis vectors procreates => |parents + offspring| = 2*|parents|
 # P_0 -> {P_0^i=parents+offspring_i,i=1,...,nRaces}
 
-iwSET = [intwLIT]
-rwSET = [rws]
-cfgSET = [cfgs]
-basSET = []
+P0 = [cfgs, intwLIT, rws, []]
 
 for nCivi in range(nRaces):
 
@@ -69,24 +68,23 @@ for nCivi in range(nRaces):
         #    and breed offsping generation == (C0)
         iTNG = []
         rTNG = []
-        for cfg in range(len(iwSET[nCivi])):
+        for cfg in range(len(P0[1])):
             TNGt = []
             # in case of a one-person population, carve an Eve from the rip of Adam
-            if len(iwSET[nCivi][cfg]) == 1:
-                iwSET[nCivi][cfg] += [
-                    iwSET[nCivi][cfg][0] * np.random.random()
+            if len(P0[1][cfg]) == 1:
+                P0[1][cfg] += [P0[1][cfg][0] * np.random.random()]
+                P0[2][cfg] += [
+                    (np.array(P0[2][cfg][0]) * np.random.random()).tolist()
                 ]
-                rwSET[nCivi][cfg] += [(np.array(rwSET[nCivi][cfg][0]) *
-                                       np.random.random()).tolist()]
-            inxs = np.arange(len(iwSET[nCivi][cfg]))
+            inxs = np.arange(len(P0[1][cfg]))
             np.random.shuffle(inxs)
             parentpairs = np.reshape(
                 inxs, (-1, 2)) if len(inxs) % 2 == 0 else np.reshape(
                     np.append(inxs, np.random.choice(inxs[:-1])), (-1, 2))
             for coupl in parentpairs:
                 muta_rate = 0.1
-                father = iwSET[nCivi][cfg][coupl[0]]
-                mother = iwSET[nCivi][cfg][coupl[1]]
+                father = P0[1][cfg][coupl[0]]
+                mother = P0[1][cfg][coupl[1]]
                 son, daughter = intertwining(father,
                                              mother,
                                              mutation_rate=muta_rate)
@@ -115,17 +113,16 @@ for nCivi in range(nRaces):
             iTNG.append(
                 np.sort(
                     np.random.choice(
-                        np.ravel(TNGt),
-                        size=len(iwSET[nCivi][cfg]),
+                        np.ravel(TNGt), size=len(P0[1][cfg]),
                         replace=False))[::-1].astype(float).tolist())
             rTNG.append([])
-            for relwS in range(len(iwSET[nCivi][cfg])):
+            for relwS in range(len(P0[1][cfg])):
                 # in case of a one-person population, carve an Eve from the rip of Adam
-                if len(rwSET[nCivi][cfg][relwS]) == 1:
-                    rwSET[nCivi][cfg][relwS] += [
-                        rwSET[nCivi][cfg][relwS][0] * np.random.random()
+                if len(P0[2][cfg][relwS]) == 1:
+                    P0[2][cfg][relwS] += [
+                        P0[2][cfg][relwS][0] * np.random.random()
                     ]
-                inxs = np.arange(len(rwSET[nCivi][cfg][relwS]))
+                inxs = np.arange(len(P0[2][cfg][relwS]))
                 np.random.shuffle(inxs)
                 parentpairs = np.reshape(
                     inxs, (-1, 2)) if len(inxs) % 2 == 0 else np.reshape(
@@ -133,8 +130,8 @@ for nCivi in range(nRaces):
                 TNGt = []
                 for coupl in parentpairs:
                     muta_rate = 0.1
-                    father = rwSET[nCivi][cfg][relwS][coupl[0]]
-                    mother = rwSET[nCivi][cfg][relwS][coupl[1]]
+                    father = P0[2][cfg][relwS][coupl[0]]
+                    mother = P0[2][cfg][relwS][coupl[1]]
                     son, daughter = intertwining(father,
                                                  mother,
                                                  mutation_rate=muta_rate)
@@ -162,8 +159,8 @@ for nCivi in range(nRaces):
             if iTNG == []:
                 print('no offspring...')
                 exit()
-            iwTNG = iwSET[nCivi] + iTNG
-            rwTNG = rwSET[nCivi] + rTNG
+            iwTNG = P0[1] + iTNG
+            rwTNG = P0[2] + rTNG
 
         for cfg in range(len(rwTNG)):
             anzrelmin = np.max([len(relS) for relS in rwTNG[cfg]])
@@ -173,28 +170,30 @@ for nCivi in range(nRaces):
                                                     np.max(rwTNG[cfg][relwS]),
                                                     anzrelmin)[::-1]
         if dbg:
-            print('IW(parents)  :\n', iwSET[nCivi])
+            print('IW(parents)  :\n', P0[1])
             print('IW(offspring):\n', iTNG, '\n')
             print('IW(family)   :\n', iwTNG, '\nRW(family)   :', rwTNG)
 
-        iwSET[nCivi] = iwTNG
-        rwSET[nCivi] = rwTNG
-        cfgSET[nCivi] = 2 * cfgSET[nCivi]
+        P0 = [2 * P0[0], iwTNG, rwTNG, []]
+        Civilizations.append(P0)
 
     Dfull = []
     anzPro = 0
-    for cfg in range(len(iwSET[nCivi])):
-        for bv in range(len(iwSET[nCivi][cfg])):
+    for cfg in range(len(Civilizations[nCivi][1])):
+        for bv in range(len(Civilizations[nCivi][1][cfg])):
             anzPro += 1
-            tnp = np.arange(1, len(rwSET[nCivi][cfg][bv]) + 1).tolist()
+            tnp = np.arange(1,
+                            len(Civilizations[nCivi][2][cfg][bv]) +
+                            1).tolist()
             Dfull.append([anzPro, tnp])
-    basSET.append(Dfull)
+    if Civilizations[nCivi][3] == []:
+        Civilizations[nCivi][3] = Dfull
 
-    cfgbnds = np.add.accumulate([len(iws) for iws in iwSET[nCivi]])
+    cfgbnds = np.add.accumulate([len(iws) for iws in Civilizations[nCivi][1]])
     cfgbnds = np.insert(cfgbnds, 0, 0)
 
-    lfragTNG = np.array(cfgSET[nCivi])[:, 1].tolist()
-    sfragTNG = np.array(cfgSET[nCivi])[:, 0].tolist()
+    lfragTNG = np.array(Civilizations[nCivi][0])[:, 1].tolist()
+    sfragTNG = np.array(Civilizations[nCivi][0])[:, 0].tolist()
     insam(len(lfragTNG))
 
     # i) each initial parent-offspring basis is likely unstable if comprised of all 'families'(Dfull)
@@ -208,8 +207,8 @@ for nCivi in range(nRaces):
     n3_inob(sfragTNG, 15, fn='INOB', indep=parall)
     os.system(BINBDGpath + 'DROBER.exe')
 
-    he3inquaBS(intwi=iwSET[-1],
-               relwi=rwSET[-1],
+    he3inquaBS(intwi=Civilizations[-1][1],
+               relwi=Civilizations[-1][2],
                potf=potnn,
                inquaout='INQUA_M_0')
     parallel_mod_of_3inqua(lfragTNG,
@@ -226,7 +225,9 @@ for nCivi in range(nRaces):
         subprocess.run([BINBDGpath + 'V18_PAR/sammel'])
 
     if tnni == 11:
-        he3inquaBS(intwi=iwSET[-1], relwi=rwSET[-1], potf=potnnn)
+        he3inquaBS(intwi=Civilizations[-1][1],
+                   relwi=Civilizations[-1][2],
+                   potf=potnnn)
         parallel_mod_of_3inqua(lfragTNG,
                                sfragTNG,
                                infile='INQUA_M',
@@ -245,10 +246,10 @@ for nCivi in range(nRaces):
     if dbg:
         print('all qua-MEs calculated. Entering individual BV assessment.')
 
-    ma = blunt_ev(cfgSET[-1],
-                  iwSET[-1],
-                  rwSET[-1],
-                  Dfull,
+    ma = blunt_ev(Civilizations[-1][0],
+                  Civilizations[-1][1],
+                  Civilizations[-1][2],
+                  Civilizations[-1][3],
                   wrkdir='',
                   nzopt=zop,
                   costring=costr,
@@ -263,27 +264,36 @@ for nCivi in range(nRaces):
 
     ewN, ewH = NormHamDiag(ma)
 
-    basCond = np.min(np.abs(ewN)) / np.max(np.abs(ewN))
+    if ewH == []:
+        print('parent basis unstable:\n', Civilizations[-1][3])
+
+        exit()
+
+    basCond = np.min(np.abs(ewN)) / np.max(np.abs(ewN)) if ewH != [] else 0.
+
+    print('civ-%d) initial stability (condition number): ' % nCivi, basCond)
+    exit()
 
     # generate stable-basis candidates for the offspring set nCivi
     # < A_i -> A^j_i >
     # initial j-basis dimension which might still result in an entirely unstable
     # set of bases; if so, the targetDim is reduced until a stable set is found
-    targetDim = int(basisDim(Dfull) - 1)
+    targetDim = int(basisDim(Civilizations[-1][3]) * targetDimfac0)
 
     go = True if basCond < minCond else False
+
     while (go):
         # select the candidates for stable bases randomly from the full, but unstable basis
         competingCivilizations = [
-            select_random_basis(Dfull, targetDim) for n in range(nBasisSamples)
+            select_random_basis(Civilizations[-1][3], targetDim)
+            for n in range(nBasisSamples)
         ]
-        # include the full basis which might be stable after all
-        competingCivilizations = [Dfull] + competingCivilizations
+
         oAijList = []
 
         print(
             'stabilizing %d-dimensional basis with %d random %d-dim samples' %
-            (basisDim(Dfull), nBasisSamples, targetDim))
+            (basisDim(Civilizations[-1][3]), nBasisSamples, targetDim))
 
         for oAij in competingCivilizations:
             # assess oAij's resilience
@@ -304,18 +314,18 @@ for nCivi in range(nRaces):
             matout = np.core.records.fromfile('MATOUTB',
                                               formats='f8',
                                               offset=4)
-            try:
-                specN, specH = NormHamDiag(matout)
+            specN, specH = NormHamDiag(matout)
+            if specH != []:
                 Quala = specH[-1]
                 Qualb = len([bvv for bvv in specN if bvv < ewMax]) + len(
                     [bvv for bvv in specH if bvv < ewMax])
                 Cond = np.min(np.abs(specN)) / np.max(np.abs(specN))
-            except:
+            else:
                 print(
                     'eigensystem calculation failed for rnd basis sample of people set %d'
                     % nCivi)
-                Quala = 0.
-                Qualb = 0.
+                Quala = 10**4
+                Qualb = 0
                 Cond = 0.
             # admit the random basis of the norm's condition number exceeds a lower bound
             if Cond > minCond:
@@ -340,11 +350,12 @@ for nCivi in range(nRaces):
         print(
             'people set (i) = %d chose the fittest of |j| = %d samples:\n' %
             (nCivi, len(oAijList)), 'quality:', Dopt[1:],
-            '\n dimensionality: %d/%d' % (basisDim(Dopt[0]), basisDim(Dfull)))
+            '\n dimensionality: %d/%d' %
+            (basisDim(Dopt[0]), basisDim(Civilizations[-1][3])))
 
     # sift through the candidate population and purge it of 'ideling' individuals
     # which are those without whom the ground state's energy drops by less than some epsilon > 0
-    D0 = Dopt[0] if basCond < minCond else Dfull
+    D0 = Dopt[0] if basCond < minCond else Civilizations[-1][3]
     go = True
     nPW = 0
 
@@ -379,9 +390,15 @@ for nCivi in range(nRaces):
             if bvTrail == 'Raeuber':
                 Quala = specH[-1]
                 continue
-            basQuala = specH[-1]
-            basQualb = len([bvv for bvv in specN if bvv < ewMax]) + len(
-                [bvv for bvv in specH if bvv < ewMax])
+
+            if specH != []:
+                basQuala = specH[-1]
+                basQualb = len([bvv for bvv in specN if bvv < ewMax]) + len(
+                    [bvv for bvv in specH if bvv < ewMax])
+            else:
+                basQuala = 10**4
+                basQualb = 0
+
             if np.abs(basQuala - Quala) < mDiff:
                 newpopList.append([
                     cpy,
@@ -409,10 +426,15 @@ for nCivi in range(nRaces):
 
     ewN, ewH = NormHamDiag(matout)
 
-    basQuala_i = ewH[-1]
-    basQualb_i = len([bvv for bvv in ewN if bvv < ewMax]) + len(
-        [bvv for bvv in ewH if bvv < ewMax])
-    basCond_i = np.min(np.abs(ewN)) / np.max(np.abs(ewN))
+    if ewH != []:
+        basQuala_i = ewH[-1]
+        basQualb_i = len([bvv for bvv in ewN if bvv < ewMax]) + len(
+            [bvv for bvv in ewH if bvv < ewMax])
+        basCond_i = np.min(np.abs(ewN)) / np.max(np.abs(ewN))
+    else:
+        basQuala_i = 10**3
+        basQualb_i = 0
+        basCond_i = 10**-19
 
     if dbg:
         print('D0 bare:', D0, '\n')
@@ -421,7 +443,7 @@ for nCivi in range(nRaces):
         'B0(gen %d/%d, civ %d/%d, basDim = %d) = ' %
         (nGen + 1, nGenMax, nCivi + 1, nRaces, basisDim(D0)), ewH[-1])
 
-    if nCivi > 3:
+    if nCivi > 2:
         exit()
 
     # write a stable and fit population (i) on TAPE
@@ -429,7 +451,7 @@ for nCivi in range(nRaces):
         ncfg for ncfg in range(len(cfgbnds) - 1)
         if ((bv[0] > cfgbnds[ncfg]) & (bv[0] <= cfgbnds[ncfg + 1]))
     ] for bv in D0]
-    bvcfgnames = (np.array(2 * cfgSET[-1])[sum(bvcfgs, [])].tolist())
+    bvcfgnames = (np.array(2 * Civilizations[-1][0])[sum(bvcfgs, [])].tolist())
     D0 = np.concatenate((np.array(D0), bvcfgnames, bvcfgs), axis=-1).tolist()
     D1 = {}
     for cfg in np.unique(bvcfgnames, axis=0).tolist():
@@ -438,22 +460,22 @@ for nCivi in range(nRaces):
             if bv[2:4] == cfg:
                 D1[str(cfg)].append(bv[:2] + [bv[-1]])
     rwTNGt = []
-    for nn in range(len(rwSET[-1])):
-        for mm in range(len(rwSET[-1][nn])):
-            rwTNGt.append(np.sort(rwSET[-1][nn][mm])[::-1].tolist())
+    for nn in range(len(Civilizations[-1][2])):
+        for mm in range(len(Civilizations[-1][2][nn])):
+            rwTNGt.append(np.sort(Civilizations[-1][2][nn][mm])[::-1].tolist())
 
     if dbg:
         print('(iso)spin configurations:')
-        print(cfgSET[-1], '\n')
+        print(Civilizations[-1][0], '\n')
         print('internal widths:')
-        print(iwSET, '\n')
+        print(Civilizations[-1][1], '\n')
         print('relative widths:')
-        print(rwTNGt, '\n')
+        print(Civilizations[-1][2], '\n')
         print('cfg boundaries:')
         print(cfgbnds, '\n')
-        print('D0 rect.:', D0, '\n')
         print(bvcfgs)
-        print(D1)
+        print('D0: ', D0, '\n')
+        print('D1: ', D1, '\n')
 
     cfgsNext = []
     iwTNGNext = []
@@ -462,10 +484,10 @@ for nCivi in range(nRaces):
     for stru in D1:
         for rwlen in np.unique([len(cff[1]) for cff in D1[stru]]):
 
-            cfgsNext.append(cfgSET[-1][D1[stru][0][2]])
+            cfgsNext.append(Civilizations[-1][0][D1[stru][0][2]])
 
             iwTNGNext.append([
-                sum(iwSET[-1], [])[bvs[0] - 1] for bvs in D1[stru]
+                sum(Civilizations[-1][1], [])[bvs[0] - 1] for bvs in D1[stru]
                 if len(bvs[1]) == rwlen
             ])
             rwTNGNext.append([
@@ -482,27 +504,22 @@ for nCivi in range(nRaces):
         print('NEXT relative widths:')
         print(rwTNGNext, '\n')
 
-    if nCivi == 0:
-        iwSET[0] = iwTNGNext
-        rwSET[0] = rwTNGNext
-        cfgSET[0] = cfgsNext
-    else:
-        iwSET.append(iwTNGNext)
-        rwSET.append(rwTNGNext)
-        cfgSET.append(cfgsNext)
+    Civilizations.append([cfgsNext, iwTNGNext, rwTNGNext, []])
 
     if dbg:
         print('fit and stable basis %d/%d populated.' % (nCivi, nRaces))
 
     Dp = []
     anzPro = 0
-    for cfg in range(len(iwSET[-1])):
-        for bv in range(len(iwSET[-1][cfg])):
+    for cfg in range(len(Civilizations[-1][1])):
+        for bv in range(len(Civilizations[-1][1][cfg])):
             anzPro += 1
-            tnp = np.arange(1, len(rwSET[-1][cfg][bv]) + 1).tolist()
+            tnp = np.arange(1, len(Civilizations[-1][2][cfg][bv]) + 1).tolist()
             Dp.append([anzPro, tnp])
 
-    Ais = [cfgSET[-1], iwSET[-1], rwSET[-1], Dp]
+    Ais = [
+        Civilizations[-1][0], Civilizations[-1][1], Civilizations[-1][2], Dp
+    ]
 
     for nGen in range(nGenMax):
 
@@ -559,8 +576,6 @@ for nCivi in range(nRaces):
 
             aitmp3 = Dp1
 
-            #print('child #%d' % child, offs_set[child])
-            #print('|Ai%d| = %d' % (child, basisDim(aitmp3)))
             Ai.append([aitmp0, aitmp1, aitmp2, aitmp3])
 
         for m in range(len(Ai)):
@@ -588,22 +603,35 @@ for nCivi in range(nRaces):
             basCond_m = np.min(np.abs(ewN)) / np.max(np.abs(ewN))
             if basCond_m > minCond:
                 Ai[m].append([basQuala_m, basQualb_m, basCond_m])
-                print('%d) ' % m, basQuala_m, basQualb_m, basCond_m)
+                if dbg:
+                    print('%d) ' % m, basQuala_m, basQualb_m, basCond_m)
             else:
-                print('%d) ' % m, basQuala_m, basQualb_m, basCond_m,
-                      '  (NOT added!)')
+                if dbg:
+                    print('%d) ' % m, basQuala_m, basQualb_m, basCond_m,
+                          '  (NOT added!)')
 
-        criterium = [gs[4][0] for gs in Ai if len(gs) > 4]
-        idx = np.argmin(criterium) if criterium != [] else -1
+        qualCrit = 2
+        criterium = [gs[4][qualCrit] for gs in Ai if len(gs) > 4]
+        if qualCrit == 0:
+            idx = np.argmin(criterium) if criterium != [] else -1
+        elif qualCrit == 2:
+            idx = np.argmax(criterium) if criterium != [] else -1
+
         if dbg:
             print('quality of generation %d:\n' % nGen)
             print('fittest element: %d' % idx)
 
         Ais = Ai[idx][:4] if idx >= 0 else []
+        print(Ai[idx][-1])
 
     if Ais != []:
-        iwSET.append(Ais[1])
-        rwSET.append(Ais[2])
-        cfgSET.append(Ais[0])
+        Civilizations[-1][1].append(Ais[1][0])
+        Civilizations[-1][2].append(Ais[2][0])
+        Civilizations[-1][0].append(Ais[0][0])
         print('a new, %d-dimensional race has evolved!' %
               len(sum(sum(Ais[2], []), [])))
+        for Civilization in Civilizations:
+            print('\n', Civilization)
+
+    else:
+        print('no fruitful new generation emerged to replace the elder...')

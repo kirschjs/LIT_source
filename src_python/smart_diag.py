@@ -1,5 +1,5 @@
 import numpy as np
-#from numpy import linalg as LA
+import shlex
 from scipy.linalg import eigh
 from bridgeA3 import *
 from genetic_width_growth import *
@@ -22,7 +22,7 @@ def blunt_ev(cfgs,
              wrkdir='',
              dia=True):
 
-    assert basisDim(basis) == len(sum(sum(relws, []), []))
+    #assert basisDim(basis) == len(sum(sum(relws, []), []))
 
     if wrkdir != '':
         base_path = os.getcwd()
@@ -31,6 +31,7 @@ def blunt_ev(cfgs,
             os.mkdir(tmp_path)
         os.chdir(tmp_path)
 
+    #print('diaging in ', os.getcwd())
     lfrag = np.array(cfgs)[:, 1].tolist()
     sfrag = np.array(cfgs)[:, 0].tolist()
     insam(len(lfrag))
@@ -218,3 +219,74 @@ def NormHamDiag(matout, threshold=10**(-7)):
     #print('E_min/E_max = %12.4e   B(0) = %12.4e' % (condition, ewGood[-1]))
 
     return ewN, ewH
+
+
+def endmat(para, send_end):
+
+    inenf = 'inen_%d' % para[5]
+    outf = 'endout_%d' % para[5]
+    maoutf = 'MATOUTB_%d' % para[5]
+
+    #           basis
+    #           jay
+    #           costring
+    #           nzopt
+    #           tnni
+
+    n3_inen_bdg(para[0],
+                para[1],
+                para[2],
+                fn=inenf,
+                pari=0,
+                nzop=para[3],
+                tni=para[4])
+
+    cmdend = para[6] + 'TDR2END_PYpool.exe %s %s %s' % (inenf, outf, maoutf)
+
+    pend = subprocess.Popen(shlex.split(cmdend),
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
+    #cwd=workdir)
+
+    # <communicate> is needed in order to ensure the process ended before parsing its output!
+    out, err = pend.communicate()
+
+    NormHam = np.core.records.fromfile(maoutf, formats='f8', offset=4)
+
+    dim = int(np.sqrt(len(NormHam) * 0.5))
+
+    # read Norm and Hamilton matrices
+    normat = np.reshape(np.array(NormHam[:dim**2]).astype(float), (dim, dim))
+    hammat = np.reshape(np.array(NormHam[dim**2:]).astype(float), (dim, dim))
+    # diagonalize normalized norm (using "eigh(ermitian)" to speed-up the computation)
+    ewN, evN = eigh(normat)
+    idx = ewN.argsort()[::-1]
+    ewN = [eww for eww in ewN[idx]]
+    evN = evN[:, idx]
+    #    print('lowest eigen values (N): ', ewN[-4:])
+
+    try:
+        ewH, evH = eigh(hammat, normat)
+        idx = ewH.argsort()[::-1]
+        ewH = [eww for eww in ewH[idx]]
+        evH = evH[:, idx]
+
+    except:
+        print(
+            'failed to solve generalized eigenvalue problem (norm ev\'s < 0 ?)'
+        )
+        attractiveness = 0.
+        basCond = 0.
+        gsEnergy = 0.
+        ewH = []
+
+    if ewH != []:
+        gsEnergy = ewH[-1]
+
+        basCond = np.min(np.abs(ewN)) / np.max(np.abs(ewN))
+
+        minCond = 10**-5
+        attractiveness = ((-1. * gsEnergy)**
+                          4) / np.log(basCond)**2 if basCond > minCond else 0.
+
+    send_end.send([attractiveness, gsEnergy, basCond, para[5]])

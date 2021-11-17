@@ -541,7 +541,8 @@ def n3_inen_bdg(bas, jay, co, fn='INEN', pari=0, nzop=31, tni=11, idum=2):
             out += '%3d%3d\n' % (1, bv[0])
 
         tmp = ''
-        for n in range(1, max(1, 1 + max(bv[1]))):
+
+        for n in range(1, int(max(1, 1 + max(bv[1])))):
             if n in bv[1]:
                 tmp += '%3d' % int(1)
             else:
