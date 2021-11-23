@@ -13,17 +13,17 @@ def basQ(normSpectrum,
 
     basCond = np.min(np.abs(normSpectrum)) / np.max(np.abs(normSpectrum))
 
-    attractiveness = anzSigEV**4 * (
+    attractiveness = anzSigEV**1 * (
         (-1. * gsEnergy)**4) / np.log(basCond)**2 if basCond > minCond else 0.
 
     return attractiveness
 
 
-def breed_offspring(iws, rws, parentBVs=[]):
+def breed_offspring(iws, rws, parentBVs=[], chpa=[1, 1]):
 
     anzBV = len(sum(sum(rws, []), []))
 
-    cand = np.random.choice(range(1, 1 + anzBV),
+    cand = np.random.choice(np.arange(1, 1 + anzBV),
                             (1,
                              2)).tolist()[0] if parentBVs == [] else parentBVs
 
@@ -48,8 +48,14 @@ def breed_offspring(iws, rws, parentBVs=[]):
         print(cand[1])
         exit()
 
-    c0 = [chint[0], chrel[0], cf[0]]
-    c1 = [chint[1], chrel[1], cf[1]]
+    c0 = [
+        chint[0] * chpa[0] + mw[0] * (1 - chpa[0]),
+        chrel[0] * chpa[1] + mw[1] * (1 - chpa[1]), cf[0]
+    ]
+    c1 = [
+        chint[1] * chpa[0] + fw[0] * (1 - chpa[0]),
+        chrel[1] * chpa[1] + fw[1] * (1 - chpa[1]), cf[1]
+    ]
 
     return [c0, c1]
 

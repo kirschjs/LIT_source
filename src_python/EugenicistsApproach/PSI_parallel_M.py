@@ -1,18 +1,11 @@
 import operator
 
 from bridgeA3 import *
-from triton_width_gen import *
 from parameters_and_constants import *
-#from BasisVisualization import visbas
-#from plot_basis_3bdy import plotbasis3bdy
 
 with open(respath + 'dtype.dat', 'w') as outf:
     outf.write(dt)
 outf.close()
-
-bastypes = streukas
-bastypes = [boundstatekanal]
-bastypes = [boundstatekanal] + streukas
 
 for bastype in bastypes:
     angu = channels[bastype]
@@ -50,7 +43,7 @@ for bastype in bastypes:
     nGrd = 14
 
     nwint = 5
-    nwrel = 14
+    nwrel = 5
 
     wscu = 0.80
     wsco = 14.0
@@ -67,20 +60,18 @@ for bastype in bastypes:
     mindist_int = 0.001
 
     iLcutoff = [12., 4., 3.]
-    rLcutoff = [32., 24., 33.]
+    rLcutoff = [12., 4., 3.]
 
     if bastype == boundstatekanal:
 
         rel_scale = 1.
-        wi, wf, nw = 0.001, 22.5, [nwint
+        wi, wf, nw = 0.001, 12.5, [nwint
                                    for n in lfrags]  # for lit-state continuum
 
     else:
 
-        #nwint = 14
-        #nwrel = 6
         rel_scale = 0.04
-        wi, wf, nw = 0.001, 41.5, [nwint
+        wi, wf, nw = 0.0001, 2.5, [nwint
                                    for n in lfrags]  # for lit-state continuum
 
     cumWi = cumWidths(anza=len(lfrags) * nwint, centers=[2.1], widths=[1.0])
@@ -247,15 +238,15 @@ for bastype in bastypes:
             bvv = 0
             for m in range(len(widi[n])):
                 bvv += 1
-                sbas += [[bv, [(bvv) % (1 + len(widr[n][m]))]]]
-                #sbas += [[
-                #    bv,
-                #    [
-                #        x
-                #        for x in range(1, 1 +
-                #                       max([len(wid) for wid in widr[n]]), 1)
-                #    ]
-                #]]
+                #sbas += [[bv, [(bvv) % (1 + len(widr[n][m]))]]]
+                sbas += [[
+                    bv,
+                    [
+                        x
+                        for x in range(1, 1 +
+                                       max([len(wid) for wid in widr[n]]), 1)
+                    ]
+                ]]
                 bv += 1
 
     else:

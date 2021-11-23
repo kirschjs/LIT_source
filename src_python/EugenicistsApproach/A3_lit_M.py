@@ -10,7 +10,6 @@ import numpy as np
 from bridgeA3 import *
 from rrgm_functions import *
 from three_particle_functions import *
-from triton_width_gen import *
 
 # CG(j1, m1, j2, m2, j3, m3)
 from sympy.physics.quantum.cg import CG

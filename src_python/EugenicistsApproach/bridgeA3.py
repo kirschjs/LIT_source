@@ -1,4 +1,5 @@
 import subprocess
+import multiprocessing
 import os, fnmatch, copy, struct
 import numpy as np
 import sympy as sy
@@ -9,7 +10,6 @@ from parameters_and_constants import *
 from rrgm_functions import *
 from three_particle_functions import *
 
-import multiprocessing
 from smart_diag import *
 
 
@@ -133,6 +133,10 @@ streukas = ['0.5^-']  #,'1.5^-']
 
 #                  realistic    L>0 (only)         deuteron
 boundstatekanal = 'npp0.5^+'
+
+bastypes = [boundstatekanal]
+bastypes = [boundstatekanal] + streukas
+bastypes = streukas
 
 J0 = float(boundstatekanal.split('^')[0][-3:])
 

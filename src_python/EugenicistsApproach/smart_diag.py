@@ -223,9 +223,11 @@ def NormHamDiag(matout, threshold=10**(-7)):
 
 def endmat(para, send_end):
 
-    inenf = 'inen_%d' % para[5]
-    outf = 'endout_%d' % para[5]
-    maoutf = 'MATOUTB_%d' % para[5]
+    child_id = ''.join(str(x) for x in np.array(para[5]))
+
+    inenf = 'inen_%s' % child_id
+    outf = 'endout_%s' % child_id
+    maoutf = 'MATOUTB_%s' % child_id
 
     #           basis
     #           jay
