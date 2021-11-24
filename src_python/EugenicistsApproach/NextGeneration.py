@@ -53,8 +53,9 @@ for bastype in bastypes:
 
     muta_initial = 0.2
     # nRaces := |i|
-    nRaces = 14
+    nRaces = 2
     nbrOff = 2
+    MaxOff = 20
     targetDimfac0 = 0.95
 
     dbg = False
@@ -123,10 +124,11 @@ for bastype in bastypes:
 
         D0 = Civilizations[-1][3]
 
-        go = True
         nPW = 0
 
         print('              commencing purge... ', end='')
+
+        go = True
         while go:
 
             nPW += 1
@@ -293,6 +295,9 @@ for bastype in bastypes:
                     tmp = Ais[2][cfg][bvn]
                     Ais[2][cfg][bvn] = tmp
 
+        np.random.shuffle(childishParaSets)
+        offgenMax = min(len(childishParaSets), MaxOff)
+        childishParaSets = childishParaSets[:offgenMax]
         # 2) calc. matrices including all children
         ma = blunt_ev(Ais[0],
                       Ais[1],
@@ -407,16 +412,16 @@ for bastype in bastypes:
                   jay=Jstreu,
                   dia=True)
 
-    if bastype == boundstatekanal:
-        lfrags = np.array(Civilizations[-1][0])[:, 1].tolist()
-        sfrags = np.array(Civilizations[-1][0])[:, 0].tolist()
-        n3_inlu(8, fn=basisPath + 'INLU_ref', fr=lfrags, indep=-1)
-        n3_inlu(8, fn=basisPath + 'INLUCN_ref', fr=lfrags, indep=-1)
-        n3_inob(sfrags, 8, fn=basisPath + 'INOB_ref', indep=-1)
-        n3_inob(sfrags, 15, fn=basisPath + 'DRINOB_ref', indep=-1)
-        os.system('cp INQUA_M ' + basisPath + 'INQUA_V18_ref')
-        os.system('cp INEN ' + basisPath + 'INEN_ref')
-        os.system('cp INSAM ' + basisPath)
+    suf = 'ref' if bastype == boundstatekanal else 'fin'
+    lfrags = np.array(Civilizations[-1][0])[:, 1].tolist()
+    sfrags = np.array(Civilizations[-1][0])[:, 0].tolist()
+    n3_inlu(8, fn=basisPath + 'INLU_%s' % suf, fr=lfrags, indep=-1)
+    n3_inlu(8, fn=basisPath + 'INLUCN_%s' % suf, fr=lfrags, indep=-1)
+    n3_inob(sfrags, 8, fn=basisPath + 'INOB_%s' % suf, indep=-1)
+    n3_inob(sfrags, 15, fn=basisPath + 'DRINOB_%s' % suf, indep=-1)
+    os.system('cp INQUA_M ' + basisPath + 'INQUA_V18_%s' % suf)
+    os.system('cp INEN ' + basisPath + 'INEN_%s' % suf)
+    os.system('cp INSAM ' + basisPath)
 
     os.system('rm -rf ./inen_*')
     os.system('rm -rf ./endout_*')
@@ -426,3 +431,6 @@ for bastype in bastypes:
 
     write_basis_on_tape(Civilizations[-1], Jstreu, bastype, baspath=basisPath)
     subprocess.call('cp MATOUTB %smat_%s' % (respath, bastype), shell=True)
+    print(
+        'channel %s: Basis structure, Norm, and Hamiltonian written into %s' %
+        (bastype, respath + 'mat_' + bastype))

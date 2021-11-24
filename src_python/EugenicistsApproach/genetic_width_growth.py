@@ -219,6 +219,41 @@ def write_basis_on_tape(basis, jay, btype, baspath=''):
         f.truncate()
     f.close()
 
+    finalstate_indices = []
+    bv = 0
+    for ncfg in range(len(basis[0])):
+        for nbv in range(len(basis[1][ncfg])):
+            rw = 1
+            bv += 1
+            for nrw in range(len(basis[2][ncfg][nbv])):
+
+                found = False
+                for basv in range(len(basis[3])):
+                    for basrw in range(len(basis[3][basv][1])):
+
+                        if ((bv == basis[3][basv][0]) &
+                            (rw == basis[3][basv][1][basrw])):
+                            found = True
+
+                rw += 1
+                if found:
+                    finalstate_indices.append(1)
+                else:
+                    finalstate_indices.append(0)
+
+    sigindi = [
+        n for n in range(1, len(finalstate_indices))
+        if finalstate_indices[n - 1] == 1
+    ]
+
+    path_indi = baspath + 'Ssigbasv3heLIT_J%s_%s.dat' % (jaystr, btype)
+    if os.path.exists(path_indi): os.remove(path_indi)
+    with open(path_indi, 'wb') as f:
+        np.savetxt(f, sigindi, fmt='%d', delimiter=' ')
+        f.seek(NEWLINE_SIZE_IN_BYTES, 2)
+        f.truncate()
+    f.close()
+
 
 def basisDim(bas=[]):
     dim = 0

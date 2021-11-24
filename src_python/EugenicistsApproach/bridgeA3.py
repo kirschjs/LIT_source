@@ -46,7 +46,7 @@ cal = [
     'rhs-end',
     'rhs',
     'rhs-couple',
-    'lhs'
+    #'lhs'
 ]
 
 suffix = 'miwchan-v4'
@@ -135,8 +135,8 @@ streukas = ['0.5^-']  #,'1.5^-']
 boundstatekanal = 'npp0.5^+'
 
 bastypes = [boundstatekanal]
-bastypes = [boundstatekanal] + streukas
 bastypes = streukas
+bastypes = [boundstatekanal] + streukas
 
 J0 = float(boundstatekanal.split('^')[0][-3:])
 

@@ -42,7 +42,7 @@ for bastype in bastypes:
     nwadd = 0
     nGrd = 14
 
-    nwint = 5
+    nwint = 4
     nwrel = 5
 
     wscu = 0.80
@@ -65,14 +65,14 @@ for bastype in bastypes:
     if bastype == boundstatekanal:
 
         rel_scale = 1.
-        wi, wf, nw = 0.001, 12.5, [nwint
-                                   for n in lfrags]  # for lit-state continuum
+        wi, wf, nw = 0.001, 8.5, [nwint
+                                  for n in lfrags]  # for lit-state continuum
 
     else:
 
         rel_scale = 0.04
-        wi, wf, nw = 0.0001, 2.5, [nwint
-                                   for n in lfrags]  # for lit-state continuum
+        wi, wf, nw = 0.001, 2.5, [nwint
+                                  for n in lfrags]  # for lit-state continuum
 
     cumWi = cumWidths(anza=len(lfrags) * nwint, centers=[2.1], widths=[1.0])
     cumWr = cumWidths(anza=len(lfrags) * nwint * nwrel,
