@@ -42,16 +42,8 @@ for bastype in bastypes:
     nwadd = 0
     nGrd = 14
 
-    nwint = 4
-    nwrel = 5
-
-    wscu = 0.80
-    wsco = 14.0
-
-    cent1 = np.linspace(0.2 * wscu, 3.9 * wscu, len(lfrags) + 1)
-    cent2 = np.linspace(0.9 * wsco, 1.9 * wsco, len(lfrags) + 1)
-    sig1 = .25 * np.ones(len(lfrags) + 1)
-    sig2 = np.ones(len(lfrags) + 1)
+    nwint = 24
+    nwrel = 4
 
     grd_type = 'geo'  #'cum'  #'poly'  #
 
@@ -65,13 +57,13 @@ for bastype in bastypes:
     if bastype == boundstatekanal:
 
         rel_scale = 1.
-        wi, wf, nw = 0.001, 8.5, [nwint
-                                  for n in lfrags]  # for lit-state continuum
+        wi, wf, nw = 0.001, 11.5, [nwint
+                                   for n in lfrags]  # for lit-state continuum
 
     else:
 
         rel_scale = 0.04
-        wi, wf, nw = 0.001, 2.5, [nwint
+        wi, wf, nw = 0.001, 3.5, [nwint
                                   for n in lfrags]  # for lit-state continuum
 
     cumWi = cumWidths(anza=len(lfrags) * nwint, centers=[2.1], widths=[1.0])

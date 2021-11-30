@@ -33,6 +33,17 @@ f.close()
 
 siffux = '_ref'
 he_iw, he_rw, he_frgs = retrieve_he3_M(basisPath + 'INQUA_V18%s' % siffux)
+HelBasDimRef = len(sum(sum(he_rw, []), []))
+siffux = '_fin'
+final_iw, final_rw, final_frgs = retrieve_he3_M(basisPath +
+                                                'INQUA_V18%s' % siffux)
+FinBasDimRef = len(sum(sum(final_rw, []), []))
+
+with open(basisPath + 'BareBasDims.dat', 'wb') as f:
+    np.savetxt(f, [HelBasDimRef, FinBasDimRef], fmt='%d')
+    f.seek(NEWLINE_SIZE_IN_BYTES, 2)
+    f.truncate()
+f.close()
 
 if 'construe_fresh_helion' in cal:
 
@@ -471,12 +482,16 @@ if 'rhs' in cal:
                                                     'r').read_reals(float)
 
                             tDim = int(np.sqrt(np.shape(fortranIn)[0]))
-                            OutBasDim = int(tDim - HelBasDim)
+                            OutBasDimFr = int(tDim - HelBasDimRef)
+                            print(
+                                'processing final fragment: %s\ndim(he_bare) = %d ; dim(fin) = %d ; dim(total) = %d'
+                                % (fna, HelBasDimRef, OutBasDimFr, tDim))
 
                             subIndices = [
-                                range((HelBasDim + ni) * tDim,
-                                      (HelBasDim + ni) * tDim + HelBasDim)
-                                for ni in range(OutBasDim)
+                                range(
+                                    (HelBasDimRef + ni) * tDim,
+                                    (HelBasDimRef + ni) * tDim + HelBasDimRef)
+                                for ni in range(OutBasDimFr)
                             ]
 
                             test = np.take(fortranIn, subIndices)
@@ -487,6 +502,7 @@ if 'rhs' in cal:
                         if firstmJ == True:
                             rhsInMIn = clebsch * rhstmp
                             firstmJ = False
+
                         else:
                             temp = clebsch * rhstmp
                             rhsInMIn = rhsInMIn + temp

@@ -50,11 +50,12 @@ for bastype in bastypes:
     minDiffwidthsINT = 10**-2
     minDiffwidthsREL = 10**-3
     minCond = 10**-8
+    maxE = 100
 
     muta_initial = 0.2
     # nRaces := |i|
-    nRaces = 2
-    nbrOff = 2
+    nRaces = 12
+    nbrOff = 4
     MaxOff = 20
     targetDimfac0 = 0.95
 
@@ -108,7 +109,7 @@ for bastype in bastypes:
 
         ewN, ewH = NormHamDiag(ma)
 
-        print('parents: \n', Civilizations[-1])
+        #print('parents: \n', Civilizations[-1])
 
         if ewH == []:
             print('parent basis unstable:\n', Civilizations[-1][3])
@@ -116,77 +117,144 @@ for bastype in bastypes:
             exit()
 
         print(
-            'civ-%d)          parents: Dim = %d) B(GS) = %8.4f  fit = %8.4f' %
-            (nCivi, basisDim(Civilizations[-1][3]), ewH[-1], basQ(ewN, ewH)))
+            'civ-%d)          parents: Dim = %d) B(GS) = %8.4f  fit = ' %
+            (nCivi, basisDim(Civilizations[-1][3]), ewH[-1]), basQ(ewN, ewH))
 
         # sift through the parents and purge it of 'ideling' individuals
         # which yield reduce the fitness
 
         D0 = Civilizations[-1][3]
 
-        nPW = 0
+        print('              commencing 1st wave of purges (stability) ',
+              end='\n')
 
-        print('              commencing purge... ', end='')
+        go = False
+        go = True
 
+        while go:
+
+            newpopList = []
+            go = False
+            unstParaSets = []
+            D0flat = flatten_basis(D0)
+
+            cpy = copy.deepcopy(D0flat)
+            unstParaSets.append([
+                cpy, Jstreu, costr, zop, 10, [0, 0], BINBDGpath, minCond, maxE
+            ])
+
+            for bvTrail in D0flat:
+
+                bvID = [int(bvTrail[0]), int(''.join(map(str, bvTrail[1])))]
+
+                cpy = copy.deepcopy(D0flat)
+
+                cpy.remove(bvTrail)
+
+                unstParaSets.append([
+                    cpy, Jstreu, costr, zop, 10, bvID, BINBDGpath, minCond,
+                    maxE
+                ])
+
+            pool = ThreadPool(anzproc)
+            jobs = []
+            unst_list = []
+            for procnbr in range(len(unstParaSets)):
+                recv_end, send_end = multiprocessing.Pipe(False)
+                pars = unstParaSets[procnbr]
+                p = multiprocessing.Process(target=endmat,
+                                            args=(pars, send_end))
+                jobs.append(p)
+                unst_list.append(recv_end)
+                p.start()
+            for proc in jobs:
+                proc.join()
+
+            bvunst_ladder = [x.recv() for x in unst_list]
+
+            # ranking following condition-number
+            bvunst_ladder.sort(key=lambda tup: tup[2])
+
+            refQual, refCond = bvunst_ladder[0][0], bvunst_ladder[0][2]
+            print('reference (q,f) = %2.3e , %2.3e' % (refQual, refCond))
+            print('best/worst=  %2.3e , %2.3e /  %2.3e , %2.3e' %
+                  (bvunst_ladder[-1][0], bvunst_ladder[-1][2],
+                   bvunst_ladder[1][0], bvunst_ladder[1][2]))
+
+            if 1.025 * refCond < bvunst_ladder[-1][2]:
+                go = True
+                D0 = rectify_basis(bvunst_ladder[-1][4])
+                print('1/%d ' % basisDim(D0), end='\n')
+
+        D0 = rectify_basis(D0flat)
+
+        print('              commencing 2nd wave of purges (quality) ',
+              end='\n')
+
+        go = False
         go = True
         while go:
 
-            nPW += 1
             newpopList = []
             go = False
-
+            qualParaSets = []
             D0flat = flatten_basis(D0)
 
-            for bvTrail in ['Raeuber'] + D0flat:
+            cpy = copy.deepcopy(D0flat)
+            qualParaSets.append([
+                cpy, Jstreu, costr, zop, 10, [0, 0], BINBDGpath, minCond, maxE
+            ])
 
-                cpy = D0flat.copy()
-                if bvTrail in cpy:
-                    #print('assessing BV: ', bvTrail)
-                    cpy.remove(bvTrail)
+            for bvTrail in D0flat:
 
-                n3_inen_bdg(cpy,
-                            Jstreu,
-                            costr,
-                            fn='INEN',
-                            pari=0,
-                            nzop=zop,
-                            tni=tnni)
+                bvID = [int(bvTrail[0]), int(''.join(map(str, bvTrail[1])))]
 
-                subprocess.run([BINBDGpath + 'TDR2END_NORMAL.exe'],
-                               capture_output=True,
-                               text=True)
-                matout = np.core.records.fromfile('MATOUTB',
-                                                  formats='f8',
-                                                  offset=4)
-                specN, specH = NormHamDiag(matout)
-                # number of norm AND ham ev < TH
-                if bvTrail == 'Raeuber':
-                    refQual = basQ(specN, specH)
-                    #print('reference E=', Quala)
-                    if refQual <= 0:
-                        break
+                cpy = copy.deepcopy(D0flat)
 
-                else:
+                cpy.remove(bvTrail)
 
-                    redbasQ = basQ(specN, specH)
+                qualParaSets.append([
+                    cpy, Jstreu, costr, zop, 10, bvID, BINBDGpath, minCond,
+                    maxE
+                ])
 
-                    if 1.005 * refQual < redbasQ:
-                        #print('irrelevant BV found: ', bvTrail)
-                        #print('dE = ', bvTdiff)
-                        newpopList.append([cpy, redbasQ])
+            pool = ThreadPool(anzproc)
+            jobs = []
+            unst_list = []
+            for procnbr in range(len(qualParaSets)):
+                recv_end, send_end = multiprocessing.Pipe(False)
+                pars = qualParaSets[procnbr]
+                p = multiprocessing.Process(target=endmat,
+                                            args=(pars, send_end))
+                jobs.append(p)
+                unst_list.append(recv_end)
+                p.start()
+            for proc in jobs:
+                proc.join()
 
-            if newpopList != []:
+            bvunst_ladder = [x.recv() for x in unst_list]
+
+            # ranking following condition-number
+            bvunst_ladder.sort(key=lambda tup: tup[0])
+
+            [refQual, refCond] = [[bvm[0], bvm[2]] for bvm in bvunst_ladder
+                                  if bvm[3] == [0, 0]][0]
+
+            print('reference (q,f) = %4.4e,%4.4e' % (refQual, refCond))
+
+            print('best/worst=  %2.3e , %2.3e /  %2.3e , %2.3e' %
+                  (bvunst_ladder[-1][0], bvunst_ladder[-1][2],
+                   bvunst_ladder[1][0], bvunst_ladder[1][2]))
+
+            if 1.05 * refQual < bvunst_ladder[-1][0]:
                 go = True
-                nQual = 1
-                idx = np.array([elem[nQual]
-                                for elem in newpopList]).argsort()[::-1]
-                newpopList = [eww for eww in np.array(newpopList)[idx]]
-                D0 = rectify_basis(newpopList[0][0])
-                print('1/%d ' % basisDim(D0), end='')
+                D0 = rectify_basis(bvunst_ladder[-1][4])
+                print('1/%d ' % basisDim(D0), end='\n')
+
+        D0 = rectify_basis(D0flat)
 
         # -- end of purges; the removal of any BV will now reduce the population's fitness
 
-        D0 = rectify_basis(D0flat)
         n3_inen_bdg(D0, Jstreu, costr, fn='INEN', pari=0, nzop=zop, tni=tnni)
 
         subprocess.run([BINBDGpath + 'TDR2END_NORMAL.exe'],
@@ -199,7 +267,8 @@ for bastype in bastypes:
 
         print(
             '\nciv-%d) (purged) parents: Dim = %d) B(GS) = %8.4f  fit = %8.4f'
-            % (nCivi, basisDim(D0), ewH[-1], basQ(ewN, ewH)))
+            % (nCivi, basisDim(D0), ewH[-1],
+               basQ(ewN, ewH, denseEnergyInterval=[-1000, maxE])[0]))
 
         Civilizations[-1][3] = D0
 
@@ -243,9 +312,12 @@ for bastype in bastypes:
             chiBV = len(offs_set)
             childishParaSets = [[
                 Ais[3] + [[ch, [1]]], Jstreu, costr, zop, 10, ch, BINBDGpath,
-                minCond
+                minCond, maxE
             ] for ch in range(parBV + 1, 1 + parBV + chiBV)]
 
+            np.random.shuffle(childishParaSets)
+            offgenMax = min(len(childishParaSets), MaxOff)
+            childishParaSets = childishParaSets[:offgenMax]
         # the internal width is kept fixed, and the offspring expands the relative-width set of an existing BV
         if newRW:
 
@@ -257,6 +329,11 @@ for bastype in bastypes:
                     len(Ais[2][cfg][0]) + 1,
                     len(Ais[2][cfg][0]) + nbrOff + 1),
                                    repeat=len(Ais[1][cfg]))
+
+                tmp = list(chcombos)
+                np.random.shuffle(tmp)
+                offgenMax = min(len(tmp), MaxOff)
+                chcombos = tmp[:offgenMax]
 
                 for combo in chcombos:
 
@@ -274,7 +351,7 @@ for bastype in bastypes:
 
                     childishParaSets.append([
                         tmpBas, Jstreu, costr, zop, 10, childidentifier,
-                        BINBDGpath, minCond
+                        BINBDGpath, minCond, maxE
                     ])
                     chiBV += 1
 
@@ -295,9 +372,6 @@ for bastype in bastypes:
                     tmp = Ais[2][cfg][bvn]
                     Ais[2][cfg][bvn] = tmp
 
-        np.random.shuffle(childishParaSets)
-        offgenMax = min(len(childishParaSets), MaxOff)
-        childishParaSets = childishParaSets[:offgenMax]
         # 2) calc. matrices including all children
         ma = blunt_ev(Ais[0],
                       Ais[1],
@@ -340,6 +414,9 @@ for bastype in bastypes:
         # attr ranking
         child_ladder.sort(key=lambda tup: tup[0])
         child_ladder.reverse()
+
+        for ch in child_ladder:
+            print(ch[:3])
 
         if child_ladder[0][0] > 0.0:
 
@@ -413,12 +490,14 @@ for bastype in bastypes:
                   dia=True)
 
     suf = 'ref' if bastype == boundstatekanal else 'fin'
+
     lfrags = np.array(Civilizations[-1][0])[:, 1].tolist()
     sfrags = np.array(Civilizations[-1][0])[:, 0].tolist()
     n3_inlu(8, fn=basisPath + 'INLU_%s' % suf, fr=lfrags, indep=-1)
     n3_inlu(8, fn=basisPath + 'INLUCN_%s' % suf, fr=lfrags, indep=-1)
     n3_inob(sfrags, 8, fn=basisPath + 'INOB_%s' % suf, indep=-1)
     n3_inob(sfrags, 15, fn=basisPath + 'DRINOB_%s' % suf, indep=-1)
+
     os.system('cp INQUA_M ' + basisPath + 'INQUA_V18_%s' % suf)
     os.system('cp INEN ' + basisPath + 'INEN_%s' % suf)
     os.system('cp INSAM ' + basisPath)

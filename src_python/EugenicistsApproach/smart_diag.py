@@ -283,12 +283,16 @@ def endmat(para, send_end):
         ewH = []
 
     if ewH != []:
+
+        anzSigEV = len([bvv for bvv in ewH if bvv < para[8]])
+
         gsEnergy = ewH[-1]
 
         basCond = np.min(np.abs(ewN)) / np.max(np.abs(ewN))
 
         minCond = para[7]
-        attractiveness = ((-1. * gsEnergy)**
-                          4) / np.log(basCond)**2 if basCond > minCond else 0.
+        attractiveness = anzSigEV**4.14 * (
+            (-1. *
+             gsEnergy)**4) / np.log(basCond)**2 if basCond > minCond else 0.
 
-    send_end.send([attractiveness, gsEnergy, basCond, para[5]])
+    send_end.send([basCond, attractiveness, gsEnergy, para[5], para[0]])

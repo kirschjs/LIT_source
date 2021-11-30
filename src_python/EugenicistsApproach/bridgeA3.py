@@ -49,7 +49,7 @@ cal = [
     #'lhs'
 ]
 
-suffix = 'miwchan-v4'
+suffix = 'miwchan-v4-4'
 anzproc = 6  #int(len(os.sched_getaffinity(0)) / 1)
 
 home = os.getenv("HOME")
@@ -174,7 +174,7 @@ nzf0 = int(np.ceil(len(rw0) / 20.0))
 
 # basis ------------------------------------------------------------------
 
-bvma = 12
+bvma = 4
 rwma = 45
 
 # -- here, I allowed for an enhancement of certain operators, to bind an S-wave triton with v18/uix

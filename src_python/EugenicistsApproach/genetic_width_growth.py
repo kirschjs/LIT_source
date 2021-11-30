@@ -4,7 +4,7 @@ from bridgeA3 import *
 def basQ(normSpectrum,
          hamiltonianSpectrum,
          minCond=10**-12,
-         denseEnergyInterval=[0, 100]):
+         denseEnergyInterval=[0, 80]):
 
     anzSigEV = len(
         [bvv for bvv in hamiltonianSpectrum if bvv < denseEnergyInterval[1]])
@@ -13,10 +13,10 @@ def basQ(normSpectrum,
 
     basCond = np.min(np.abs(normSpectrum)) / np.max(np.abs(normSpectrum))
 
-    attractiveness = anzSigEV**1 * (
+    attractiveness = anzSigEV**4.14 * (
         (-1. * gsEnergy)**4) / np.log(basCond)**2 if basCond > minCond else 0.
 
-    return attractiveness
+    return attractiveness, basCond
 
 
 def breed_offspring(iws, rws, parentBVs=[], chpa=[1, 1]):
@@ -220,6 +220,7 @@ def write_basis_on_tape(basis, jay, btype, baspath=''):
     f.close()
 
     finalstate_indices = []
+    print(basis[3])
     bv = 0
     for ncfg in range(len(basis[0])):
         for nbv in range(len(basis[1][ncfg])):
@@ -230,7 +231,7 @@ def write_basis_on_tape(basis, jay, btype, baspath=''):
                 found = False
                 for basv in range(len(basis[3])):
                     for basrw in range(len(basis[3][basv][1])):
-
+                        #print(bv, rw, ' ', basis[3][basv][0],basis[3][basv][1][basrw])
                         if ((bv == basis[3][basv][0]) &
                             (rw == basis[3][basv][1][basrw])):
                             found = True
@@ -242,7 +243,7 @@ def write_basis_on_tape(basis, jay, btype, baspath=''):
                     finalstate_indices.append(0)
 
     sigindi = [
-        n for n in range(1, len(finalstate_indices))
+        n for n in range(1, 1 + len(finalstate_indices))
         if finalstate_indices[n - 1] == 1
     ]
 
@@ -253,6 +254,8 @@ def write_basis_on_tape(basis, jay, btype, baspath=''):
         f.seek(NEWLINE_SIZE_IN_BYTES, 2)
         f.truncate()
     f.close()
+
+    #exit()
 
 
 def basisDim(bas=[]):
