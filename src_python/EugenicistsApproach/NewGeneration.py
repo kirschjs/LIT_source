@@ -50,15 +50,16 @@ for bastype in bastypes:
     minDiffwidthsINT = 10**-2
     minDiffwidthsREL = 10**-3
 
-    minCond = 10**-11
-    maxE = 100
+    minCond = 10**-10
+    maxE = 160
 
-    muta_initial = 0.5
+    maxParLen = 18
+    removalGainFactor = 1.05
+    muta_initial = 0.4
     # nRaces := |i|
-    nRaces = 4
+    nRaces = 2
     nbrOff = 2
     MaxOff = 20
-    targetDimfac0 = 0.95
 
     dbg = False
 
@@ -85,10 +86,6 @@ for bastype in bastypes:
         cfgbnds = np.add.accumulate(
             [len(iws) for iws in Civilizations[nCivi][1]])
         cfgbnds = np.insert(cfgbnds, 0, 0)
-
-        print(cfgbnds)
-        print(Civilizations[-1][3])
-        #        exit()
 
         lfragTNG = np.array(Civilizations[nCivi][0])[:, 1].tolist()
         sfragTNG = np.array(Civilizations[nCivi][0])[:, 0].tolist()
@@ -130,20 +127,25 @@ for bastype in bastypes:
 
         D0 = Civilizations[-1][3]
 
+        # according to the quality criterion <pw> the offspring is ordered
         pw = nCivi % 3
+        # for each civilization, the initial population of parents is purged, i.e.,
+        # parents which destabilize the basis significantly are removed
+        pwpurge = 0
+
         pur = [
             'condition number', 'quality = f(#EV<100, B(GS), cond. nbr.)',
             'B(GS)'
         ]
-        print('              commencing wave-%d of purges (%s) ' %
-              (pw, pur[pw]),
+
+        print('              commencing purges (%s) ' % (pur[pwpurge]),
               end='\n')
 
         go = True
 
-        while go:
+        removalGainFactor *= 1.1
 
-            pwp = 0
+        while go:
 
             newpopList = []
             go = False
@@ -169,24 +171,35 @@ for bastype in bastypes:
                     maxE
                 ])
 
-            pool = ThreadPool(anzproc)
-            jobs = []
+            split_points = [
+                n * maxParLen
+                for n in range(1 + int(len(ParaSets) / maxParLen))
+            ] + [len(ParaSets) + 42]
+
+            Parchunks = [
+                ParaSets[split_points[i]:split_points[i + 1]]
+                for i in range(len(split_points) - 1)
+            ]
+
             cand_list = []
-            for procnbr in range(len(ParaSets)):
-                recv_end, send_end = multiprocessing.Pipe(False)
-                pars = ParaSets[procnbr]
-                p = multiprocessing.Process(target=endmat,
-                                            args=(pars, send_end))
-                jobs.append(p)
-                cand_list.append(recv_end)
-                p.start()
-            for proc in jobs:
-                proc.join()
+            for chunk in Parchunks:
+                pool = ThreadPool(anzproc)
+                jobs = []
+                for procnbr in range(len(chunk)):
+                    recv_end, send_end = multiprocessing.Pipe(False)
+                    pars = chunk[procnbr]
+                    p = multiprocessing.Process(target=endmat,
+                                                args=(pars, send_end))
+                    jobs.append(p)
+                    cand_list.append(recv_end)
+                    p.start()
+                for proc in jobs:
+                    proc.join()
 
             cand_ladder = [x.recv() for x in cand_list]
 
             # ranking following condition-number (0) or quality (1)
-            cand_ladder.sort(key=lambda tup: np.abs(tup[pwp]))
+            cand_ladder.sort(key=lambda tup: np.abs(tup[pwpurge]))
 
             reff = [[bvm[0], bvm[1], bvm[2]] for bvm in cand_ladder
                     if bvm[3] == [0, 0]][0]
@@ -197,8 +210,10 @@ for bastype in bastypes:
                   (cand_ladder[-1][0], cand_ladder[-1][1], cand_ladder[1][0],
                    cand_ladder[1][1]))
 
-            if ((1.05 * np.abs(reff[pwp]) < np.abs(cand_ladder[-1][pwp])) |
-                (np.abs(cand_ladder[-1][pwp]) < minCond)):
+            if ((removalGainFactor * np.abs(reff[pwpurge]) < np.abs(
+                    cand_ladder[-1][pwpurge])) |
+                ((np.abs(cand_ladder[-1][pwpurge]) < minCond) &
+                 (reff[0] < minCond))):
                 go = True
                 D0 = rectify_basis(cand_ladder[-1][4])
                 print('1/%d ' % basisDim(D0), end='\n')
@@ -229,13 +244,108 @@ for bastype in bastypes:
         Ais = copy.deepcopy(Civilizations[-1])
 
         # generate a pair of offspring from a randomly selected couple
-        newBV = False
-        newRW = True
+        newRW = False  #True
+        newBV = True
 
         bvsPerCfg = 12
         # bv with new int an relw. => append new offspring cfg's
+
+        # =================================================================================================
         if newBV:
 
+            anzBV = sum([len(iws) for iws in Ais[1]])
+
+            childishParaSets = []
+            chiBV = nbrOff
+
+            # produce an offspring cfg for each parent cfg
+            for cfg in range(len(Ais[0])):
+
+                print(Ais[0], '\n')
+                print(Ais[1], '\n')
+                print(Ais[2], '\n')
+                print(Ais[3], '\n')
+                tmpBas = copy.deepcopy(Ais[3])
+                # from the iw's of the parent cfg, select mother/father pairs
+                iwpairs = [
+                    ip
+                    for ip in list(product(range(len(Ais[1][cfg])), repeat=2))
+                    if ip[0] != ip[1]
+                ]
+                np.random.shuffle(iwpairs)
+                iwpairs = iwpairs[:int((len(Ais[1][cfg])) / 2)]
+
+                print(iwpairs)
+                Ais[0].append(Ais[0][cfg])
+                Ais[2].append([])
+
+                daughterson = []
+                for iws in iwpairs:
+                    mother = Ais[1][cfg][iws[0]]
+                    father = Ais[1][cfg][iws[1]]
+                    daughterson.append(
+                        intertwining(mother,
+                                     father,
+                                     mutation_rate=muta_initial))
+                    rwshake1 = 0.9 + 0.2 * np.random.random()
+                    rwshake2 = 0.9 + 0.2 * np.random.random()
+                    rwa = list(
+                        np.random.choice(rwshake1 *
+                                         np.array(Ais[2][cfg][iws[0]]),
+                                         2,
+                                         replace=False))
+                    rwa.sort()
+                    rw1 = rwa[::-1]
+                    rwa = list(
+                        np.random.choice(rwshake2 *
+                                         np.array(Ais[2][cfg][iws[1]]),
+                                         2,
+                                         replace=False))
+                    rwa.sort()
+                    rw2 = rwa[::-1]
+                    Ais[2][-1].append(rw1)
+                    anzBV += 1
+                    tmpBas.append([anzBV, list(range(1, 1 + len(rw1)))])
+                    Ais[2][-1].append(rw2)
+                    anzBV += 1
+                    tmpBas.append([anzBV, list(range(1, 1 + len(rw2)))])
+
+                dstmp = np.array(daughterson).flatten()
+                dstmp.sort()
+                daughterson = list(dstmp)[::-1]
+
+                Ais[1].append(daughterson)
+
+                print(Ais[0], '\n')
+                print(Ais[1], '\n')
+                print(Ais[2], '\n')
+                print(Ais[3], '\n', tmpBas)
+                exit()
+
+#                for bvn in range(len(Ais[1][cfg])):
+#                    l0 = len(Ais[2][cfg][bvn])
+#                    while len(Ais[2][cfg][bvn]) < l0 + nbrOff:
+#                        motherfather = np.random.choice(l0, 2, replace=False)
+#                        childRW = intertwining(
+#                            Ais[2][cfg][bvn][motherfather[0]],
+#                            Ais[2][cfg][bvn][motherfather[1]],
+#                            mutation_rate=0.2)
+#                        for ca in childRW:
+#                            if min([
+#                                    np.abs(ca - rw) for rw in Ais[2][cfg][bvn]
+#                            ]) > minDiffwidthsREL:
+#                                Ais[2][cfg][bvn].append(ca)
+#                                break
+#                    tmp = Ais[2][cfg][bvn]
+#
+#
+#                    childishParaSets.append([
+#                        tmpBas, Jstreu, costr, zop, 10, childidentifier,
+#                        BINBDGpath, minCond, maxE
+#                    ])
+#                    chiBV += 1
+
+# =================================================================================================
             offs_set = []
             for n in range(nbrOff):
                 son, daughter = breed_offspring(Ais[1],
@@ -270,6 +380,7 @@ for bastype in bastypes:
             np.random.shuffle(childishParaSets)
             offgenMax = min(len(childishParaSets), MaxOff)
             childishParaSets = childishParaSets[:offgenMax]
+
         # the internal width is kept fixed, and the offspring expands the relative-width set of an existing BV
         if newRW:
 
@@ -293,18 +404,21 @@ for bastype in bastypes:
                     childidentifier.append(cfg)
 
                     tmpBas = copy.deepcopy(Ais[3])
-
                     for bvn in range(len(Ais[1][cfg])):
 
                         try:
-                            tmpBas[cfgbnds[cfg] + bvn] = [
-                                Ais[3][cfgbnds[cfg] + bvn][0],
-                                Ais[3][cfgbnds[cfg] + bvn][1] +
-                                [list(combo)[bvn]]
-                            ]
+                            for bvm in range(len(tmpBas)):
+                                if (tmpBas[bvm][0] == (cfgbnds[cfg] + bvn +
+                                                       1)):
+                                    tmpBas[bvm] = [
+                                        tmpBas[bvm][0],
+                                        tmpBas[bvm][1] + [list(combo)[bvn]]
+                                    ]
                         except:
                             print(cfg, bvn, list(combo)[bvn])
-                            exit()
+                            print(Ais[3])
+                            print(cfgbnds[cfg])
+                            print(tmpBas)
 
                     childishParaSets.append([
                         tmpBas, Jstreu, costr, zop, 10, childidentifier,
@@ -369,7 +483,7 @@ for bastype in bastypes:
         child_ladder.sort(key=lambda tup: np.abs(tup[pw]))
         child_ladder.reverse()
 
-        for ch in child_ladder:
+        for ch in child_ladder[:3]:
             print(ch[:3])
 
         if child_ladder[0][0] > 0.0:

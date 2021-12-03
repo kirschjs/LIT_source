@@ -39,10 +39,10 @@ for bastype in bastypes:
 
     inv_scale_i = 0.25
     inv_scale_r = 5.1
-    nwadd = 0
+
     nGrd = 14
 
-    nwint = 24
+    nwint = 14
     nwrel = 4
 
     grd_type = 'geo'  #'cum'  #'poly'  #
@@ -62,14 +62,9 @@ for bastype in bastypes:
 
     else:
 
-        rel_scale = 0.04
-        wi, wf, nw = 0.001, 3.5, [nwint
-                                  for n in lfrags]  # for lit-state continuum
-
-    cumWi = cumWidths(anza=len(lfrags) * nwint, centers=[2.1], widths=[1.0])
-    cumWr = cumWidths(anza=len(lfrags) * nwint * nwrel,
-                      centers=[1.0],
-                      widths=[1.0])
+        rel_scale = 0.1
+        wi, wf, nw = 0.0001, 3.1, [nwint
+                                   for n in lfrags]  # for lit-state continuum
 
     # to include all reference basis states in the augmented basis
     #lit_rw_sparse = np.empty(max(len(sfrags), len(ob_stru)), dtype=list)
@@ -85,7 +80,6 @@ for bastype in bastypes:
         #if (sfrags[frg][-1] == 'y'):
         offset += 0.1 * frg / (1 + len(lfrags[frg]))
 
-        print('offset=', offset, frg / (1 + len(lfrags[frg])))
         wii = wi * offset
         wff = wf * offset
 
@@ -98,37 +92,8 @@ for bastype in bastypes:
                     num=nw[frg],
                     endpoint=True,
                     dtype=None))
-            lit_w_tmp_add = np.abs(
-                np.geomspace(start=wf + offset,
-                             stop=inv_scale_i * (2 * wf - wi) + offset,
-                             num=nwadd,
-                             endpoint=True,
-                             dtype=None))
-        elif grd_type == 'poly':
-            lit_w_tmp = polyWidths(wmin=wii,
-                                   wmax=wff,
-                                   nbrw=nw[frg],
-                                   npoly=nGrd)
-            lit_w_tmp_add = polyWidths(wmin=wf + offset,
-                                       wmax=inv_scale_i * (2 * wf - wi) +
-                                       offset,
-                                       nbrw=nwadd,
-                                       npoly=nGrd)
-        elif grd_type == 'cum':
-            lit_w_tmp = cumWi[frg::len(lfrags)]
 
-#            lit_w_tmp = cumWidths(anza=nw[frg],
-#                                  centers=[cent1[frg]],
-#                                  widths=[sig1[frg]])
-#            lit_w_tmp_add = cumWidths(anza=nwadd,
-#                                      centers=[2 * cent1[frg]],
-#                                      widths=[sig1[frg]])
-
-        lit_w[frg] = [
-            float(x)
-            for x in np.sort(np.concatenate((lit_w_tmp,
-                                             lit_w_tmp_add), axis=0))
-        ] if nwadd != 0 else lit_w_tmp
+        lit_w[frg] = lit_w_tmp
         lit_w[frg] = [
             ww for ww in sparse(lit_w[frg], mindist=mindist_int)
             if ww < iLcutoff[int(
@@ -140,12 +105,10 @@ for bastype in bastypes:
         #geomspace
         wir, wfr, nwr = rel_scale * wi, rel_scale * wf, nwrel * len(lit_w[frg])
 
-        offset = 1.  #+ 0.05 * frg / len(lfrags[frg])
-        if (sfrags[frg][-1] == 'y'):
-            offset += 0.25 * frg / len(lfrags[frg])
+        offset = 0.95 + 0.1 * np.random.random()
 
-        wiir = wir * offset
-        wffr = wfr * offset
+        wiir = wir
+        wffr = wfr
 
         if grd_type == 'geo':
             lit_w_tmp = np.geomspace(
@@ -155,31 +118,8 @@ for bastype in bastypes:
                 num=nwr,
                 endpoint=True,
                 dtype=None)
-            lit_w_add = np.geomspace(start=wfr + offset,
-                                     stop=inv_scale_r * (2 * wfr - wir) +
-                                     offset,
-                                     num=nwadd * len(lit_w[frg]),
-                                     endpoint=True,
-                                     dtype=None)
-        elif grd_type == 'poly':
-            lit_w_tmp = polyWidths(wmin=wiir, wmax=wffr, nbrw=nwr, npoly=nGrd)
-            lit_w_add = polyWidths(wmin=wfr + offset,
-                                   wmax=inv_scale_r * (2 * wfr - wir) + offset,
-                                   nbrw=nwadd * len(lit_w[frg]),
-                                   npoly=nGrd)
-        elif grd_type == 'cum':
-            lit_w_tmp = cumWr[frg::len(lfrags)]
-#            lit_w_tmp = cumWidths(anza=nwr,
-#                                  centers=[0.95 * cent1[frg]],
-#                                  widths=[sig1[frg]])
-#            lit_w_tmp_add = cumWidths(anza=nwadd,
-#                                      centers=[1.95 * cent1[frg]],
-#                                      widths=[sig1[frg]])
 
-        lit_w_tmp = [
-            float(x)
-            for x in np.sort(np.concatenate((lit_w_tmp, lit_w_add), axis=0))
-        ] if nwadd != 0 else lit_w_tmp
+        lit_w_tmp = offset * lit_w_tmp
 
         lit_rw_tmp = [
             ww for ww in np.abs(
