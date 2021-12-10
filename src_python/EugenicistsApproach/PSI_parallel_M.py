@@ -3,9 +3,26 @@ import operator
 from bridgeA3 import *
 from parameters_and_constants import *
 
-with open(respath + 'dtype.dat', 'w') as outf:
-    outf.write(dt)
-outf.close()
+reset_dirs = 0
+if reset_dirs:
+    # --- init directories
+    if os.path.isdir(litpath3He) != False:
+        if 'reset' in cal:
+            os.system('rm -rf ' + litpath3He)
+            os.mkdir(litpath3He)
+        else:
+            pass
+    else:
+        os.mkdir(litpath3He)
+
+    if os.path.isdir(helionpath) == False:
+        os.mkdir(helionpath)
+    if os.path.isdir(respath) == False:
+        os.mkdir(respath)
+
+    with open(respath + 'dtype.dat', 'w') as outf:
+        outf.write(dt)
+    outf.close()
 
 for bastype in bastypes:
     angu = channels[bastype]
@@ -42,8 +59,8 @@ for bastype in bastypes:
 
     nGrd = 14
 
-    nwint = 14
-    nwrel = 4
+    nwint = 18
+    nwrel = 12
 
     grd_type = 'geo'  #'cum'  #'poly'  #
 
@@ -63,8 +80,8 @@ for bastype in bastypes:
     else:
 
         rel_scale = 0.1
-        wi, wf, nw = 0.0001, 3.1, [nwint
-                                   for n in lfrags]  # for lit-state continuum
+        wi, wf, nw = 0.0001, 13.1, [nwint
+                                    for n in lfrags]  # for lit-state continuum
 
     # to include all reference basis states in the augmented basis
     #lit_rw_sparse = np.empty(max(len(sfrags), len(ob_stru)), dtype=list)
@@ -105,7 +122,7 @@ for bastype in bastypes:
         #geomspace
         wir, wfr, nwr = rel_scale * wi, rel_scale * wf, nwrel * len(lit_w[frg])
 
-        offset = 0.95 + 0.1 * np.random.random()
+        offset = 0.1 + 0.2 * np.random.random()
 
         wiir = wir
         wffr = wfr

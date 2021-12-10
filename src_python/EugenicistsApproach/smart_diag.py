@@ -293,6 +293,6 @@ def endmat(para, send_end):
         minCond = para[7]
         attractiveness = anzSigEV**4.14 * (
             (-1. *
-             gsEnergy)**4) / np.log(basCond)**2 if basCond > minCond else 0.
+             gsEnergy)**2) / np.log(basCond)**0 if basCond > minCond else 0.
 
     send_end.send([basCond, attractiveness, gsEnergy, para[5], para[0]])

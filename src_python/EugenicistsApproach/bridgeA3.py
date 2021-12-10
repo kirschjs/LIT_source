@@ -29,16 +29,10 @@ def cartesian_coord(*arrays):
 NEWLINE_SIZE_IN_BYTES = -1
 dt = 'float32'
 
-# penta+ -------------------------------------------
 #1 run <PSI_parallel.py> for boundsatekanal und streukas
 #2 1st <A3_lit_par.py>   run
 #3 2nd <A3_lit_par.py>   run
 cal = [
-    #'construe_fresh_helion',
-    #'reduce',
-    #'coeff',
-    #'diag',
-    #'reset',
     'dbg',
     'einzel',
     'rhs_lu-ob-qua',
@@ -46,10 +40,9 @@ cal = [
     'rhs-end',
     'rhs',
     'rhs-couple',
-    #'lhs'
 ]
 
-suffix = 'miwchan-v4-9'
+suffix = 'miwchan-v5'
 anzproc = 6  #int(len(os.sched_getaffinity(0)) / 1)
 
 home = os.getenv("HOME")
@@ -58,23 +51,9 @@ pathbase = home + '/kette_repo/ComptonLIT'
 
 litpath3He = pathbase + '/systems/mul_helion_' + suffix + '/'
 basisPath = litpath3He + 'basis_struct/'
-
-if os.path.isdir(litpath3He) != False:
-    if 'reset' in cal:
-        os.system('rm -rf ' + litpath3He)
-        os.mkdir(litpath3He)
-    else:
-        pass
-else:
-    os.mkdir(litpath3He)
-
 helionpath = litpath3He + 'he3/'
-if os.path.isdir(helionpath) == False:
-    os.mkdir(helionpath)
 v18uixpath = litpath3He + 'LITstate/'
 respath = litpath3He + 'results/'
-if os.path.isdir(respath) == False:
-    os.mkdir(respath)
 
 BINBDGpath = pathbase + '/source/src_nucl/'
 BINLITpath = pathbase + '/source/src_elma_new/'
@@ -135,8 +114,8 @@ streukas = ['0.5^-']  #,'1.5^-']
 boundstatekanal = 'npp0.5^+'
 
 bastypes = [boundstatekanal]
-bastypes = streukas
 bastypes = [boundstatekanal] + streukas
+bastypes = streukas
 
 J0 = float(boundstatekanal.split('^')[0][-3:])
 

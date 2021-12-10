@@ -52,16 +52,16 @@ for bastype in bastypes:
     minDiffwidthsINT = 10**-2
     minDiffwidthsREL = 10**-3
 
-    minCond = 10**-10
-    maxE = 160
+    minCond = 10**-11
+    maxE = 40.0
 
     maxParLen = 18
     removalGainFactor = 1.5
-    muta_initial = 0.94
+    muta_initial = 0.762
     # nRaces := |i|
-    nRaces = 13
+    nRaces = 19
     nbrOff = 2
-    MaxOff = 150
+    MaxOff = 10
 
     dbg = False
 
@@ -117,7 +117,6 @@ for bastype in bastypes:
 
         if ewH == []:
             print('parent basis unstable:\n', Civilizations[-1][3])
-
             exit()
 
         print(
@@ -143,12 +142,12 @@ for bastype in bastypes:
         print('              commencing purges (%s) ' % (pur[pwpurge]),
               end='\n')
 
-        go = True
+        goPurge = True
 
-        while go:
+        while goPurge:
 
             newpopList = []
-            go = False
+            goPurge = False
             ParaSets = []
 
             D0flat = flatten_basis(D0)
@@ -219,7 +218,7 @@ for bastype in bastypes:
                     cand_ladder[-1][pwpurge])) |
                 ((np.abs(cand_ladder[-1][pwpurge]) < minCond) &
                  (reff[0] < minCond))):
-                go = True
+                goPurge = True
                 D0 = rectify_basis(cand_ladder[-1][4])
                 print('1/%d ' % basisDim(D0), end='\n')
 
@@ -239,11 +238,6 @@ for bastype in bastypes:
 
         ewN, ewH = NormHamDiag(matout)
 
-        print(
-            '\nciv-%d) (purged) parents: Dim = %d) B(GS) = %8.4f  fit = %8.4f'
-            % (nCivi, basisDim(D0), ewH[-1],
-               basQ(ewN, ewH, denseEnergyInterval=[-1000, maxE])[0]))
-
         Civilizations[-1][3] = D0
 
         parBV = D0[-1][0]
@@ -251,13 +245,19 @@ for bastype in bastypes:
         Ais = copy.deepcopy(Civilizations[-1])
 
         # generate a pair of offspring from a randomly selected couple
-        newRW = True  #True if nCivi % 4 != 0 else False
-        newBV = False  #True if nCivi % 4 == 0 else False
+        newRW = True if nCivi % 2 != 0 else False
+        newBV = True if nCivi % 2 == 0 else False
+        growthType = 'relative widths to a CFG' if newRW else 'an additional CFG'
+
+        print(
+            '\nciv-%d) (purged) parents: Dim = %d) B(GS) = %8.4f  fit = %8.4f\n        >>> adding %s <<<'
+            %
+            (nCivi, basisDim(D0), ewH[-1],
+             basQ(ewN, ewH, denseEnergyInterval=[-1000, maxE])[0], growthType))
 
         bvsPerCfg = 12
         # bv with new int an relw. => append new offspring cfg's
 
-        # =================================================================================================
         if newBV:
 
             anzBV = sum([len(iws) for iws in Ais[1]])
@@ -441,14 +441,13 @@ for bastype in bastypes:
                 proc.join()
 
         child_ladder = [x.recv() for x in pipe_list]
-        child_ladder_un = copy.deepcopy(child_ladder)
-
         # ranking (0=cond; 1=fit; 2=bind)
+        print('\n>>> Offspring order based on %s <<<' % pur[pw])
         child_ladder.sort(key=lambda tup: np.abs(tup[pw]))
         child_ladder.reverse()
 
         for ch in child_ladder[:3]:
-            print(ch[:3])
+            print(ch[:4])
 
         if child_ladder[0][0] > 0.0:
 
@@ -456,12 +455,14 @@ for bastype in bastypes:
 
                 nbrParBV = sum([len(iw) for iw in Civilizations[-1][1]])
                 parvenue = child_ladder[0]
+
                 if int(parvenue[3][0]) >= 0:
                     Aisopt = copy.deepcopy(Civilizations[-1])
 
                     nbrParentCFGs = len(Civilizations[-1][1])
                     optCFG = int(parvenue[3][0])
                     Aisopt[0].append(Civilizations[-1][0][optCFG])
+
                     optCHiw = nbrParentCFGs + int(parvenue[3][0])
 
                     Aisopt[1].append(Ais[1][optCHiw])
@@ -469,10 +470,10 @@ for bastype in bastypes:
 
                     newBVs = [[
                         nbrParBV + 1 + i,
-                        list(range(1, 1 + len(Aisopt[2][optCHiw][i])))
-                    ] for i in range(len(Ais[1][optCHiw]))][0]
-
-                    Aisopt[3].append(newBVs)
+                        list(range(1, 1 + len(Ais[2][optCHiw][i])))
+                    ] for i in range(len(Ais[1][optCHiw]))]
+                    for nbv in newBVs:
+                        Aisopt[3].append(nbv)
 
                     stratifiedOptCivilization = Aisopt
 
@@ -512,9 +513,6 @@ for bastype in bastypes:
                 print('... although wild mutations were allowed. Aborting...')
                 break
 
-    print('After %d generations,\n-----\n' % nCivi, Civilizations[-1],
-          '\n-----\nemerged as the dominant culture.')
-
     ma = blunt_ev(Civilizations[-1][0],
                   Civilizations[-1][1],
                   Civilizations[-1][2],
@@ -530,6 +528,12 @@ for bastype in bastypes:
                   tnni=10,
                   jay=Jstreu,
                   dia=True)
+    ewN, ewH = NormHamDiag(ma)
+
+    print(
+        'After %d generations,\n-----\n' % nCivi, Civilizations[-1],
+        '\n-----\nemerged as the dominant culture.\nDim = %d) B(GS) = %8.4f  fit = '
+        % (basisDim(Civilizations[-1][3]), ewH[-1]), basQ(ewN, ewH))
 
     suf = 'ref' if bastype == boundstatekanal else 'fin'
 

@@ -483,9 +483,9 @@ if 'rhs' in cal:
 
                             tDim = int(np.sqrt(np.shape(fortranIn)[0]))
                             OutBasDimFr = int(tDim - HelBasDimRef)
-                            print(
-                                'processing final fragment: %s\ndim(he_bare) = %d ; dim(fin) = %d ; dim(total) = %d'
-                                % (fna, HelBasDimRef, OutBasDimFr, tDim))
+                            #print(
+                            #    'processing final fragment: %s\ndim(he_bare) = %d ; dim(fin) = %d ; dim(total) = %d'
+                            #    % (fna, HelBasDimRef, OutBasDimFr, tDim))
 
                             subIndices = [
                                 range(
