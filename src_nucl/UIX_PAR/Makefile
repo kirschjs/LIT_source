@@ -3,7 +3,7 @@ F77         = mpif77
 #MAKRO       = -DSUN_FORTRAN
 #MAKRO       = -DPC_FORTRAN
 #LIBS        = -parallel -static -L/opt/intel/mkl52sp1/lib/32 -lmkl_lapack -lmkl_p4
-FOPTS       = -Ofast -ffpe-summary=none 
+FOPTS       = -Ofast -ffpe-summary=none -mcmodel=large
 # -mcmodel=large
 #LIBS        = -L/home/kirscher/lib/intel/mkl/10.0.1.014/lib/em64t -lmkl_em64t -lguide
 

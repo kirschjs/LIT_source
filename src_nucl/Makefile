@@ -1,23 +1,16 @@
+# hexpresso
 F77     =       gfortran
 FFLAGS  =       -g -O2 -ffpe-summary='none'  -mcmodel=large
-#F77     =       mpif77
-#-ffpe-trap=denormal -pg -funroll-loops -g -fdefault-real-8 -fconvert=native -frecord-marker=4
-
-# hexpresso
 LIBS    = -L -lgfortran -L/usr/lib/x86_64-linux-gnu/lapack -llapack -lblas
 #LIBS    = -L${MKLROOT} -llapack -lblas  -lm -ldl
+
 #theogate
+#F77     =       ifort
+#FFLAGS  =       -Ofast -ffpe-summary='none'  -mcmodel=large
 #LIBS    = -L${MKLROOT} -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5
 
 # ohne -g und -traceback erzeugt spoleinv runtime error in smatest,rrandb subroutinen wenn auf die variable nbess zugegriffen wird;
 # mit den optionen tritt der fehler nicht auf;
-#FFLAGS  =       -C -Wall
-#LIBS    =       -L/opt/f77/lib:/home/hmh/lib -leispack -lsu2
-#LIBS    =       -L/home/hmh/lib -leispack -lsu2 -llapack -lblas
-#LIBS    =       -L/home/hmh/lib -L/opt/intel_mkl_61/lib -leispack -lsu2 -lmkl -lmkl_lapack -lmkl_lapack32 -lguide -lblas
-#LIBS    =       -L/opt/intel/mkl/lib/ia32 
-#LIBS    =       -L/home/hmh/lib -leispack -lsu2  -lblas
-#LIBS    =       -L/home/jkirscher/zweistein/lib -lmkl_lapack -lguide -lpthread
 
 .f.o:
 	$(F77) $(FFLAGS) -c -o $*.o $<

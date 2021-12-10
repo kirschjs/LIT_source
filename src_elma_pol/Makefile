@@ -1,7 +1,8 @@
 F77          = gfortran
 
 # production settings
-FFLAGS  =  -O2 -mcmodel=large #-pedantic #-finteger-4-integer-8 #-funroll-loops -funroll-all-loops
+FFLAGS  =  -Ofast -finteger-4-integer-8 -funroll-loops -funroll-all-loops -mcmodel=large
+#FFLAGS  =  -O2 -mcmodel=large #-pedantic #-finteger-4-integer-8 #-funroll-loops -funroll-all-loops
 
 # profiling setup 
 #1- compile 
