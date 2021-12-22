@@ -3,7 +3,7 @@ import operator
 from bridgeA3 import *
 from parameters_and_constants import *
 
-reset_dirs = 0
+reset_dirs = 1
 if reset_dirs:
     # --- init directories
     if os.path.isdir(litpath3He) != False:
@@ -57,11 +57,6 @@ for bastype in bastypes:
     inv_scale_i = 0.25
     inv_scale_r = 5.1
 
-    nGrd = 14
-
-    nwint = 18
-    nwrel = 12
-
     grd_type = 'geo'  #'cum'  #'poly'  #
 
     cal += ['diag']
@@ -73,15 +68,19 @@ for bastype in bastypes:
 
     if bastype == boundstatekanal:
 
+        nwint = 8
+        nwrel = 12
         rel_scale = 1.
         wi, wf, nw = 0.001, 11.5, [nwint
                                    for n in lfrags]  # for lit-state continuum
 
     else:
 
+        nwint = 12
+        nwrel = 8
         rel_scale = 0.1
-        wi, wf, nw = 0.0001, 13.1, [nwint
-                                    for n in lfrags]  # for lit-state continuum
+        wi, wf, nw = 0.0001, 6.1, [nwint
+                                   for n in lfrags]  # for lit-state continuum
 
     # to include all reference basis states in the augmented basis
     #lit_rw_sparse = np.empty(max(len(sfrags), len(ob_stru)), dtype=list)

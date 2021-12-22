@@ -42,7 +42,7 @@ cal = [
     'rhs-couple',
 ]
 
-suffix = 'miwchan-v5'
+suffix = 'miwchan-v7'
 anzproc = 6  #int(len(os.sched_getaffinity(0)) / 1)
 
 home = os.getenv("HOME")

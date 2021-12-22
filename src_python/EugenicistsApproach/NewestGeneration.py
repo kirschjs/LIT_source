@@ -53,15 +53,15 @@ for bastype in bastypes:
     minDiffwidthsREL = 10**-3
 
     minCond = 10**-11
-    maxE = 40.0
+    maxE = 100.0
 
     maxParLen = 18
     removalGainFactor = 1.5
-    muta_initial = 0.762
+    muta_initial = 0.92
     # nRaces := |i|
-    nRaces = 19
+    nRaces = 3 if bastype == boundstatekanal else 20
     nbrOff = 2
-    MaxOff = 10
+    MaxOff = 12
 
     dbg = False
 
