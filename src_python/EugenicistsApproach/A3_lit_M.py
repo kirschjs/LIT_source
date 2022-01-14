@@ -51,7 +51,7 @@ for nB in range(anzStreuBases):
                                                     'INQUA_V18%s' % siffux)
     FinBasDimRef = len(sum(sum(final_rw, []), []))
 
-    with open(basisPath + 'BareBasDims.dat', 'wb') as f:
+    with open(respath + 'BareBasDims_%d.dat' % nb, 'wb') as f:
         np.savetxt(f, [HelBasDimRef, FinBasDimRef], fmt='%d')
         f.seek(NEWLINE_SIZE_IN_BYTES, 2)
         f.truncate()

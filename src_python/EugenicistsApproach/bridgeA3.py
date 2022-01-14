@@ -43,9 +43,11 @@ cal = [
 ]
 
 suffix = 'miwchan-v23'
-anzproc = 6  #int(len(os.sched_getaffinity(0)) / 1)
+anzproc = int(len(os.sched_getaffinity(0)) / 2)
 
-home = os.getenv("HOME")
+home = os.getenv(
+    "HOME"
+)  # use local, /tmp, directory on ageneric machine with shared memory
 
 pathbase = home + '/kette_repo/ComptonLIT'
 litpath3He = pathbase + '/systems/mul_helion_' + suffix + '/'
