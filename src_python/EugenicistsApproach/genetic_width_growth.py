@@ -1,6 +1,16 @@
 from bridgeA3 import *
 
 
+def loveliness(groundstateEnergy, conditionNumber, HeigenvaluesbelowX,
+               minimalConditionnumber):
+
+    pulchritude = HeigenvaluesbelowX**4.14 * (
+        (-1. * groundstateEnergy)**
+        4) / np.log(conditionNumber
+                    )**2 if conditionNumber > minimalConditionnumber else 0.
+    return pulchritude
+
+
 def basQ(normSpectrum,
          hamiltonianSpectrum,
          minCond=10**-12,
@@ -13,8 +23,7 @@ def basQ(normSpectrum,
 
     basCond = np.min(np.abs(normSpectrum)) / np.max(np.abs(normSpectrum))
 
-    attractiveness = anzSigEV**4.14 * (
-        (-1. * gsEnergy)**4) / np.log(basCond)**2 if basCond > minCond else 0.
+    attractiveness = loveliness(gsEnergy, basCond, anzSigEV, minCond)
 
     return attractiveness, basCond
 

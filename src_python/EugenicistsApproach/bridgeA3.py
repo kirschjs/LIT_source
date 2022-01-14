@@ -42,22 +42,24 @@ cal = [
     'rhs-couple',
 ]
 
-suffix = 'miwchan-v7'
+suffix = 'miwchan-v23'
 anzproc = 6  #int(len(os.sched_getaffinity(0)) / 1)
 
 home = os.getenv("HOME")
 
 pathbase = home + '/kette_repo/ComptonLIT'
-
 litpath3He = pathbase + '/systems/mul_helion_' + suffix + '/'
-basisPath = litpath3He + 'basis_struct/'
-helionpath = litpath3He + 'he3/'
-v18uixpath = litpath3He + 'LITstate/'
 respath = litpath3He + 'results/'
+if os.path.isdir(litpath3He) == False:
+    os.mkdir(litpath3He)
+    os.mkdir(respath)
+    with open(respath + 'dtype.dat', 'w') as outf:
+        outf.write(dt)
+
+helionpath = litpath3He + 'he3/'
 
 BINBDGpath = pathbase + '/source/src_nucl/'
-BINLITpath = pathbase + '/source/src_elma_new/'
-BINLITpathPOL = pathbase + '/source/src_elma_pol/'
+BINLITpath = pathbase + '/source/src_elma_pol/'
 
 # NN: tnni=10   NN+NNN: tnni=11
 tnni = 10
@@ -113,9 +115,9 @@ streukas = ['0.5^-']  #,'1.5^-']
 #                  realistic    L>0 (only)         deuteron
 boundstatekanal = 'npp0.5^+'
 
+bastypes = streukas
 bastypes = [boundstatekanal]
 bastypes = [boundstatekanal] + streukas
-bastypes = streukas
 
 J0 = float(boundstatekanal.split('^')[0][-3:])
 
@@ -128,32 +130,14 @@ phot_e_d = 1.0  #  delta E
 opME_th_low = 10**(-24)
 opME_th_up = 10**24
 
-# deuteron/initial-state basis -------------------------------------------
-cluster_centers_per_zerl = 3
-min_eucl_pair_dist = 0.0001
-eps_up = [10.2, 10.01]
-eps_low = [0.2, 0.1]
-
-wini0 = w120  #wLAPLACE[::-1]
-
-addw = 1
-addwt = 'middle'
-scale = 1.
-min_spacing = 0.02
-min_spacing_to_LITWs = 0.001
-
-rw0 = wid_gen(add=addw,
-              addtype=addwt,
-              w0=wini0,
-              ths=[1e-5, 2e2, 0.2],
-              sca=scale)
-rw0 = sparsify(rw0, min_spacing)
-
-nzf0 = int(np.ceil(len(rw0) / 20.0))
-
 # basis ------------------------------------------------------------------
 
+# maximal number of basis vectors per calculation block (numerical parameter)
 bvma = 6
+
+# maximal number of radial Gauss widths for the expansion of the coordinate
+# between the two fragments which are associated with a basis vector (numerical
+# paramter)
 rwma = 45
 
 # -- here, I allowed for an enhancement of certain operators, to bind an S-wave triton with v18/uix
@@ -165,13 +149,3 @@ for nn in range(1, zop):
     cf = 1.0 if (nn < 28) else 0.0
     cf = 0.0 if (nn == 1) else cf
     costr += '%12.7f' % cf if (nn % 7 != 0) else '%12.7f\n' % cf
-
-#print('costr = ', costr)
-#print(BINBDGpath)
-# for the cleaner --------------------------------------------------------
-
-maxCoef = 10000
-minCoef = 1200
-ncycl = 30
-maxDiff = 0.001
-delPcyc = 1

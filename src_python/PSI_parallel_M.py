@@ -6,24 +6,40 @@ from parameters_and_constants import *
 #from BasisVisualization import visbas
 #from plot_basis_3bdy import plotbasis3bdy
 
-with open(respath + 'dtype.dat', 'w') as outf:
-    outf.write(dt)
-outf.close()
-
 bastypes = streukas
 bastypes = [boundstatekanal]
 bastypes = [boundstatekanal] + streukas
+
+litpath3He = pathbase + '/systems/mul_helion_' + suffix + '/'
+
+if os.path.isdir(litpath3He) != False:
+    if 'reset' in cal:
+        os.system('rm -rf ' + litpath3He)
+        os.mkdir(litpath3He)
+    else:
+        pass
+else:
+    os.mkdir(litpath3He)
+
+helionpath = litpath3He + 'he3/'
+if os.path.isdir(helionpath) == False:
+    os.mkdir(helionpath)
+
+if os.path.isdir(v18uixpath) == False:
+    os.mkdir(v18uixpath)
+
+respath = litpath3He + 'results/'
+if os.path.isdir(respath) == False:
+    os.mkdir(respath)
+    with open(respath + 'dtype.dat', 'w') as outf:
+        outf.write(dt)
+    outf.close()
 
 for bastype in bastypes:
     angu = channels[bastype]
 
     Jstreu = float(bastype.split('^')[0][-3:])
     Jstreustring = '%s' % str(Jstreu)[:3]
-
-    if os.path.isdir(v18uixpath) == False:
-        os.mkdir(v18uixpath)
-    if os.path.isdir(litpath3He) == False:
-        os.mkdir(litpath3He)
 
     os.chdir(litpath3He)
 
@@ -49,8 +65,8 @@ for bastype in bastypes:
     nwadd = 0
     nGrd = 14
 
-    nwint = 5
-    nwrel = 14
+    nwint = 3
+    nwrel = 5
 
     wscu = 0.80
     wsco = 14.0
@@ -72,8 +88,8 @@ for bastype in bastypes:
     if bastype == boundstatekanal:
 
         rel_scale = 1.
-        wi, wf, nw = 0.001, 22.5, [nwint
-                                   for n in lfrags]  # for lit-state continuum
+        wi, wf, nw = 0.01, 4.5, [nwint
+                                 for n in lfrags]  # for lit-state continuum
 
     else:
 

@@ -49,8 +49,10 @@ cal = [
     'lhs'
 ]
 
-suffix = 'miwchan-v4'
+suffix = 'miwchan-v22'
 anzproc = 6  #int(len(os.sched_getaffinity(0)) / 1)
+
+nbrOfBases = 4
 
 home = os.getenv("HOME")
 
@@ -58,23 +60,24 @@ pathbase = home + '/kette_repo/ComptonLIT'
 
 litpath3He = pathbase + '/systems/mul_helion_' + suffix + '/'
 basisPath = litpath3He + 'basis_struct/'
-
-if os.path.isdir(litpath3He) != False:
-    if 'reset' in cal:
-        os.system('rm -rf ' + litpath3He)
-        os.mkdir(litpath3He)
-    else:
-        pass
-else:
-    os.mkdir(litpath3He)
-
-helionpath = litpath3He + 'he3/'
-if os.path.isdir(helionpath) == False:
-    os.mkdir(helionpath)
 v18uixpath = litpath3He + 'LITstate/'
-respath = litpath3He + 'results/'
-if os.path.isdir(respath) == False:
-    os.mkdir(respath)
+#
+#if os.path.isdir(litpath3He) != False:
+#    if 'reset' in cal:
+#        os.system('rm -rf ' + litpath3He)
+#        os.mkdir(litpath3He)
+#    else:
+#        pass
+#else:
+#    os.mkdir(litpath3He)
+#
+#helionpath = litpath3He + 'he3/'
+#if os.path.isdir(helionpath) == False:
+#    os.mkdir(helionpath)
+#v18uixpath = litpath3He + 'LITstate/'
+#respath = litpath3He + 'results/'
+#if os.path.isdir(respath) == False:
+#    os.mkdir(respath)
 
 BINBDGpath = pathbase + '/source/src_nucl/'
 BINLITpath = pathbase + '/source/src_elma_new/'
