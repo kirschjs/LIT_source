@@ -43,7 +43,7 @@ cal = [
 ]
 
 suffix = 'miwchan-v23'
-anzproc = int(len(os.sched_getaffinity(0)) / 2)
+MaxProc = int(len(os.sched_getaffinity(0)) / 2)
 
 home = os.getenv(
     "HOME"

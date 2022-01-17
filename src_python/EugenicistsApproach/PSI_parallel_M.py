@@ -4,9 +4,12 @@ from bridgeA3 import *
 from parameters_and_constants import *
 
 
-def span_initial_basis(basisType,
-                       ini_grid_bounds=[0.001, 11.5, 0.0001, 6.5],
-                       ini_dims=[4, 8, 4, 8]):
+def span_initial_basis(
+    basisType,
+    coefstr,
+    ini_grid_bounds=[0.001, 11.5, 0.0001, 6.5],
+    ini_dims=[4, 8, 4, 8],
+):
 
     wrkDir = os.getcwd()
 
@@ -290,6 +293,8 @@ def span_initial_basis(basisType,
             indep=+1)
     os.system(BINBDGpath + 'DRLUD.exe')
 
+    os.chdir(wrkDir)
+
     print(lfrags2)
     n3_inlu(8, fn='INLU', fr=lfrags2, indep=parall)
     os.system(BINBDGpath + 'DRLUD.exe')
@@ -306,7 +311,10 @@ def span_initial_basis(basisType,
                            outfile='INQUA_M',
                            einzel_path=wrkDir + '/')
     insam(len(lfrags2))
-    n3_inen_bdg(sbas, Jstreu, costr, fn='INEN', pari=0, nzop=zop, tni=tnni)
+
+    anzproc = min(len(lfrags2), MaxProc)
+
+    n3_inen_bdg(sbas, Jstreu, coefstr, fn='INEN', pari=0, nzop=zop, tni=tnni)
 
     if parall == -1:
         subprocess.run([

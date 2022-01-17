@@ -264,7 +264,7 @@ def write_basis_on_tape(basis, jay, btype, baspath=''):
         f.truncate()
     f.close()
 
-    #exit()
+    return path_bas_int_rel_pairs, path_indi
 
 
 def basisDim(bas=[]):

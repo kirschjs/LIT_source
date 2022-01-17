@@ -16,6 +16,17 @@ dbg = False
 bastypes = [boundstatekanal] + streukas
 
 for bastype in bastypes:
+    # number of final-state bases which are grown with the above-set criteria
+    anzStreuBases = 4
+
+    costr = ''
+    zop = 31 if tnni == 11 else 14
+    for nn in range(1, zop):
+        if bastype == boundstatekanal:
+            cf = 1.0 if (1 < nn < 28) else 0.0
+        else:
+            cf = 0.0 if (1 < nn < 28) else 0.0
+        costr += '%12.7f' % cf if (nn % 7 != 0) else '%12.7f\n' % cf
 
     if bastype == boundstatekanal:
         if os.path.isdir(helionpath) != False:
@@ -46,12 +57,9 @@ for bastype in bastypes:
     removalGainFactor = 1.5
     muta_initial = 0.92
     # nRaces := |i|
-    nRaces = 4 if bastype == boundstatekanal else 4
+    nRaces = 2 if bastype == boundstatekanal else 2
     nbrOff = 6
     MaxOff = 12
-
-    # number of final-state bases which are grown with the above-set criteria
-    anzStreuBases = 4
 
     for nB in range(anzStreuBases):
 
@@ -63,7 +71,8 @@ for bastype in bastypes:
 
         span_initial_basis(basisType=bastype,
                            ini_grid_bounds=[0.001, 3.5, 0.0001, 4.5],
-                           ini_dims=[4, 4, 4, 4])
+                           ini_dims=[4, 4, 4, 4],
+                           coefstr=costr)
 
         print('\n#---------   Basistype: %s ---------------#\n' % bastype)
         # 1) calculation for ONE trail channel, only.
@@ -145,6 +154,7 @@ for bastype in bastypes:
                           potNN=potnn,
                           potNNN=potnnn,
                           parall=-1,
+                          anzcores=min(len(lfragTNG), MaxProc),
                           tnni=10,
                           jay=Jstreu,
                           dia=False)
@@ -228,7 +238,7 @@ for bastype in bastypes:
 
                 cand_list = []
                 for chunk in Parchunks:
-                    pool = ThreadPool(anzproc)
+                    pool = ThreadPool(min(MaxProc, len(ParaSets)))
                     jobs = []
                     for procnbr in range(len(chunk)):
                         recv_end, send_end = multiprocessing.Pipe(False)
@@ -460,6 +470,7 @@ for bastype in bastypes:
                           potNN=potnn,
                           potNNN=potnnn,
                           parall=-1,
+                          anzcores=min(len(Ais[0]), MaxProc),
                           tnni=10,
                           jay=Jstreu,
                           dia=False)
@@ -483,7 +494,7 @@ for bastype in bastypes:
             pipe_list = []
 
             for chunk in Parchunks:
-                pool = ThreadPool(anzproc)
+                pool = ThreadPool(min(MaxProc, len(ParaSets)))
                 jobs = []
                 for procnbr in range(len(chunk)):
                     recv_end, send_end = multiprocessing.Pipe(False)
@@ -583,6 +594,7 @@ for bastype in bastypes:
                       potNN=potnn,
                       potNNN=potnnn,
                       parall=-1,
+                      anzcores=min(len(Civilizations[-1][0]), MaxProc),
                       tnni=10,
                       jay=Jstreu,
                       dia=True)
@@ -612,10 +624,25 @@ for bastype in bastypes:
         os.system('rm -rf ./T*OUT.*')
         os.system('rm -rf ./D*OUT.*')
 
-        write_basis_on_tape(Civilizations[-1],
-                            Jstreu,
-                            bastype,
-                            baspath=basisPath)
+        fullBasfile, actBasfile = write_basis_on_tape(Civilizations[-1],
+                                                      Jstreu,
+                                                      bastype,
+                                                      baspath=basisPath)
+
+        if bastype != boundstatekanal:
+            AbasOutStr = respath + 'Ssigbasv3heLIT_J%s_%s_BasNR-%d.dat' % (
+                Jstreu, bastype, nB)
+            FbasOutStr = respath + 'SLITbas_full_J%s_%s_BasNR-%d.dat' % (
+                Jstreu, bastype, nB)
+            subprocess.call('cp %s %s' % (fullBasfile, FbasOutStr), shell=True)
+            subprocess.call('cp %s %s' % (actBasfile, AbasOutStr), shell=True)
+        else:
+            AbasOutStr = respath + 'Ssigbasv3heLIT_J%s_%s.dat' % (Jstreu,
+                                                                  bastype)
+            FbasOutStr = respath + 'SLITbas_full_J%s_%s.dat' % (Jstreu,
+                                                                bastype)
+            subprocess.call('cp %s %s' % (fullBasfile, FbasOutStr), shell=True)
+            subprocess.call('cp %s %s' % (actBasfile, AbasOutStr), shell=True)
 
         matoutstr = '%smat_%s' % (
             respath, bastype + '_BasNR-%d' % nB

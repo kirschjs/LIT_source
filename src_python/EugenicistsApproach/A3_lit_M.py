@@ -36,7 +36,9 @@ he_iw, he_rw, he_frgs = retrieve_he3_M(helionpath + 'basis_struct/' +
                                        'INQUA_V18%s' % siffux)
 HelBasDimRef = len(sum(sum(he_rw, []), []))
 
-anzStreuBases = len([f for f in glob.glob(litpath3He + 'results/*_BasNR-*')])
+anzStreuBases = len(
+    [f for f in glob.glob(litpath3He + 'results/mat_*_BasNR-*')])
+
 finalStatePaths = [
     litpath3He[:-1] + '-%d/' % nB for nB in range(anzStreuBases)
 ]
@@ -51,7 +53,7 @@ for nB in range(anzStreuBases):
                                                     'INQUA_V18%s' % siffux)
     FinBasDimRef = len(sum(sum(final_rw, []), []))
 
-    with open(respath + 'BareBasDims_%d.dat' % nb, 'wb') as f:
+    with open(respath + 'BareBasDims_%d.dat' % nB, 'wb') as f:
         np.savetxt(f, [HelBasDimRef, FinBasDimRef], fmt='%d')
         f.seek(NEWLINE_SIZE_IN_BYTES, 2)
         f.truncate()
@@ -283,7 +285,7 @@ for nB in range(anzStreuBases):
             if 'rhs-qual' in cal:
                 parameter_set = parameter_set_lu_ob_qua
                 results = []
-                pool = ThreadPool(anzproc)
+                pool = ThreadPool(min(MaxProc, len(parameter_set)))
                 for procnbr in range(len(parameter_set)):
                     pars = parameter_set[procnbr]
                     results.append(
@@ -312,7 +314,7 @@ for nB in range(anzStreuBases):
                         exit()
 
                     results = []
-                    pool = ThreadPool(anzproc)
+                    pool = ThreadPool(min(MaxProc, len(parameter_set)))
                     parameter_set = parameter_set_end[lit_zerl]
 
                     for procnbr in range(len(parameter_set)):
@@ -558,6 +560,8 @@ for nB in range(anzStreuBases):
                 os.system(BINBDGpath + 'LUDW_CN.exe')
                 n3_inob(sfrags, 8, fn='INOB', indep=-0)
                 os.system(BINBDGpath + 'KOBER.exe')
+
+                anzproc = min(len(lfrags), MaxProc)
 
                 if tnni == 11:
                     n3_inlu(8, fn='INLU', fr=lfrags, indep=-0)
