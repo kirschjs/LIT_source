@@ -17,7 +17,7 @@ bastypes = [boundstatekanal] + streukas
 
 for bastype in bastypes:
     # number of final-state bases which are grown with the above-set criteria
-    anzStreuBases = 4
+    anzStreuBases = 2
 
     costr = ''
     zop = 31 if tnni == 11 else 14
@@ -57,7 +57,7 @@ for bastype in bastypes:
     removalGainFactor = 1.5
     muta_initial = 0.92
     # nRaces := |i|
-    nRaces = 2 if bastype == boundstatekanal else 2
+    nRaces = 4 if bastype == boundstatekanal else 4
     nbrOff = 6
     MaxOff = 12
 
@@ -71,8 +71,9 @@ for bastype in bastypes:
 
         span_initial_basis(basisType=bastype,
                            ini_grid_bounds=[0.001, 3.5, 0.0001, 4.5],
-                           ini_dims=[4, 4, 4, 4],
-                           coefstr=costr)
+                           ini_dims=[12, 12, 12, 18],
+                           coefstr=costr,
+                           anzOp=zop)
 
         print('\n#---------   Basistype: %s ---------------#\n' % bastype)
         # 1) calculation for ONE trail channel, only.

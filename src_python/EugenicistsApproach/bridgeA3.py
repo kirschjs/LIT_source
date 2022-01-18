@@ -27,7 +27,7 @@ def cartesian_coord(*arrays):
 # float64 : Double precision float: sign bit, 11 bits exponent, 52 bits mantissa
 #
 NEWLINE_SIZE_IN_BYTES = -1
-dt = 'float32'
+dt = 'float64'
 
 #1 run <PSI_parallel.py> for boundsatekanal und streukas
 #2 1st <A3_lit_par.py>   run
@@ -141,13 +141,3 @@ bvma = 6
 # between the two fragments which are associated with a basis vector (numerical
 # paramter)
 rwma = 45
-
-# -- here, I allowed for an enhancement of certain operators, to bind an S-wave triton with v18/uix
-costr = ''
-
-zop = 31 if tnni == 11 else 14
-
-for nn in range(1, zop):
-    cf = 1.0 if (nn < 28) else 0.0
-    cf = 0.0 if (nn == 1) else cf
-    costr += '%12.7f' % cf if (nn % 7 != 0) else '%12.7f\n' % cf

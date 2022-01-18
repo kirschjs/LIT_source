@@ -7,6 +7,7 @@ from parameters_and_constants import *
 def span_initial_basis(
     basisType,
     coefstr,
+    anzOp=14,
     ini_grid_bounds=[0.001, 11.5, 0.0001, 6.5],
     ini_dims=[4, 8, 4, 8],
 ):
@@ -31,6 +32,7 @@ def span_initial_basis(
     grd_type = 'geo'
     diag = 1
     mindist_int = 0.001
+    rWmin = 0.0001
     iLcutoff = [12., 4., 3.]
     rLcutoff = [12., 4., 3.]
     if basisType == boundstatekanal:
@@ -63,44 +65,50 @@ def span_initial_basis(
         offset += 0.1 * frg / (1 + len(lfrags[frg]))
         wii = wi * offset
         wff = wf * offset
-        if grd_type == 'geo':
-            lit_w_tmp = np.abs(
-                np.geomspace(
-                    #lit_w_tmp = np.abs(np.linspace(
-                    start=wii,
-                    stop=wff,
-                    num=nw[frg],
-                    endpoint=True,
-                    dtype=None))
+
+        lit_w_tmp = np.abs(
+            np.geomspace(start=wii,
+                         stop=wff,
+                         num=nw[frg],
+                         endpoint=True,
+                         dtype=None))
+
+        lit_w_tmp = np.sort([wd * np.random.random()
+                             for wd in lit_w_tmp])[::-1]
+
         lit_w[frg] = lit_w_tmp
+
         lit_w[frg] = [
             ww for ww in sparse(lit_w[frg], mindist=mindist_int)
-            if ww < iLcutoff[int(
+            if rWmin < ww < iLcutoff[int(
                 np.max([float(lfrags[frg][0]),
                         float(lfrags[frg][1])]))]
         ]
         #  -- relative widths --------------------------------------------------
-        #geomspace
         wir, wfr, nwr = rel_scale * wi, rel_scale * wf, nwrel * len(lit_w[frg])
         offset = 0.1 + 0.2 * np.random.random()
         wiir = wir
         wffr = wfr
-        if grd_type == 'geo':
-            lit_w_tmp = np.geomspace(
-                #lit_w_tmp = np.linspace(
-                start=wiir,
-                stop=wffr,
-                num=nwr,
-                endpoint=True,
-                dtype=None)
+
+        lit_w_tmp = np.geomspace(start=wiir,
+                                 stop=wffr,
+                                 num=nwr,
+                                 endpoint=True,
+                                 dtype=None)
+
         lit_w_tmp = offset * lit_w_tmp
+
+        lit_w_tmp = np.sort([wd * np.random.random()
+                             for wd in lit_w_tmp])[::-1]
+
         lit_rw_tmp = [
             ww for ww in np.abs(
                 np.sort(np.array(lit_w_tmp).flatten())[::-1].tolist())
-            if ww < rLcutoff[int(
+            if rWmin < ww < rLcutoff[int(
                 np.max([float(lfrags[frg][0]),
                         float(lfrags[frg][1])]))]
         ]
+
         lit_rw[frg] = []
         for bv in range(len(lit_w[frg])):
             lit_rw[frg].append(lit_rw_tmp[bv::len(lit_w[frg])])
@@ -314,7 +322,7 @@ def span_initial_basis(
 
     anzproc = min(len(lfrags2), MaxProc)
 
-    n3_inen_bdg(sbas, Jstreu, coefstr, fn='INEN', pari=0, nzop=zop, tni=tnni)
+    n3_inen_bdg(sbas, Jstreu, coefstr, fn='INEN', pari=0, nzop=anzOp, tni=tnni)
 
     if parall == -1:
         subprocess.run([
