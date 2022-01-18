@@ -43,14 +43,13 @@ cal = [
 ]
 
 suffix = 'miwchan-v23'
+DC = True
 MaxProc = int(len(os.sched_getaffinity(0)) / 2)
 
-home = os.getenv(
-    "HOME"
-)  # use local, /tmp, directory on ageneric machine with shared memory
+pathbase = os.getenv(
+    "HOME") + '/kette_repo/ComptonLIT/systems' if DC else '/tmp'
 
-pathbase = home + '/kette_repo/ComptonLIT'
-litpath3He = pathbase + '/systems/mul_helion_' + suffix + '/'
+litpath3He = pathbase + '/mul_helion_' + suffix + '/'
 respath = litpath3He + 'results/'
 if os.path.isdir(litpath3He) == False:
     os.mkdir(litpath3He)
@@ -60,8 +59,8 @@ if os.path.isdir(litpath3He) == False:
 
 helionpath = litpath3He + 'he3/'
 
-BINBDGpath = pathbase + '/source/src_nucl/'
-BINLITpath = pathbase + '/source/src_elma_pol/'
+BINBDGpath = os.getenv("HOME") + '/kette_repo/ComptonLIT/source/src_nucl/'
+BINLITpath = os.getenv("HOME") + '/kette_repo/ComptonLIT/source/src_elma_pol/'
 
 # NN: tnni=10   NN+NNN: tnni=11
 tnni = 10

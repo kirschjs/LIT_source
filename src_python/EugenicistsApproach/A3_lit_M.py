@@ -427,7 +427,7 @@ for nB in range(anzStreuBases):
         print('(ii)    calculating norm/ham in scattering-channel basis')
 
         if os.path.isdir(wrkDir + 'lit_bas_lhs/') == False:
-            os.(wrkDir + 'lit_bas_lhs/')
+            os.mkdir(wrkDir + 'lit_bas_lhs/')
         os.chdir(wrkDir + 'lit_bas_lhs/')
 
         for streukanal in streukas:
