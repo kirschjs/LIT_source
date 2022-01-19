@@ -51,10 +51,9 @@ def blunt_ev(cfgs,
     n3_inen_bdg(basis, jay, costring, fn='INEN', pari=0, nzop=nzopt, tni=tnni)
 
     if parall == -1:
-        subprocess.run([
-            'mpirun', '-np',
-            '%d' % anzcores, bin_path + 'V18_PAR/mpi_quaf_v7'
-        ])
+        subprocess.run(
+            [MPIRUN, '-np',
+             '%d' % anzcores, bin_path + 'V18_PAR/mpi_quaf_v7'])
         subprocess.run([bin_path + 'V18_PAR/sammel'])
     else:
         subprocess.run([bin_path + 'QUAFL_M.exe'])
@@ -75,7 +74,7 @@ def blunt_ev(cfgs,
 
         if parall == -1:
             subprocess.run([
-                'mpirun', '-np',
+                MPIRUN, '-np',
                 '%d' % anzcores, bin_path + 'UIX_PAR/mpi_drqua_v7'
             ])
             subprocess.run([bin_path + 'UIX_PAR/SAMMEL-uix'])
@@ -253,7 +252,11 @@ def endmat(para, send_end):
     # <communicate> is needed in order to ensure the process ended before parsing its output!
     out, err = pend.communicate()
 
-    NormHam = np.core.records.fromfile(maoutf, formats='f8', offset=4)
+    try:
+        NormHam = np.core.records.fromfile(maoutf, formats='f8', offset=4)
+    except:
+        print(maoutf)
+        exit()
 
     dim = int(np.sqrt(len(NormHam) * 0.5))
 
@@ -284,7 +287,7 @@ def endmat(para, send_end):
 
     if ewH != []:
 
-        anzSigEV = len([bvv for bvv in ewH if bvv < para[8]])
+        anzSigEV = len([bvv for bvv in ewH if para[8][0] < bvv < para[8][1]])
 
         gsEnergy = ewH[-1]
 
@@ -293,5 +296,9 @@ def endmat(para, send_end):
         minCond = para[7]
 
         attractiveness = loveliness(gsEnergy, basCond, anzSigEV, minCond)
+
+    os.system('rm -rf ./%s' % inenf)
+    os.system('rm -rf ./%s' % outf)
+    os.system('rm -rf ./%s' % maoutf)
 
     send_end.send([basCond, attractiveness, gsEnergy, para[5], para[0]])

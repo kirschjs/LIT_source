@@ -1,6 +1,6 @@
 # hexpresso
 F77     =       gfortran
-FFLAGS  =       -g -Ofast -ffpe-summary='none' # -mcmodel=large
+FFLAGS  =       -Ofast -ffpe-summary='none' -mcmodel=medium
 LIBS    = -L -lgfortran -L/usr/lib/x86_64-linux-gnu/lapack -llapack -lblas
 #LIBS    = -L${MKLROOT} -llapack -lblas  -lm -ldl
 

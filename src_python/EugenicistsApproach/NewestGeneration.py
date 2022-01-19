@@ -53,7 +53,7 @@ for bastype in bastypes:
 
     # evolution criteria
     minCond = 10**-11
-    maxE = 100.0
+    denseEVinterval = [10., 200.0]
     removalGainFactor = 1.5
     muta_initial = 0.92
     # nRaces := |i|
@@ -70,7 +70,7 @@ for bastype in bastypes:
         os.chdir(wrkDir)
 
         span_initial_basis(basisType=bastype,
-                           ini_grid_bounds=[0.001, 3.5, 0.0001, 4.5],
+                           ini_grid_bounds=[0.001, 6.5, 0.001, 6.5],
                            ini_dims=[12, 12, 12, 18],
                            coefstr=costr,
                            anzOp=zop)
@@ -171,7 +171,7 @@ for bastype in bastypes:
             print(
                 'civ-%d)          parents: Dim = %d) B(GS) = %8.4f  fit = ' %
                 (nCivi, basisDim(Civilizations[-1][3]), ewH[-1]),
-                basQ(ewN, ewH))
+                basQ(ewN, ewH, minCond, denseEVinterval))
 
             # sift through the parents and purge it of 'ideling' individuals
             # which yield reduce the fitness
@@ -185,8 +185,9 @@ for bastype in bastypes:
             pwpurge = 0
 
             pur = [
-                'condition number', 'quality = f(#EV<100, B(GS), cond. nbr.)',
-                'B(GS)'
+                'condition number',
+                'quality = f(%d<#EV<%d, B(GS), cond. nbr.)',
+                'B(GS)' % (int(denseEVinterval[0]), int(denseEVinterval[1]))
             ]
 
             print('              commencing purges (%s) ' % (pur[pwpurge]),
@@ -205,7 +206,7 @@ for bastype in bastypes:
                 cpy = copy.deepcopy(D0flat)
                 ParaSets.append([
                     cpy, Jstreu, costr, zop, 10, [0, 0], BINBDGpath, minCond,
-                    maxE
+                    denseEVinterval
                 ])
 
                 for bvTrail in D0flat:
@@ -222,7 +223,7 @@ for bastype in bastypes:
 
                     ParaSets.append([
                         cpy, Jstreu, costr, zop, 10, bvID, BINBDGpath, minCond,
-                        maxE
+                        denseEVinterval
                     ])
 
                 # x) the parallel environment is set up in sets(chunks) of bases
@@ -315,8 +316,7 @@ for bastype in bastypes:
             print(
                 '\nciv-%d) (purged) parents: Dim = %d) B(GS) = %8.4f  fit = %8.4f\n        >>> adding %s <<<'
                 % (nCivi, basisDim(D0), ewH[-1],
-                   basQ(ewN, ewH, denseEnergyInterval=[-1000, maxE
-                                                       ])[0], growthType))
+                   basQ(ewN, ewH, minCond, denseEVinterval)[0], growthType))
 
             bvsPerCfg = 12
             # bv with new int an relw. => append new offspring cfg's
@@ -328,7 +328,7 @@ for bastype in bastypes:
                 childishParaSets = []
                 childishParaSets.append([
                     Ais[3], Jstreu, costr, zop, 10, [-1], BINBDGpath, minCond,
-                    maxE
+                    denseEVinterval
                 ])
                 chiBV = nbrOff
 
@@ -390,7 +390,7 @@ for bastype in bastypes:
 
                     childishParaSets.append([
                         tmpBas, Jstreu, costr, zop, 10, childidentifier,
-                        BINBDGpath, minCond, maxE
+                        BINBDGpath, minCond, denseEVinterval
                     ])
 
             # the internal width is kept fixed, and the offspring expands the relative-width set of an existing BV
@@ -434,7 +434,7 @@ for bastype in bastypes:
 
                         childishParaSets.append([
                             tmpBas, Jstreu, costr, zop, 10, childidentifier,
-                            BINBDGpath, minCond, maxE
+                            BINBDGpath, minCond, denseEVinterval
                         ])
                         chiBV += 1
 
@@ -604,7 +604,8 @@ for bastype in bastypes:
         print(
             'After %d generations,\n-----\n' % nCivi, Civilizations[-1],
             '\n-----\nemerged as the dominant culture.\nDim = %d) B(GS) = %8.4f  fit = '
-            % (basisDim(Civilizations[-1][3]), ewH[-1]), basQ(ewN, ewH))
+            % (basisDim(Civilizations[-1][3]), ewH[-1]),
+            basQ(ewN, ewH, minCond, denseEVinterval))
 
         suf = 'ref' if bastype == boundstatekanal else 'fin'
 

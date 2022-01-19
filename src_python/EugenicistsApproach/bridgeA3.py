@@ -42,12 +42,16 @@ cal = [
     'rhs-couple',
 ]
 
-suffix = 'miwchan-v23'
+suffix = 'miwchan-v22'
 DC = True
 MaxProc = int(len(os.sched_getaffinity(0)) / 2)
 
-pathbase = os.getenv(
-    "HOME") + '/kette_repo/ComptonLIT/systems' if DC else '/tmp'
+if DC:
+    pathbase = os.getenv("HOME") + '/kette_repo/ComptonLIT/systems'
+    MPIRUN = '/usr/local/bin/mpirun'
+else:
+    pathbase = '/tmp'
+    MPIRUN = '/usr/lib64/mpich/bin/mpirun'
 
 litpath3He = pathbase + '/mul_helion_' + suffix + '/'
 respath = litpath3He + 'results/'
@@ -67,8 +71,10 @@ tnni = 10
 parall = -1
 
 mpii = '137'
-potnn = pathbase + '/data/AV4.14'  #'/data/AV18'  #'/data/BONN'  #
-potnnn = pathbase + '/data/urbana9_AK_neu'
+potnn = os.getenv(
+    "HOME"
+) + '/kette_repo/ComptonLIT/data/AV4.14'  #'/data/AV18'  #'/data/BONN'  #
+potnnn = os.getenv("HOME") + '/kette_repo/ComptonLIT/data/urbana9_AK_neu'
 
 new_helion = True
 # convention: bound-state-expanding BVs: (1-8), i.e., 8 states per rw set => nzf0*8

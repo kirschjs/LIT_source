@@ -326,7 +326,7 @@ def span_initial_basis(
 
     if parall == -1:
         subprocess.run([
-            'mpirun', '-np',
+            MPIRUN, '-np',
             '%d' % anzproc, BINBDGpath + 'V18_PAR/mpi_quaf_v7'
         ])
         subprocess.run([BINBDGpath + 'V18_PAR/sammel'])
@@ -342,7 +342,7 @@ def span_initial_basis(
                                einzel_path=wrkDir + '/')
         if parall == -1:
             subprocess.run([
-                'mpirun', '-np',
+                MPIRUN, '-np',
                 '%d' % anzproc, BINBDGpath + 'UIX_PAR/mpi_drqua_v7'
             ])
             subprocess.run([BINBDGpath + 'UIX_PAR/SAMMEL-uix'])

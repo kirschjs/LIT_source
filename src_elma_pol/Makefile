@@ -38,3 +38,5 @@ jquelma: jquelma.o par/jquelma
 
 jenelmas: jenelmas.o par/jenelmas
 	$(F77) $(FFLAGS) -o jenelmas.exe jenelmas.o  $(LIBS)
+
+all: juelma jobelma jquelma jenelmas clean

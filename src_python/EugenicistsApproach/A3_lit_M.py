@@ -589,7 +589,7 @@ for nB in range(anzStreuBases):
                                        outfile='INQUA_M')
 
                 subprocess.run([
-                    'mpirun', '-np',
+                    MPIRUN, '-np',
                     '%d' % anzproc, BINBDGpath + 'V18_PAR/mpi_quaf_v7'
                 ])
 
@@ -605,7 +605,7 @@ for nB in range(anzStreuBases):
                                            tni=1)
 
                     subprocess.run([
-                        'mpirun', '-np',
+                        MPIRUN, '-np',
                         '%d' % anzproc, BINBDGpath + 'UIX_PAR/mpi_drqua_v7'
                     ])
 
