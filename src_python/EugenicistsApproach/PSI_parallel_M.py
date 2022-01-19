@@ -108,6 +108,8 @@ def span_initial_basis(
                 np.max([float(lfrags[frg][0]),
                         float(lfrags[frg][1])]))]
         ]
+        if lit_rw_tmp == []:
+            lit_rw_tmp = [np.random.random()]
 
         lit_rw[frg] = []
         for bv in range(len(lit_w[frg])):
@@ -182,6 +184,7 @@ def span_initial_basis(
     path_frag_stru = wrkDir + '/basis_struct/frags_LIT_J%s_%s.dat' % (
         Jstreustring, basisType)
     if os.path.exists(path_frag_stru): os.remove(path_frag_stru)
+
     with open(path_frag_stru, 'wb') as f:
         np.savetxt(f,
                    np.column_stack([sfrags2, lfrags2]),
@@ -320,7 +323,9 @@ def span_initial_basis(
                            einzel_path=wrkDir + '/')
     insam(len(lfrags2))
 
-    anzproc = min(len(lfrags2), MaxProc)
+    anzproc = max(2, min(len(lfrags2), MaxProc))
+    #print('Anzahl der Sklaven + 1: %d' % anzproc)
+    #exit()
 
     n3_inen_bdg(sbas, Jstreu, coefstr, fn='INEN', pari=0, nzop=anzOp, tni=tnni)
 

@@ -57,7 +57,7 @@ for bastype in bastypes:
     removalGainFactor = 1.5
     muta_initial = 0.92
     # nRaces := |i|
-    nRaces = 4 if bastype == boundstatekanal else 4
+    nRaces = 2 if bastype == boundstatekanal else 6
     nbrOff = 6
     MaxOff = 12
 
@@ -71,7 +71,7 @@ for bastype in bastypes:
 
         span_initial_basis(basisType=bastype,
                            ini_grid_bounds=[0.001, 6.5, 0.001, 6.5],
-                           ini_dims=[12, 12, 12, 18],
+                           ini_dims=[1, 1, 8, 13],
                            coefstr=costr,
                            anzOp=zop)
 
@@ -131,457 +131,471 @@ for bastype in bastypes:
                             len(Civilizations[0][2][cfg][nbvc - 1]))).tolist()
                 ]]
 
-        for nCivi in range(nRaces):
+        nCivi = 0
+        if nbv > 1:
 
-            cfgbnds = np.add.accumulate(
-                [len(iws) for iws in Civilizations[nCivi][1]])
-            cfgbnds = np.insert(cfgbnds, 0, 0)
+            for nCivi in range(nRaces):
 
-            lfragTNG = np.array(Civilizations[nCivi][0])[:, 1].tolist()
-            sfragTNG = np.array(Civilizations[nCivi][0])[:, 0].tolist()
-            insam(len(lfragTNG))
+                cfgbnds = np.add.accumulate(
+                    [len(iws) for iws in Civilizations[nCivi][1]])
+                cfgbnds = np.insert(cfgbnds, 0, 0)
 
-            # i) each initial parent-offspring basis is likely unstable if comprised of all 'families'(Dfull)
+                lfragTNG = np.array(Civilizations[nCivi][0])[:, 1].tolist()
+                sfragTNG = np.array(Civilizations[nCivi][0])[:, 0].tolist()
+                insam(len(lfragTNG))
 
-            ma = blunt_ev(Civilizations[-1][0],
-                          Civilizations[-1][1],
-                          Civilizations[-1][2],
-                          Civilizations[-1][3],
-                          wrkdir='',
-                          nzopt=zop,
-                          costring=costr,
-                          bin_path=BINBDGpath,
-                          einzel_file_path=wrkDir,
-                          potNN=potnn,
-                          potNNN=potnnn,
-                          parall=-1,
-                          anzcores=min(len(lfragTNG), MaxProc),
-                          tnni=10,
-                          jay=Jstreu,
-                          dia=False)
+                # i) each initial parent-offspring basis is likely unstable if comprised of all 'families'(Dfull)
 
-            ewN, ewH = NormHamDiag(ma)
+                ma = blunt_ev(Civilizations[-1][0],
+                              Civilizations[-1][1],
+                              Civilizations[-1][2],
+                              Civilizations[-1][3],
+                              wrkdir='',
+                              nzopt=zop,
+                              costring=costr,
+                              bin_path=BINBDGpath,
+                              mpipath=MPIRUN,
+                              einzel_file_path=wrkDir,
+                              potNN=potnn,
+                              potNNN=potnnn,
+                              parall=-1,
+                              anzcores=max(2, min(len(lfragTNG), MaxProc)),
+                              tnni=10,
+                              jay=Jstreu,
+                              dia=False)
 
-            #print('parents: \n', Civilizations[-1])
+                ewN, ewH = NormHamDiag(ma)
 
-            if ewH == []:
-                print('parent basis unstable:\n', Civilizations[-1][3])
-                exit()
+                #print('parents: \n', Civilizations[-1])
 
-            print(
-                'civ-%d)          parents: Dim = %d) B(GS) = %8.4f  fit = ' %
-                (nCivi, basisDim(Civilizations[-1][3]), ewH[-1]),
-                basQ(ewN, ewH, minCond, denseEVinterval))
+                if ewH == []:
+                    print('parent basis unstable:\n', Civilizations[-1][3])
+                    exit()
 
-            # sift through the parents and purge it of 'ideling' individuals
-            # which yield reduce the fitness
+                print(
+                    'civ-%d)          parents: Dim = %d) B(GS) = %8.4f  fit = '
+                    % (nCivi, basisDim(Civilizations[-1][3]), ewH[-1]),
+                    basQ(ewN, ewH, minCond, denseEVinterval))
 
-            D0 = Civilizations[-1][3]
+                # sift through the parents and purge it of 'ideling' individuals
+                # which yield reduce the fitness
 
-            # according to the quality criterion <pw> the offspring is ordered
-            pw = 1 + nCivi % 2
-            # for each civilization, the initial population of parents is purged, i.e.,
-            # parents which destabilize the basis significantly are removed
-            pwpurge = 0
+                D0 = Civilizations[-1][3]
 
-            pur = [
-                'condition number',
-                'quality = f(%d<#EV<%d, B(GS), cond. nbr.)',
-                'B(GS)' % (int(denseEVinterval[0]), int(denseEVinterval[1]))
-            ]
+                # according to the quality criterion <pw> the offspring is ordered
+                pw = 1 + nCivi % 2
+                # for each civilization, the initial population of parents is purged, i.e.,
+                # parents which destabilize the basis significantly are removed
+                pwpurge = 0
 
-            print('              commencing purges (%s) ' % (pur[pwpurge]),
-                  end='\n')
-
-            goPurge = True
-
-            while goPurge:
-
-                newpopList = []
-                goPurge = False
-                ParaSets = []
-
-                D0flat = flatten_basis(D0)
-
-                cpy = copy.deepcopy(D0flat)
-                ParaSets.append([
-                    cpy, Jstreu, costr, zop, 10, [0, 0], BINBDGpath, minCond,
-                    denseEVinterval
-                ])
-
-                for bvTrail in D0flat:
-
-                    bvID = [
-                        int(bvTrail[0]),
-                        int(''.join(map(str, bvTrail[1])))
-                    ]
-
-                    cpy = copy.deepcopy(D0flat)
-
-                    cpy.remove(bvTrail)
-                    cpy = rectify_basis(cpy)
-
-                    ParaSets.append([
-                        cpy, Jstreu, costr, zop, 10, bvID, BINBDGpath, minCond,
-                        denseEVinterval
-                    ])
-
-                # x) the parallel environment is set up in sets(chunks) of bases
-                #    in order to limit the number of files open simultaneously
-                split_points = [
-                    n * maxParLen
-                    for n in range(1 + int(len(ParaSets) / maxParLen))
-                ] + [len(ParaSets) + 42]
-
-                Parchunks = [
-                    ParaSets[split_points[i]:split_points[i + 1]]
-                    for i in range(len(split_points) - 1)
+                pur = [
+                    'condition number',
+                    'quality = f(%d<#EV<%d, B(GS), cond. nbr.)' %
+                    (int(denseEVinterval[0]), int(denseEVinterval[1])), 'B(GS)'
                 ]
 
-                cand_list = []
-                for chunk in Parchunks:
-                    pool = ThreadPool(min(MaxProc, len(ParaSets)))
-                    jobs = []
-                    for procnbr in range(len(chunk)):
-                        recv_end, send_end = multiprocessing.Pipe(False)
+                print('              commencing purges (%s) ' % (pur[pwpurge]),
+                      end='\n')
 
-                        pars = chunk[procnbr]
+                goPurge = True
 
-                        p = multiprocessing.Process(target=endmat,
-                                                    args=(pars, send_end))
-                        jobs.append(p)
-                        cand_list.append(recv_end)
-                        p.start()
-                    for proc in jobs:
-                        proc.join()
+                while goPurge:
 
-                cand_ladder = [x.recv() for x in cand_list]
+                    newpopList = []
+                    goPurge = False
+                    ParaSets = []
 
-                # ranking following condition-number (0) or quality (1)
-                cand_ladder.sort(key=lambda tup: np.abs(tup[pwpurge]))
+                    D0flat = flatten_basis(D0)
 
-                reff = [[bvm[0], bvm[1], bvm[2]] for bvm in cand_ladder
-                        if bvm[3] == [0, 0]][0]
-
-                print('reference (cond,qual) = %4.4e,%4.4e' %
-                      (reff[0], reff[1]))
-
-                print('best/worst=  %2.3e , %2.3e /  %2.3e , %2.3e' %
-                      (cand_ladder[-1][0], cand_ladder[-1][1],
-                       cand_ladder[1][0], cand_ladder[1][1]))
-
-                if ((removalGainFactor * np.abs(reff[pwpurge]) < np.abs(
-                        cand_ladder[-1][pwpurge])) |
-                    ((np.abs(cand_ladder[-1][pwpurge]) < minCond) &
-                     (reff[0] < minCond))):
-                    goPurge = True
-                    D0 = rectify_basis(cand_ladder[-1][4])
-                    print('1/%d ' % basisDim(D0), end='\n')
-
-            removalGainFactor *= 1.1
-
-            #        D0 = rectify_basis(D0flat)
-
-            # -- end of purges; the removal of any BV will now reduce the population's fitness
-
-            n3_inen_bdg(D0,
-                        Jstreu,
-                        costr,
-                        fn='INEN',
-                        pari=0,
-                        nzop=zop,
-                        tni=tnni)
-
-            subprocess.run([BINBDGpath + 'TDR2END_NORMAL.exe'],
-                           capture_output=True,
-                           text=True)
-
-            matout = np.core.records.fromfile('MATOUTB',
-                                              formats='f8',
-                                              offset=4)
-
-            ewN, ewH = NormHamDiag(matout)
-
-            Civilizations[-1][3] = D0
-
-            parBV = D0[-1][0]
-
-            Ais = copy.deepcopy(Civilizations[-1])
-
-            # generate a pair of offspring from a randomly selected couple
-            newRW = True if nCivi % 2 != 0 else False
-            newBV = True if nCivi % 2 == 0 else False
-            growthType = 'relative widths to a CFG' if newRW else 'an additional CFG'
-
-            print(
-                '\nciv-%d) (purged) parents: Dim = %d) B(GS) = %8.4f  fit = %8.4f\n        >>> adding %s <<<'
-                % (nCivi, basisDim(D0), ewH[-1],
-                   basQ(ewN, ewH, minCond, denseEVinterval)[0], growthType))
-
-            bvsPerCfg = 12
-            # bv with new int an relw. => append new offspring cfg's
-
-            if newBV:
-
-                anzBV = sum([len(iws) for iws in Ais[1]])
-
-                childishParaSets = []
-                childishParaSets.append([
-                    Ais[3], Jstreu, costr, zop, 10, [-1], BINBDGpath, minCond,
-                    denseEVinterval
-                ])
-                chiBV = nbrOff
-
-                # produce an offspring cfg for each parent cfg
-                for cfg in range(len(Ais[0])):
-
-                    childidentifier = [cfg]
-
-                    tmpBas = copy.deepcopy(Ais[3])
-
-                    # from the iw's of the parent cfg, select mother/father pairs
-                    iwpairs = [
-                        ip for ip in list(
-                            product(range(len(Ais[1][cfg])), repeat=2))
-                        if ip[0] != ip[1]
-                    ]
-                    np.random.shuffle(iwpairs)
-                    iwpairs = iwpairs[:int((len(Ais[1][cfg])) / 2)]
-
-                    Ais[0].append(Ais[0][cfg])
-                    Ais[2].append([])
-
-                    daughterson = []
-                    for iws in iwpairs:
-                        mother = Ais[1][cfg][iws[0]]
-                        father = Ais[1][cfg][iws[1]]
-                        daughterson.append(
-                            intertwining(mother,
-                                         father,
-                                         mutation_rate=muta_initial))
-                        rwshake1 = 0.9 + 0.2 * np.random.random()
-                        rwshake2 = 0.9 + 0.2 * np.random.random()
-                        rwa = list(
-                            np.random.choice(rwshake1 *
-                                             np.array(Ais[2][cfg][iws[0]]),
-                                             2,
-                                             replace=False))
-                        rwa.sort()
-                        rw1 = rwa[::-1]
-                        rwa = list(
-                            np.random.choice(rwshake2 *
-                                             np.array(Ais[2][cfg][iws[1]]),
-                                             2,
-                                             replace=False))
-                        rwa.sort()
-                        rw2 = rwa[::-1]
-                        Ais[2][-1].append(rw1)
-                        anzBV += 1
-                        tmpBas.append([anzBV, list(range(1, 1 + len(rw1)))])
-                        Ais[2][-1].append(rw2)
-                        anzBV += 1
-                        tmpBas.append([anzBV, list(range(1, 1 + len(rw2)))])
-
-                    dstmp = np.array(daughterson).flatten()
-                    dstmp.sort()
-                    daughterson = list(dstmp)[::-1]
-
-                    Ais[1].append(daughterson)
-
-                    childishParaSets.append([
-                        tmpBas, Jstreu, costr, zop, 10, childidentifier,
-                        BINBDGpath, minCond, denseEVinterval
+                    cpy = copy.deepcopy(D0flat)
+                    ParaSets.append([
+                        cpy, Jstreu, costr, zop, 10, [0, 0], BINBDGpath,
+                        minCond, denseEVinterval
                     ])
 
-            # the internal width is kept fixed, and the offspring expands the relative-width set of an existing BV
-            if newRW:
+                    for bvTrail in D0flat:
 
-                childishParaSets = []
-                chiBV = nbrOff
-                for cfg in range(len(Ais[0])):
+                        bvID = [
+                            int(bvTrail[0]),
+                            int(''.join(map(str, bvTrail[1])))
+                        ]
 
-                    chcombos = product(range(
-                        len(Ais[2][cfg][0]) + 1,
-                        len(Ais[2][cfg][0]) + nbrOff + 1),
-                                       repeat=len(Ais[1][cfg]))
+                        cpy = copy.deepcopy(D0flat)
 
-                    tmp = list(chcombos)
-                    np.random.shuffle(tmp)
-                    offgenMax = min(len(tmp), MaxOff)
-                    chcombos = tmp[:offgenMax]
+                        cpy.remove(bvTrail)
+                        cpy = rectify_basis(cpy)
 
-                    for combo in chcombos:
+                        ParaSets.append([
+                            cpy, Jstreu, costr, zop, 10, bvID, BINBDGpath,
+                            minCond, denseEVinterval
+                        ])
 
-                        childidentifier = list(combo)
-                        childidentifier.append(cfg)
+                    # x) the parallel environment is set up in sets(chunks) of bases
+                    #    in order to limit the number of files open simultaneously
+                    split_points = [
+                        n * maxParLen
+                        for n in range(1 + int(len(ParaSets) / maxParLen))
+                    ] + [len(ParaSets) + 42]
+
+                    Parchunks = [
+                        ParaSets[split_points[i]:split_points[i + 1]]
+                        for i in range(len(split_points) - 1)
+                    ]
+
+                    cand_list = []
+                    for chunk in Parchunks:
+                        pool = ThreadPool(max(min(MaxProc, len(ParaSets)), 2))
+                        jobs = []
+                        for procnbr in range(len(chunk)):
+                            recv_end, send_end = multiprocessing.Pipe(False)
+
+                            pars = chunk[procnbr]
+
+                            p = multiprocessing.Process(target=endmat,
+                                                        args=(pars, send_end))
+                            jobs.append(p)
+                            cand_list.append(recv_end)
+                            p.start()
+                        for proc in jobs:
+                            proc.join()
+
+                    cand_ladder = [x.recv() for x in cand_list]
+
+                    # ranking following condition-number (0) or quality (1)
+                    cand_ladder.sort(key=lambda tup: np.abs(tup[pwpurge]))
+
+                    reff = [[bvm[0], bvm[1], bvm[2]] for bvm in cand_ladder
+                            if bvm[3] == [0, 0]][0]
+
+                    print('reference (cond,qual) = %4.4e,%4.4e' %
+                          (reff[0], reff[1]))
+
+                    print('best/worst=  %2.3e , %2.3e /  %2.3e , %2.3e' %
+                          (cand_ladder[-1][0], cand_ladder[-1][1],
+                           cand_ladder[1][0], cand_ladder[1][1]))
+
+                    if ((removalGainFactor * np.abs(reff[pwpurge]) < np.abs(
+                            cand_ladder[-1][pwpurge])) |
+                        ((np.abs(cand_ladder[-1][pwpurge]) < minCond) &
+                         (reff[0] < minCond))):
+                        goPurge = True
+                        D0 = rectify_basis(cand_ladder[-1][4])
+                        print('1/%d ' % basisDim(D0), end='\n')
+
+                removalGainFactor *= 1.1
+
+                #        D0 = rectify_basis(D0flat)
+
+                # -- end of purges; the removal of any BV will now reduce the population's fitness
+
+                n3_inen_bdg(D0,
+                            Jstreu,
+                            costr,
+                            fn='INEN',
+                            pari=0,
+                            nzop=zop,
+                            tni=tnni)
+
+                subprocess.run([BINBDGpath + 'TDR2END_NORMAL.exe'],
+                               capture_output=True,
+                               text=True)
+
+                matout = np.core.records.fromfile('MATOUTB',
+                                                  formats='f8',
+                                                  offset=4)
+
+                ewN, ewH = NormHamDiag(matout)
+
+                Civilizations[-1][3] = D0
+
+                parBV = D0[-1][0]
+
+                Ais = copy.deepcopy(Civilizations[-1])
+
+                # generate a pair of offspring from a randomly selected couple
+                newRW = True if nCivi % 2 != 0 else False
+                newBV = True if nCivi % 2 == 0 else False
+                growthType = 'relative widths to a CFG' if newRW else 'an additional CFG'
+
+                print(
+                    '\nciv-%d) (purged) parents: Dim = %d) B(GS) = %8.4f  fit = %8.4f\n        >>> adding %s <<<'
+                    %
+                    (nCivi, basisDim(D0), ewH[-1],
+                     basQ(ewN, ewH, minCond, denseEVinterval)[0], growthType))
+
+                bvsPerCfg = 12
+                # bv with new int an relw. => append new offspring cfg's
+
+                if newBV:
+
+                    anzBV = sum([len(iws) for iws in Ais[1]])
+
+                    childishParaSets = []
+                    childishParaSets.append([
+                        Ais[3], Jstreu, costr, zop, 10, [-1], BINBDGpath,
+                        minCond, denseEVinterval
+                    ])
+                    chiBV = nbrOff
+
+                    # produce an offspring cfg for each parent cfg
+                    for cfg in range(len(Ais[0])):
+
+                        childidentifier = [cfg]
 
                         tmpBas = copy.deepcopy(Ais[3])
-                        for bvn in range(len(Ais[1][cfg])):
 
-                            try:
-                                for bvm in range(len(tmpBas)):
-                                    if (tmpBas[bvm][0] == (cfgbnds[cfg] + bvn +
-                                                           1)):
-                                        tmpBas[bvm] = [
-                                            tmpBas[bvm][0], tmpBas[bvm][1] +
-                                            [list(combo)[bvn]]
-                                        ]
-                            except:
-                                print(cfg, bvn, list(combo)[bvn])
-                                print(Ais[3])
-                                print(cfgbnds[cfg])
-                                print(tmpBas)
+                        # from the iw's of the parent cfg, select mother/father pairs
+                        iwpairs = [
+                            ip for ip in list(
+                                product(range(len(Ais[1][cfg])), repeat=2))
+                            if ip[0] != ip[1]
+                        ]
+                        np.random.shuffle(iwpairs)
+                        iwpairs = iwpairs[:int((len(Ais[1][cfg])) / 2)]
+
+                        Ais[0].append(Ais[0][cfg])
+                        Ais[2].append([])
+
+                        daughterson = []
+                        for iws in iwpairs:
+                            mother = Ais[1][cfg][iws[0]]
+                            father = Ais[1][cfg][iws[1]]
+                            daughterson.append(
+                                intertwining(mother,
+                                             father,
+                                             mutation_rate=muta_initial))
+                            rwshake1 = 0.9 + 0.2 * np.random.random()
+                            rwshake2 = 0.9 + 0.2 * np.random.random()
+                            rwa = list(
+                                np.random.choice(rwshake1 *
+                                                 np.array(Ais[2][cfg][iws[0]]),
+                                                 2,
+                                                 replace=False))
+                            rwa.sort()
+                            rw1 = rwa[::-1]
+                            rwa = list(
+                                np.random.choice(rwshake2 *
+                                                 np.array(Ais[2][cfg][iws[1]]),
+                                                 2,
+                                                 replace=False))
+                            rwa.sort()
+                            rw2 = rwa[::-1]
+                            Ais[2][-1].append(rw1)
+                            anzBV += 1
+                            tmpBas.append(
+                                [anzBV, list(range(1, 1 + len(rw1)))])
+                            Ais[2][-1].append(rw2)
+                            anzBV += 1
+                            tmpBas.append(
+                                [anzBV, list(range(1, 1 + len(rw2)))])
+
+                        dstmp = np.array(daughterson).flatten()
+                        dstmp.sort()
+                        daughterson = list(dstmp)[::-1]
+
+                        Ais[1].append(daughterson)
 
                         childishParaSets.append([
                             tmpBas, Jstreu, costr, zop, 10, childidentifier,
                             BINBDGpath, minCond, denseEVinterval
                         ])
-                        chiBV += 1
 
-                    for bvn in range(len(Ais[1][cfg])):
-                        l0 = len(Ais[2][cfg][bvn])
-                        while len(Ais[2][cfg][bvn]) < l0 + nbrOff:
-                            motherfather = np.random.choice(l0,
-                                                            2,
-                                                            replace=False)
-                            childRW = intertwining(
-                                Ais[2][cfg][bvn][motherfather[0]],
-                                Ais[2][cfg][bvn][motherfather[1]],
-                                mutation_rate=0.2)
-                            for ca in childRW:
-                                if min([
-                                        np.abs(ca - rw)
-                                        for rw in Ais[2][cfg][bvn]
-                                ]) > minDiffwidthsREL:
-                                    Ais[2][cfg][bvn].append(ca)
-                                    break
-                        tmp = Ais[2][cfg][bvn]
-                        Ais[2][cfg][bvn] = tmp
+                # the internal width is kept fixed, and the offspring expands the relative-width set of an existing BV
+                if newRW:
 
-            # 2) calc. matrices including all children
-            ma = blunt_ev(Ais[0],
-                          Ais[1],
-                          Ais[2],
-                          Ais[3],
-                          wrkdir='',
-                          nzopt=zop,
-                          costring=costr,
-                          bin_path=BINBDGpath,
-                          einzel_file_path=wrkDir,
-                          potNN=potnn,
-                          potNNN=potnnn,
-                          parall=-1,
-                          anzcores=min(len(Ais[0]), MaxProc),
-                          tnni=10,
-                          jay=Jstreu,
-                          dia=False)
+                    childishParaSets = []
+                    chiBV = nbrOff
+                    for cfg in range(len(Ais[0])):
 
-            # 3) rate certain partitions according to their fitness
-            if glob.glob('MATOUTB*') != []:
-                os.system('rm -rf MATOUTB*')
+                        chcombos = product(range(
+                            len(Ais[2][cfg][0]) + 1,
+                            len(Ais[2][cfg][0]) + nbrOff + 1),
+                                           repeat=len(Ais[1][cfg]))
 
-            # x) the parallel environment is set up in sets(chunks) of bases
-            #    in order to limit the number of files open simultaneously
-            split_points = [
-                n * maxParLen
-                for n in range(1 + int(len(childishParaSets) / maxParLen))
-            ] + [len(childishParaSets) + 42]
+                        tmp = list(chcombos)
+                        np.random.shuffle(tmp)
+                        offgenMax = min(len(tmp), MaxOff)
+                        chcombos = tmp[:offgenMax]
 
-            Parchunks = [
-                childishParaSets[split_points[i]:split_points[i + 1]]
-                for i in range(len(split_points) - 1)
-            ]
+                        for combo in chcombos:
 
-            pipe_list = []
+                            childidentifier = list(combo)
+                            childidentifier.append(cfg)
 
-            for chunk in Parchunks:
-                pool = ThreadPool(min(MaxProc, len(ParaSets)))
-                jobs = []
-                for procnbr in range(len(chunk)):
-                    recv_end, send_end = multiprocessing.Pipe(False)
-                    pars = chunk[procnbr]
-                    p = multiprocessing.Process(target=endmat,
-                                                args=(pars, send_end))
-                    jobs.append(p)
-                    pipe_list.append(recv_end)
-                    p.start()
-                for proc in jobs:
-                    proc.join()
+                            tmpBas = copy.deepcopy(Ais[3])
+                            for bvn in range(len(Ais[1][cfg])):
 
-            child_ladder = [x.recv() for x in pipe_list]
-            # ranking (0=cond; 1=fit; 2=bind)
-            print('\n>>> Offspring order based on %s <<<' % pur[pw])
-            child_ladder.sort(key=lambda tup: np.abs(tup[pw]))
-            child_ladder.reverse()
+                                try:
+                                    for bvm in range(len(tmpBas)):
+                                        if (tmpBas[bvm][0] == (cfgbnds[cfg] +
+                                                               bvn + 1)):
+                                            tmpBas[bvm] = [
+                                                tmpBas[bvm][0],
+                                                tmpBas[bvm][1] +
+                                                [list(combo)[bvn]]
+                                            ]
+                                except:
+                                    print(cfg, bvn, list(combo)[bvn])
+                                    print(Ais[3])
+                                    print(cfgbnds[cfg])
+                                    print(tmpBas)
 
-            for ch in child_ladder[:3]:
-                print(ch[:4])
+                            childishParaSets.append([
+                                tmpBas, Jstreu, costr, zop, 10,
+                                childidentifier, BINBDGpath, minCond,
+                                denseEVinterval
+                            ])
+                            chiBV += 1
 
-            if child_ladder[0][0] > 0.0:
+                        for bvn in range(len(Ais[1][cfg])):
+                            l0 = len(Ais[2][cfg][bvn])
+                            while len(Ais[2][cfg][bvn]) < l0 + nbrOff:
+                                motherfather = np.random.choice(l0,
+                                                                2,
+                                                                replace=False)
+                                childRW = intertwining(
+                                    Ais[2][cfg][bvn][motherfather[0]],
+                                    Ais[2][cfg][bvn][motherfather[1]],
+                                    mutation_rate=0.2)
+                                for ca in childRW:
+                                    if min([
+                                            np.abs(ca - rw)
+                                            for rw in Ais[2][cfg][bvn]
+                                    ]) > minDiffwidthsREL:
+                                        Ais[2][cfg][bvn].append(ca)
+                                        break
+                            tmp = Ais[2][cfg][bvn]
+                            Ais[2][cfg][bvn] = tmp
 
-                if newBV:
+                # 2) calc. matrices including all children
+                ma = blunt_ev(Ais[0],
+                              Ais[1],
+                              Ais[2],
+                              Ais[3],
+                              wrkdir='',
+                              nzopt=zop,
+                              costring=costr,
+                              bin_path=BINBDGpath,
+                              mpipath=MPIRUN,
+                              einzel_file_path=wrkDir,
+                              potNN=potnn,
+                              potNNN=potnnn,
+                              parall=-1,
+                              anzcores=max(2, min(len(Ais[0]), MaxProc)),
+                              tnni=10,
+                              jay=Jstreu,
+                              dia=False)
 
-                    nbrParBV = sum([len(iw) for iw in Civilizations[-1][1]])
-                    parvenue = child_ladder[0]
+                # 3) rate certain partitions according to their fitness
+                if glob.glob('MATOUTB*') != []:
+                    os.system('rm -rf MATOUTB*')
 
-                    if int(parvenue[3][0]) >= 0:
+                # x) the parallel environment is set up in sets(chunks) of bases
+                #    in order to limit the number of files open simultaneously
+                split_points = [
+                    n * maxParLen
+                    for n in range(1 + int(len(childishParaSets) / maxParLen))
+                ] + [len(childishParaSets) + 42]
+
+                Parchunks = [
+                    childishParaSets[split_points[i]:split_points[i + 1]]
+                    for i in range(len(split_points) - 1)
+                ]
+
+                pipe_list = []
+
+                for chunk in Parchunks:
+                    pool = ThreadPool(max(min(MaxProc, len(ParaSets)), 2))
+                    jobs = []
+                    for procnbr in range(len(chunk)):
+                        recv_end, send_end = multiprocessing.Pipe(False)
+                        pars = chunk[procnbr]
+                        p = multiprocessing.Process(target=endmat,
+                                                    args=(pars, send_end))
+                        jobs.append(p)
+                        pipe_list.append(recv_end)
+                        p.start()
+                    for proc in jobs:
+                        proc.join()
+
+                child_ladder = [x.recv() for x in pipe_list]
+                # ranking (0=cond; 1=fit; 2=bind)
+                print('\n>>> Offspring order based on %s <<<' % pur[pw])
+                child_ladder.sort(key=lambda tup: np.abs(tup[pw]))
+                child_ladder.reverse()
+
+                for ch in child_ladder[:3]:
+                    print(ch[:4])
+
+                if child_ladder[0][0] > 0.0:
+
+                    if newBV:
+
+                        nbrParBV = sum(
+                            [len(iw) for iw in Civilizations[-1][1]])
+                        parvenue = child_ladder[0]
+
+                        if int(parvenue[3][0]) >= 0:
+                            Aisopt = copy.deepcopy(Civilizations[-1])
+
+                            nbrParentCFGs = len(Civilizations[-1][1])
+                            optCFG = int(parvenue[3][0])
+                            Aisopt[0].append(Civilizations[-1][0][optCFG])
+
+                            optCHiw = nbrParentCFGs + int(parvenue[3][0])
+
+                            Aisopt[1].append(Ais[1][optCHiw])
+                            Aisopt[2].append(Ais[2][optCHiw])
+
+                            newBVs = [[
+                                nbrParBV + 1 + i,
+                                list(range(1, 1 + len(Ais[2][optCHiw][i])))
+                            ] for i in range(len(Ais[1][optCHiw]))]
+                            for nbv in newBVs:
+                                Aisopt[3].append(nbv)
+
+                            stratifiedOptCivilization = Aisopt
+
+                    elif newRW:
                         Aisopt = copy.deepcopy(Civilizations[-1])
 
-                        nbrParentCFGs = len(Civilizations[-1][1])
-                        optCFG = int(parvenue[3][0])
-                        Aisopt[0].append(Civilizations[-1][0][optCFG])
+                        parvenue = child_ladder[0][3]
+                        # Aisopt[0,1] do not change
+                        # the basis is improved by a set of relative widths for a specific configuration
 
-                        optCHiw = nbrParentCFGs + int(parvenue[3][0])
+                        for neww in range(len(parvenue[:-1])):
 
-                        Aisopt[1].append(Ais[1][optCHiw])
-                        Aisopt[2].append(Ais[2][optCHiw])
+                            Aisopt[2][parvenue[-1]][neww].append(
+                                Ais[2][parvenue[-1]][neww][parvenue[neww] - 1])
 
-                        newBVs = [[
-                            nbrParBV + 1 + i,
-                            list(range(1, 1 + len(Ais[2][optCHiw][i])))
-                        ] for i in range(len(Ais[1][optCHiw]))]
-                        for nbv in newBVs:
-                            Aisopt[3].append(nbv)
+                            for nbv in range(len(Aisopt[3])):
+                                if (Aisopt[3][nbv][0] -
+                                        1 == (cfgbnds[parvenue[-1]] + neww)):
+                                    Aisopt[3][nbv][1].append(
+                                        len(Aisopt[2][parvenue[-1]][neww]))
 
                         stratifiedOptCivilization = Aisopt
 
-                if newRW:
-                    Aisopt = copy.deepcopy(Civilizations[-1])
+                    else:
+                        stratifiedOptCivilization = Civilizations[-1]
 
-                    parvenue = child_ladder[0][3]
-                    # Aisopt[0,1] do not change
-                    # the basis is improved by a set of relative widths for a specific configuration
+                    Civilizations.append(stratifiedOptCivilization)
 
-                    for neww in range(len(parvenue[:-1])):
-
-                        Aisopt[2][parvenue[-1]][neww].append(
-                            Ais[2][parvenue[-1]][neww][parvenue[neww] - 1])
-
-                        for nbv in range(len(Aisopt[3])):
-                            if (Aisopt[3][nbv][0] -
-                                    1 == (cfgbnds[parvenue[-1]] + neww)):
-                                Aisopt[3][nbv][1].append(
-                                    len(Aisopt[2][parvenue[-1]][neww]))
-
-                    stratifiedOptCivilization = Aisopt
-
-                Civilizations.append(stratifiedOptCivilization)
-
-                print(
-                    'civ-%d) a new, %d-dimensional race has evolved!\n -----------------------------'
-                    % (nCivi, basisDim(stratifiedOptCivilization[3])))
-
-            else:
-                print(
-                    'civ-%d) only spoiled offspring was raised!\n       >>> increased mutation rate.\n -----------------------------'
-                    % nCivi)
-                muta_initial *= 1.1
-                Civilizations.append(Civilizations[-1])
-                if muta_initial >= 1.0:
                     print(
-                        '... although wild mutations were allowed. Aborting...'
-                    )
-                    break
+                        'civ-%d) a new, %d-dimensional race has evolved!\n -----------------------------'
+                        % (nCivi, basisDim(stratifiedOptCivilization[3])))
+
+                else:
+                    print(
+                        'civ-%d) only spoiled offspring was raised!\n       >>> increased mutation rate.\n -----------------------------'
+                        % nCivi)
+                    muta_initial *= 1.1
+                    Civilizations.append(Civilizations[-1])
+                    if muta_initial >= 1.0:
+                        print(
+                            '... although wild mutations were allowed. Aborting...'
+                        )
+                        break
 
         ma = blunt_ev(Civilizations[-1][0],
                       Civilizations[-1][1],
@@ -591,14 +605,16 @@ for bastype in bastypes:
                       nzopt=zop,
                       costring=costr,
                       bin_path=BINBDGpath,
+                      mpipath=MPIRUN,
                       einzel_file_path=wrkDir,
                       potNN=potnn,
                       potNNN=potnnn,
                       parall=-1,
-                      anzcores=min(len(Civilizations[-1][0]), MaxProc),
+                      anzcores=max(2, min(len(Civilizations[-1][0]), MaxProc)),
                       tnni=10,
                       jay=Jstreu,
                       dia=True)
+
         ewN, ewH = NormHamDiag(ma)
 
         print(

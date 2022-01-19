@@ -71,6 +71,7 @@ tnni = 10
 parall = -1
 
 mpii = '137'
+
 potnn = os.getenv(
     "HOME"
 ) + '/kette_repo/ComptonLIT/data/AV4.14'  #'/data/AV18'  #'/data/BONN'  #
@@ -82,7 +83,8 @@ channels = {
     # helion
     'npp0.5^+': [
         #['000', ['he_no1', 'he_no1y', 'he_no6', 'he_no6y']],
-        ['000', ['he_no1', 'he_no6']],
+        #['000', ['he_no1', 'he_no6']],
+        ['000', ['he_no1']],
         #['220', ['he_no1', 'he_no6']],
         #['221', ['he_no1', 'he_no2', 'he_no6']],
         #['111', ['he_no3', 'he_no3i', 'he_no3ii', 'he_no5', 'he_no5i']],

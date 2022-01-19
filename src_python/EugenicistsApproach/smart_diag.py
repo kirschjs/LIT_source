@@ -12,6 +12,7 @@ def blunt_ev(cfgs,
              nzopt,
              costring,
              bin_path,
+             mpipath,
              einzel_file_path,
              potNN,
              potNNN='',
@@ -51,9 +52,10 @@ def blunt_ev(cfgs,
     n3_inen_bdg(basis, jay, costring, fn='INEN', pari=0, nzop=nzopt, tni=tnni)
 
     if parall == -1:
-        subprocess.run(
-            [MPIRUN, '-np',
-             '%d' % anzcores, bin_path + 'V18_PAR/mpi_quaf_v7'])
+        subprocess.run([
+            mpipath, '-np',
+            '%d' % anzcores, bin_path + 'V18_PAR/mpi_quaf_v7'
+        ])
         subprocess.run([bin_path + 'V18_PAR/sammel'])
     else:
         subprocess.run([bin_path + 'QUAFL_M.exe'])
@@ -74,7 +76,7 @@ def blunt_ev(cfgs,
 
         if parall == -1:
             subprocess.run([
-                MPIRUN, '-np',
+                mpipath, '-np',
                 '%d' % anzcores, bin_path + 'UIX_PAR/mpi_drqua_v7'
             ])
             subprocess.run([bin_path + 'UIX_PAR/SAMMEL-uix'])
