@@ -52,7 +52,7 @@ for bastype in bastypes:
     maxParLen = 18
 
     # evolution criteria
-    minCond = 10**-11
+    minCond = 10**-9
     denseEVinterval = [10., 200.0]
     removalGainFactor = 1.5
     muta_initial = 0.92
@@ -70,8 +70,8 @@ for bastype in bastypes:
         os.chdir(wrkDir)
 
         span_initial_basis(basisType=bastype,
-                           ini_grid_bounds=[0.001, 6.5, 0.001, 6.5],
-                           ini_dims=[1, 1, 8, 13],
+                           ini_grid_bounds=[0.5, 6.5, 1.1, 8.5],
+                           ini_dims=[1, 1, 8, 4],
                            coefstr=costr,
                            anzOp=zop)
 

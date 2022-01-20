@@ -4,10 +4,9 @@ from bridgeA3 import *
 def loveliness(groundstateEnergy, conditionNumber, HeigenvaluesbelowX,
                minimalConditionnumber):
 
-    pulchritude = HeigenvaluesbelowX**4.14 * (
-        (-1. * groundstateEnergy)**
-        4) / np.log(conditionNumber
-                    )**2 if conditionNumber > minimalConditionnumber else 0.
+    pulchritude = HeigenvaluesbelowX**4 * np.abs(groundstateEnergy) / np.abs(
+        np.log(conditionNumber)
+    )**2 if conditionNumber > minimalConditionnumber else 0.
     return pulchritude
 
 
