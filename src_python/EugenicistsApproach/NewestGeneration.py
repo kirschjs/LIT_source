@@ -53,11 +53,11 @@ for bastype in bastypes:
 
     # evolution criteria
     minCond = 10**-9
-    denseEVinterval = [10., 200.0]
+    denseEVinterval = [10., 150.0]
     removalGainFactor = 1.5
-    muta_initial = 0.92
+    muta_initial = 0.5
     # nRaces := |i|
-    nRaces = 2 if bastype == boundstatekanal else 6
+    nRaces = 2 if bastype == boundstatekanal else 12
     nbrOff = 6
     MaxOff = 12
 
@@ -69,11 +69,12 @@ for bastype in bastypes:
 
         os.chdir(wrkDir)
 
-        span_initial_basis(basisType=bastype,
-                           ini_grid_bounds=[0.5, 6.5, 1.1, 8.5],
-                           ini_dims=[1, 1, 8, 4],
-                           coefstr=costr,
-                           anzOp=zop)
+        span_initial_basis(
+            basisType=bastype,
+            ini_grid_bounds=[1.0, 7.25, 0.25, 8.5, 1.0, 7.25, 0.1, 8.5],
+            ini_dims=[1, 1, 8, 12],
+            coefstr=costr,
+            anzOp=zop)
 
         print('\n#---------   Basistype: %s ---------------#\n' % bastype)
         # 1) calculation for ONE trail channel, only.

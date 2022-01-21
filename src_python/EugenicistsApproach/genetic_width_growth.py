@@ -12,8 +12,8 @@ def loveliness(groundstateEnergy, conditionNumber, HeigenvaluesbelowX,
 
 def basQ(normSpectrum,
          hamiltonianSpectrum,
-         minCond=10**-12,
-         denseEnergyInterval=[0, 80]):
+         minCond=10**-10,
+         denseEnergyInterval=[5, 120]):
 
     anzSigEV = len(
         [bvv for bvv in hamiltonianSpectrum if bvv < denseEnergyInterval[1]])

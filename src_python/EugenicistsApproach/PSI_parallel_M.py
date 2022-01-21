@@ -8,7 +8,7 @@ def span_initial_basis(
     basisType,
     coefstr,
     anzOp=14,
-    ini_grid_bounds=[0.001, 11.5, 0.0001, 6.5],
+    ini_grid_bounds=[0.1, 9.5, 0.01, 4.5, 0.2, 10.5, 0.02, 5.5],
     ini_dims=[4, 8, 4, 8],
 ):
 
@@ -45,8 +45,8 @@ def span_initial_basis(
     else:
         nwint = ini_dims[2]
         nwrel = ini_dims[3]
-        rel_scale = 0.1
-        wi, wf, nw = ini_grid_bounds[2], ini_grid_bounds[3], [
+        rel_scale = 1.
+        wi, wf, nw = ini_grid_bounds[4], ini_grid_bounds[5], [
             nwint for n in lfrags
         ]  # final-state continuum
 
@@ -62,7 +62,9 @@ def span_initial_basis(
         #  -- internal widths --------------------------------------------------
         offset = 1.
         #if (sfrags[frg][-1] == 'y'):
-        offset += 0.1 * frg / (1 + len(lfrags[frg]))
+        if nw[frg] != 1:
+            offset += 0.1 * frg / (1 + len(lfrags[frg]))
+
         wii = wi * offset
         wff = wf * offset
 
@@ -73,8 +75,9 @@ def span_initial_basis(
                          endpoint=True,
                          dtype=None))
 
-        lit_w_tmp = np.sort([wd * np.random.random()
-                             for wd in lit_w_tmp])[::-1]
+        if nw[frg] != 1:
+            lit_w_tmp = np.sort([wd * np.random.random()
+                                 for wd in lit_w_tmp])[::-1]
 
         lit_w[frg] = lit_w_tmp
 
@@ -85,8 +88,16 @@ def span_initial_basis(
                         float(lfrags[frg][1])]))]
         ]
         #  -- relative widths --------------------------------------------------
-        wir, wfr, nwr = rel_scale * wi, rel_scale * wf, nwrel * len(lit_w[frg])
-        offset = 0.1 + 0.2 * np.random.random()
+
+        if basisType == boundstatekanal:
+            wir, wfr, nwr = rel_scale * ini_grid_bounds[
+                2], rel_scale * ini_grid_bounds[3], nwrel * len(lit_w[frg])
+        else:
+            wir, wfr, nwr = rel_scale * ini_grid_bounds[
+                6], rel_scale * ini_grid_bounds[7], nwrel * len(lit_w[frg])
+
+        offset = 0.1 + 0.2 * np.random.random() if nwr != 1 else 1.0
+
         wiir = wir
         wffr = wfr
 
@@ -98,8 +109,9 @@ def span_initial_basis(
 
         lit_w_tmp = offset * lit_w_tmp
 
-        lit_w_tmp = np.sort([wd * np.random.random()
-                             for wd in lit_w_tmp])[::-1]
+        if nwr != 1:
+            lit_w_tmp = np.sort([wd * np.random.random()
+                                 for wd in lit_w_tmp])[::-1]
 
         lit_rw_tmp = [
             ww for ww in np.abs(
