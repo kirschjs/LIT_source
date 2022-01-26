@@ -1465,6 +1465,8 @@ c      OPEN(UNIT=29,FILE='MATOUTN',STATUS='UNKNOWN',FORM='FORMATTED')
       CLOSE(UNIT=29,STATUS='KEEP')
 
 1811  STOP 'EIGENWERTE DER NORMMATRIX'
+
+c --- if all is well, this part writes the matrices on tape
   210 CONTINUE
       DO 322 M=1,NX
       DO 322 N=1,NX
@@ -1491,6 +1493,8 @@ c     *   FORM='UNFORMATTED')
      * ((EN(N,M),N=1,MMM),M=1,MMM),
      * ((H(N,M),N=1,MMM),M=1,MMM)
 c      CLOSE(UNIT=29,STATUS='KEEP')      
+c --- if this line is reached, hamilton and norm matrix were stored
+
       STOP 'NORM, HAMILTONIAN MATRICES WRITTEN.'
 
 C     NAGLIB-AUFRUF

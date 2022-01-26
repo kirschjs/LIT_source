@@ -36,8 +36,7 @@ he_iw, he_rw, he_frgs = retrieve_he3_M(helionpath + 'basis_struct/' +
                                        'INQUA_V18%s' % siffux)
 HelBasDimRef = len(sum(sum(he_rw, []), []))
 
-anzStreuBases = len(
-    [f for f in glob.glob(litpath3He + 'results/mat_*_BasNR-*')])
+anzStreuBases = len([f for f in glob.glob(respath + 'mat_*_BasNR-*')])
 
 finalStatePaths = [
     litpath3He[:-1] + '-%d/' % nB for nB in range(anzStreuBases)
@@ -768,5 +767,8 @@ for nB in range(anzStreuBases):
 
     os.chdir(wrkDir)
 
-    #os.system('rm -rf ./tmp*')
+    os.system(
+        'cp -r %s %s' %
+        (respath[:-1], os.getenv("HOME") + '/kette_repo/ComptonLIT/systems/'))
+
     os.system('find . -name \"T*OUT.*\" -print0 | xargs -0 rm')

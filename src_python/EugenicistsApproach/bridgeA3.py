@@ -42,7 +42,7 @@ cal = [
     'rhs-couple',
 ]
 
-suffix = 'miwchan-v23'
+suffix = 'miwchan'
 DC = True
 MaxProc = int(len(os.sched_getaffinity(0)) / 2)
 
