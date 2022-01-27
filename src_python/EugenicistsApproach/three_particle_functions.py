@@ -703,7 +703,7 @@ def lit_3inqua(intwi=[],
 def lit_3inen_bare(JWSL, JWSLM, MULM2, JWSR, MREG='', anzo=11, outfile='INEN'):
     s = ''
     # NBAND1,IGAK,KAUSD,KEIND ,IDUM
-    s += ' 10  0  0  0\n'
+    s += ' 10  6  0  0\n'
     # 1-11 Einteilchen
     # 10,11: r^LY_LM fuer p,n
     if MREG == '':

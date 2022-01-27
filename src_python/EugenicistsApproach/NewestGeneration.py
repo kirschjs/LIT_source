@@ -17,7 +17,7 @@ bastypes = [boundstatekanal] + streukas
 
 for bastype in bastypes:
     # number of final-state bases which are grown with the above-set criteria
-    anzStreuBases = 16
+    anzStreuBases = 12
 
     costr = ''
     zop = 31 if tnni == 11 else 14
@@ -58,7 +58,7 @@ for bastype in bastypes:
     maxOnPurge = 22
     muta_initial = 0.75
     # nRaces := |i|
-    nRaces = 2 if bastype == boundstatekanal else 8
+    nRaces = 8 if bastype == boundstatekanal else 2
     nbrOff = 6
     MaxOff = 12
 
@@ -72,8 +72,8 @@ for bastype in bastypes:
 
         span_initial_basis(
             basisType=bastype,
-            ini_grid_bounds=[2.0, 7.25, 0.5, 8.5, 0.1, 9.25, 0.1, 11.5],
-            ini_dims=[1, 1, 6, 6],
+            ini_grid_bounds=[1.0, 7.25, 0.25, 8.5, 0.1, 9.25, 0.1, 11.5],
+            ini_dims=[6, 6, 6, 6],
             coefstr=costr,
             anzOp=zop)
 

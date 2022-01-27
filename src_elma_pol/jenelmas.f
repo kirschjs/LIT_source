@@ -318,7 +318,7 @@ c     *           F1,F,FK1new,GEFAK(MKC),FPAR,MKC
       endif
 C     AUSDRUCK DER OP-WERTE UND DER K-POTENZ LAMBDA
 c      write(nout,'(A13,F8.4,3I3)')'(ecce) DNN = ',DNN(K,L,JJ),K,L,JJ
-      IF(IQUAK.gt.5) then
+      IF(IGAK.gt.5) then
       WRITE(6,'(A42,7I3,3F12.8)') 
      *         'MFL,MFR,MKC,NBVL,NBVR,K,L,F1,DNN: ',
      *           MFL,MFR,MKC,NBVL,NBVR,K,L,

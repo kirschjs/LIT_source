@@ -766,9 +766,10 @@ for nB in range(anzStreuBases):
                 bv_offset += len(zerl_bas)
 
     os.chdir(wrkDir)
-
-    os.system(
-        'cp -r %s %s' %
-        (respath[:-1], os.getenv("HOME") + '/kette_repo/ComptonLIT/systems/'))
-
     os.system('find . -name \"T*OUT.*\" -print0 | xargs -0 rm')
+
+resdest = os.getenv("HOME") + '/kette_repo/ComptonLIT/systems/latestresults'
+resdestbkp = resdest + '%s' % (datetime.now().strftime("%d-%b-%Y--%H-%M-%S"))
+if os.path.isdir(resdest) == True:
+    os.system('mv %s %s' % (resdest, resdestbkp))
+os.system('cp -r %s %s' % (respath[:-1], resdest))
