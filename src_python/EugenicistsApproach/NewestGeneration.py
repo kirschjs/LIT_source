@@ -23,7 +23,7 @@ for bastype in bastypes:
     zop = 31 if tnni == 11 else 14
     for nn in range(1, zop):
         if bastype == boundstatekanal:
-            cf = 1.0 if (1 < nn < 28) else 0.0
+            cf = -1.0 if (1 < nn < 28) else 0.0
         else:
             cf = 0.0 if (1 < nn < 28) else 0.0
         costr += '%12.7f' % cf if (nn % 7 != 0) else '%12.7f\n' % cf
@@ -72,8 +72,8 @@ for bastype in bastypes:
 
         span_initial_basis(
             basisType=bastype,
-            ini_grid_bounds=[1.0, 7.25, 0.25, 8.5, 0.1, 9.25, 0.1, 11.5],
-            ini_dims=[6, 6, 6, 6],
+            ini_grid_bounds=[1.6, 7.25, 0.4, 8.5, 0.1, 9.25, 0.1, 11.5],
+            ini_dims=[1, 1, 6, 6],
             coefstr=costr,
             anzOp=zop)
 
@@ -548,6 +548,8 @@ for bastype in bastypes:
                             [len(iw) for iw in Civilizations[-1][1]])
                         parvenue = child_ladder[0]
 
+                        # check if sexiest basis includes an offspring; if [3][0]==-1
+                        # the most glamorous basis is comprised of the parents, only!
                         if int(parvenue[3][0]) >= 0:
                             Aisopt = copy.deepcopy(Civilizations[-1])
 
@@ -568,6 +570,9 @@ for bastype in bastypes:
                                 Aisopt[3].append(nbv)
 
                             stratifiedOptCivilization = Aisopt
+                        else:
+                            print('no parvenue! the old generation prevails.')
+                            stratifiedOptCivilization = Civilizations[-1]
 
                     elif newRW:
                         Aisopt = copy.deepcopy(Civilizations[-1])
@@ -588,9 +593,6 @@ for bastype in bastypes:
                                         len(Aisopt[2][parvenue[-1]][neww]))
 
                         stratifiedOptCivilization = Aisopt
-
-                    else:
-                        stratifiedOptCivilization = Civilizations[-1]
 
                     Civilizations.append(stratifiedOptCivilization)
 
