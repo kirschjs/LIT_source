@@ -17,15 +17,15 @@ bastypes = [boundstatekanal] + streukas
 
 for bastype in bastypes:
     # number of final-state bases which are grown with the above-set criteria
-    anzStreuBases = 12
+    anzStreuBases = 9
 
     costr = ''
     zop = 31 if tnni == 11 else 14
     for nn in range(1, zop):
         if bastype == boundstatekanal:
-            cf = -1.0 if (1 < nn < 28) else 0.0
+            cf = 1.0 if (1 < nn < 28) else 0.0
         else:
-            cf = 0.0 if (1 < nn < 28) else 0.0
+            cf = 1.0 if (1 < nn < 28) else 0.0
         costr += '%12.7f' % cf if (nn % 7 != 0) else '%12.7f\n' % cf
 
     if bastype == boundstatekanal:
@@ -58,7 +58,7 @@ for bastype in bastypes:
     maxOnPurge = 22
     muta_initial = 0.75
     # nRaces := |i|
-    nRaces = 8 if bastype == boundstatekanal else 2
+    nRaces = 6 if bastype == boundstatekanal else 8
     nbrOff = 6
     MaxOff = 12
 
@@ -73,11 +73,12 @@ for bastype in bastypes:
         span_initial_basis(
             basisType=bastype,
             ini_grid_bounds=[1.6, 7.25, 0.4, 8.5, 0.1, 9.25, 0.1, 11.5],
-            ini_dims=[1, 1, 6, 6],
+            ini_dims=[4, 1, 1, 1],
             coefstr=costr,
             anzOp=zop)
 
-        print('\n#---------   Basistype: %s ---------------#\n' % bastype)
+        print('\n>>> Basistype: %s\n >> Basis Set number: %d/%d ' %
+              (bastype, nB + 1, anzStreuBases))
         # 1) calculation for ONE trail channel, only.
         angu = channels[bastype]
         Jstreu = float(bastype.split('^')[0][-3:])
@@ -233,7 +234,7 @@ for bastype in bastypes:
                         ])
 
                     tst = np.random.choice(np.arange(len(ParaSets)),
-                                           size=maxOnPurge,
+                                           size=min(maxOnPurge, len(ParaSets)),
                                            replace=False)
 
                     if not 0 in tst:

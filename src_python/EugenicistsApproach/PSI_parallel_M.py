@@ -128,6 +128,10 @@ def span_initial_basis(
             lit_rw[frg].append(lit_rw_tmp[bv::len(lit_w[frg])])
         minL = np.min([len(ws) for ws in lit_rw[frg]])
         lit_rw[frg] = [wd[-minL:] for wd in lit_rw[frg]]
+
+    print(lit_w)
+    print(lit_rw)
+    exit()
     widi = []
     widr = []
     for n in range(len(lit_w)):
