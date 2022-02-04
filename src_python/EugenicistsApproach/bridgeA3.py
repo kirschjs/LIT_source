@@ -1,6 +1,6 @@
 import subprocess
 import multiprocessing
-import os, fnmatch, copy, struct
+import os, fnmatch, copy, struct, time
 import numpy as np
 import sympy as sy
 # CG(j1, m1, j2, m2, j3, m3)
@@ -44,7 +44,7 @@ cal = [
 ]
 
 suffix = 'miwchan'
-DC = True
+DC = True if time.tzname[0] == 'EST' else False
 MaxProc = int(len(os.sched_getaffinity(0)) / 2)
 
 if DC:
