@@ -182,8 +182,7 @@ def condense_Basis(inputBasis, independentCfgs, bvsPERcfg=12):
 
 def write_basis_on_tape(basis, jay, btype, baspath=''):
     jaystr = '%s' % str(jay)[:3]
-    path_bas_int_rel_pairs = baspath + 'SLITbas_full_J%s_%s.dat' % (jaystr,
-                                                                    btype)
+    path_bas_int_rel_pairs = baspath + 'SLITbas_full_%s.dat' % btype
     if os.path.exists(path_bas_int_rel_pairs):
         os.remove(path_bas_int_rel_pairs)
     with open(path_bas_int_rel_pairs, 'w') as oof:
@@ -198,7 +197,7 @@ def write_basis_on_tape(basis, jay, btype, baspath=''):
 
     lfrags = np.array(basis[0])[:, 1].tolist()
     sfrags = np.array(basis[0])[:, 0].tolist()
-    path_frag_stru = baspath + 'Sfrags_LIT_J%s_%s.dat' % (jaystr, btype)
+    path_frag_stru = baspath + 'Sfrags_LIT_%s.dat' % btype
     if os.path.exists(path_frag_stru): os.remove(path_frag_stru)
     with open(path_frag_stru, 'wb') as f:
         np.savetxt(f,
@@ -209,7 +208,7 @@ def write_basis_on_tape(basis, jay, btype, baspath=''):
         f.seek(NEWLINE_SIZE_IN_BYTES, 2)
         f.truncate()
     f.close()
-    path_intw = baspath + 'Sintw3heLIT_J%s_%s.dat' % (jaystr, btype)
+    path_intw = baspath + 'Sintw3heLIT_%s.dat' % btype
     if os.path.exists(path_intw): os.remove(path_intw)
     with open(path_intw, 'wb') as f:
         for ws in basis[1]:
@@ -217,7 +216,7 @@ def write_basis_on_tape(basis, jay, btype, baspath=''):
         f.seek(NEWLINE_SIZE_IN_BYTES, 2)
         f.truncate()
     f.close()
-    path_relw = baspath + 'Srelw3heLIT_J%s_%s.dat' % (jaystr, btype)
+    path_relw = baspath + 'Srelw3heLIT_%s.dat' % btype
     if os.path.exists(path_relw): os.remove(path_relw)
     with open(path_relw, 'wb') as f:
         for wss in basis[2]:
@@ -255,7 +254,7 @@ def write_basis_on_tape(basis, jay, btype, baspath=''):
         if finalstate_indices[n - 1] == 1
     ]
 
-    path_indi = baspath + 'Ssigbasv3heLIT_J%s_%s.dat' % (jaystr, btype)
+    path_indi = baspath + 'Ssigbasv3heLIT_%s.dat' % btype
     if os.path.exists(path_indi): os.remove(path_indi)
     with open(path_indi, 'wb') as f:
         np.savetxt(f, sigindi, fmt='%d', delimiter=' ')

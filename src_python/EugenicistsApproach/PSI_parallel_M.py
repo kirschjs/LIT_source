@@ -129,9 +129,6 @@ def span_initial_basis(
         minL = np.min([len(ws) for ws in lit_rw[frg]])
         lit_rw[frg] = [wd[-minL:] for wd in lit_rw[frg]]
 
-    print(lit_w)
-    print(lit_rw)
-    exit()
     widi = []
     widr = []
     for n in range(len(lit_w)):
@@ -174,15 +171,13 @@ def span_initial_basis(
         lfrags2 = lu_stru
         widi = he_iw
         widr = he_rw
-    path_bas_dims = wrkDir + '/basis_struct/LITbas_dims_J%s_%s.dat' % (
-        Jstreustring, basisType)
+    path_bas_dims = wrkDir + '/basis_struct/LITbas_dims_%s.dat' % basisType
     with open(path_bas_dims, 'wb') as f:
         np.savetxt(f, [np.size(wid) for wid in widr], fmt='%d')
         f.seek(NEWLINE_SIZE_IN_BYTES, 2)
         f.truncate()
     f.close()
-    path_bas_int_rel_pairs = wrkDir + '/basis_struct/LITbas_full_J%s_%s.dat' % (
-        Jstreustring, basisType)
+    path_bas_int_rel_pairs = wrkDir + '/basis_struct/LITbas_full_%s.dat' % basisType
     if os.path.exists(path_bas_int_rel_pairs):
         os.remove(path_bas_int_rel_pairs)
     with open(path_bas_int_rel_pairs, 'w') as oof:
@@ -197,8 +192,7 @@ def span_initial_basis(
             so += '\n'
         oof.write(so)
     oof.close()
-    path_frag_stru = wrkDir + '/basis_struct/frags_LIT_J%s_%s.dat' % (
-        Jstreustring, basisType)
+    path_frag_stru = wrkDir + '/basis_struct/frags_LIT_%s.dat' % basisType
     if os.path.exists(path_frag_stru): os.remove(path_frag_stru)
 
     with open(path_frag_stru, 'wb') as f:
@@ -210,8 +204,7 @@ def span_initial_basis(
         f.seek(NEWLINE_SIZE_IN_BYTES, 2)
         f.truncate()
     f.close()
-    path_intw = wrkDir + '/basis_struct/intw3heLIT_J%s_%s.dat' % (Jstreustring,
-                                                                  basisType)
+    path_intw = wrkDir + '/basis_struct/intw3heLIT_%s.dat' % basisType
     if os.path.exists(path_intw): os.remove(path_intw)
     with open(path_intw, 'wb') as f:
         for ws in widi:
@@ -219,8 +212,7 @@ def span_initial_basis(
         f.seek(NEWLINE_SIZE_IN_BYTES, 2)
         f.truncate()
     f.close()
-    path_relw = wrkDir + '/basis_struct/relw3heLIT_J%s_%s.dat' % (Jstreustring,
-                                                                  basisType)
+    path_relw = wrkDir + '/basis_struct/relw3heLIT_%s.dat' % basisType
     if os.path.exists(path_relw): os.remove(path_relw)
     with open(path_relw, 'wb') as f:
         for wss in widr:

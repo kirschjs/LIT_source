@@ -84,8 +84,8 @@ channels = {
     # helion
     'npp0.5^+': [
         #['000', ['he_no1', 'he_no1y', 'he_no6', 'he_no6y']],
-        #['000', ['he_no1', 'he_no6']],
-        ['000', ['he_no1']],
+        ['000', ['he_no1', 'he_no6']],
+        #['000', ['he_no1']],
         #['220', ['he_no1', 'he_no6']],
         #['221', ['he_no1', 'he_no2', 'he_no6']],
         #['111', ['he_no3', 'he_no3i', 'he_no3ii', 'he_no5', 'he_no5i']],
@@ -109,18 +109,17 @@ channels = {
         #['122', ['he_no5', 'he_no5i']],
     ],
     '1.5^-': [
-        ['011', ['he_no1', 'he_no1y', 'he_no2', 'he_no6']],
-        ['011', ['he_no6', 'he_no6', 'he_no6', 'he_no6']],
-        ['211', ['he_no1', 'he_no1y', 'he_no2', 'he_no6']],
-        ['212', ['he_no2']],  #,'he_no1',  'he_no6']],
-        ['213', ['he_no2']],  #,'he_no6',  'he_no1']],
-        #['101', ['he_no3']],  #, 'he_no4i', 'he_no5'
+        ['011', ['he_no1', 'he_no2', 'he_no6']],
+        ['101', ['he_no3']],  #, 'he_no4i', 'he_no5'
+        #['211', ['he_no1', 'he_no1y', 'he_no2', 'he_no6']],
+        #['212', ['he_no2']],  #,'he_no1',  'he_no6']],
+        #['213', ['he_no2']],  #,'he_no6',  'he_no1']],
         #['121', ['he_no3']],  #, 'he_no4i', 'he_no5'
         #['122', ['he_no5']],  #, 'he_no4i'
     ]
 }
 
-streukas = ['0.5^-']  #,'1.5^-']
+streukas = ['0.5^-', '1.5^-']
 
 #                  realistic    L>0 (only)         deuteron
 boundstatekanal = 'npp0.5^+'

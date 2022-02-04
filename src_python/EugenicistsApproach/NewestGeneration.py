@@ -58,7 +58,7 @@ for bastype in bastypes:
     maxOnPurge = 22
     muta_initial = 0.75
     # nRaces := |i|
-    nRaces = 6 if bastype == boundstatekanal else 8
+    nRaces = 2 if bastype == boundstatekanal else 2
     nbrOff = 6
     MaxOff = 12
 
@@ -72,8 +72,8 @@ for bastype in bastypes:
 
         span_initial_basis(
             basisType=bastype,
-            ini_grid_bounds=[1.6, 7.25, 0.4, 8.5, 0.1, 9.25, 0.1, 11.5],
-            ini_dims=[4, 1, 1, 1],
+            ini_grid_bounds=[0.06, 6.25, 0.04, 5.5, 0.05, 6.25, 0.1, 5.5],
+            ini_dims=[4, 6, 4, 6],
             coefstr=costr,
             anzOp=zop)
 
@@ -81,8 +81,9 @@ for bastype in bastypes:
               (bastype, nB + 1, anzStreuBases))
         # 1) calculation for ONE trail channel, only.
         angu = channels[bastype]
-        Jstreu = float(bastype.split('^')[0][-3:])
-        Jstreustring = '%s' % str(Jstreu)[:3]
+        Jay = float(bastype.split('^')[0][-3:])
+
+        Jaystring = '%s' % str(Jay)[:3]
 
         # 2) read the initial population of parents, e.g.,
         # - geom. width sets         (intwLIT,rws)
@@ -91,20 +92,18 @@ for bastype in bastypes:
 
         # Read first generation of parents == (B0)
         cfgs = [
-            con.split() for con in open(basisPath + 'frags_LIT_J%s_%s.dat' %
-                                        (Jstreustring, bastype))
+            con.split()
+            for con in open(basisPath + 'frags_LIT_%s.dat' % bastype)
         ]
         origCFGs = copy.deepcopy(cfgs)
 
         intwLIT = [
             np.array(ln.split()).astype(float).tolist()
-            for ln in open(basisPath + 'intw3heLIT_J%s_%s.dat' %
-                           (Jstreustring, bastype))
+            for ln in open(basisPath + 'intw3heLIT_%s.dat' % bastype)
         ]
         relwLIT = [
             np.array(ln.split()).astype(float).tolist()
-            for ln in open(basisPath + 'relw3heLIT_J%s_%s.dat' %
-                           (Jstreustring, bastype))
+            for ln in open(basisPath + 'relw3heLIT_%s.dat' % bastype)
         ]
         rws = []
         rw0 = 0
@@ -164,7 +163,7 @@ for bastype in bastypes:
                               parall=-1,
                               anzcores=max(2, min(len(lfragTNG), MaxProc)),
                               tnni=10,
-                              jay=Jstreu,
+                              jay=Jay,
                               dia=False)
 
                 ewN, ewH = NormHamDiag(ma)
@@ -212,8 +211,8 @@ for bastype in bastypes:
 
                     cpy = copy.deepcopy(D0flat)
                     ParaSets.append([
-                        cpy, Jstreu, costr, zop, 10, [0, 0], BINBDGpath,
-                        minCond, denseEVinterval
+                        cpy, Jay, costr, zop, 10, [0, 0], BINBDGpath, minCond,
+                        denseEVinterval
                     ])
 
                     for bvTrail in D0flat:
@@ -229,7 +228,7 @@ for bastype in bastypes:
                         cpy = rectify_basis(cpy)
 
                         ParaSets.append([
-                            cpy, Jstreu, costr, zop, 10, bvID, BINBDGpath,
+                            cpy, Jay, costr, zop, 10, bvID, BINBDGpath,
                             minCond, denseEVinterval
                         ])
 
@@ -303,7 +302,7 @@ for bastype in bastypes:
                 # -- end of purges; the removal of any BV will now reduce the population's fitness
 
                 n3_inen_bdg(D0,
-                            Jstreu,
+                            Jay,
                             costr,
                             fn='INEN',
                             pari=0,
@@ -346,8 +345,8 @@ for bastype in bastypes:
 
                     childishParaSets = []
                     childishParaSets.append([
-                        Ais[3], Jstreu, costr, zop, 10, [-1], BINBDGpath,
-                        minCond, denseEVinterval
+                        Ais[3], Jay, costr, zop, 10, [-1], BINBDGpath, minCond,
+                        denseEVinterval
                     ])
                     chiBV = nbrOff
 
@@ -410,7 +409,7 @@ for bastype in bastypes:
                         Ais[1].append(daughterson)
 
                         childishParaSets.append([
-                            tmpBas, Jstreu, costr, zop, 10, childidentifier,
+                            tmpBas, Jay, costr, zop, 10, childidentifier,
                             BINBDGpath, minCond, denseEVinterval
                         ])
 
@@ -455,9 +454,8 @@ for bastype in bastypes:
                                     print(tmpBas)
 
                             childishParaSets.append([
-                                tmpBas, Jstreu, costr, zop, 10,
-                                childidentifier, BINBDGpath, minCond,
-                                denseEVinterval
+                                tmpBas, Jay, costr, zop, 10, childidentifier,
+                                BINBDGpath, minCond, denseEVinterval
                             ])
                             chiBV += 1
 
@@ -497,7 +495,7 @@ for bastype in bastypes:
                               parall=-1,
                               anzcores=max(2, min(len(Ais[0]), MaxProc)),
                               tnni=10,
-                              jay=Jstreu,
+                              jay=Jay,
                               dia=False)
 
                 # 3) rate certain partitions according to their fitness
@@ -628,7 +626,7 @@ for bastype in bastypes:
                       parall=-1,
                       anzcores=max(2, min(len(Civilizations[-1][0]), MaxProc)),
                       tnni=10,
-                      jay=Jstreu,
+                      jay=Jay,
                       dia=True)
 
         ewN, ewH = NormHamDiag(ma)
@@ -659,22 +657,20 @@ for bastype in bastypes:
         os.system('rm -rf ./D*OUT.*')
 
         fullBasfile, actBasfile = write_basis_on_tape(Civilizations[-1],
-                                                      Jstreu,
+                                                      Jay,
                                                       bastype,
                                                       baspath=basisPath)
 
         if bastype != boundstatekanal:
-            AbasOutStr = respath + 'Ssigbasv3heLIT_J%s_%s_BasNR-%d.dat' % (
-                Jstreu, bastype, nB)
-            FbasOutStr = respath + 'SLITbas_full_J%s_%s_BasNR-%d.dat' % (
-                Jstreu, bastype, nB)
+            AbasOutStr = respath + 'Ssigbasv3heLIT_%s_BasNR-%d.dat' % (bastype,
+                                                                       nB)
+            FbasOutStr = respath + 'SLITbas_full_%s_BasNR-%d.dat' % (bastype,
+                                                                     nB)
             subprocess.call('cp %s %s' % (fullBasfile, FbasOutStr), shell=True)
             subprocess.call('cp %s %s' % (actBasfile, AbasOutStr), shell=True)
         else:
-            AbasOutStr = respath + 'Ssigbasv3heLIT_J%s_%s.dat' % (Jstreu,
-                                                                  bastype)
-            FbasOutStr = respath + 'SLITbas_full_J%s_%s.dat' % (Jstreu,
-                                                                bastype)
+            AbasOutStr = respath + 'Ssigbasv3heLIT_%s.dat' % bastype
+            FbasOutStr = respath + 'SLITbas_full_%s.dat' % bastype
             subprocess.call('cp %s %s' % (fullBasfile, FbasOutStr), shell=True)
             subprocess.call('cp %s %s' % (actBasfile, AbasOutStr), shell=True)
 

@@ -36,7 +36,8 @@ he_iw, he_rw, he_frgs = retrieve_he3_M(helionpath + 'basis_struct/' +
                                        'INQUA_V18%s' % siffux)
 HelBasDimRef = len(sum(sum(he_rw, []), []))
 
-anzStreuBases = len([f for f in glob.glob(respath + 'mat_*_BasNR-*')])
+anzStreuBases = len(
+    [f for f in glob.glob(respath + 'mat_%s_BasNR-*' % streukas[0])])
 
 finalStatePaths = [
     litpath3He[:-1] + '-%d/' % nB for nB in range(anzStreuBases)
@@ -73,8 +74,8 @@ for nB in range(anzStreuBases):
             HelBasDim = sum([
                 len(ln.split()[1:])
                 for ln in open(helionpath +
-                               'basis_struct/SLITbas_full_J%s_%s.dat' %
-                               (J0, boundstatekanal))
+                               'basis_struct/SLITbas_full_%s.dat' %
+                               boundstatekanal)
             ])
 
             lfrags = []
@@ -84,9 +85,9 @@ for nB in range(anzStreuBases):
             #    for scfg in channels[boundstatekanal][lcfg][1]:
             #        lfrags = lfrags + [channels[boundstatekanal][lcfg][0]]
             fragfile = [
-                ln for ln in open(helionpath +
-                                  'basis_struct/Sfrags_LIT_J%s_%s.dat' %
-                                  (J0, boundstatekanal))
+                ln
+                for ln in open(helionpath + 'basis_struct/Sfrags_LIT_%s.dat' %
+                               boundstatekanal)
             ]
 
             lfrags = [fr.split(' ')[1].strip() for fr in fragfile]
@@ -95,21 +96,21 @@ for nB in range(anzStreuBases):
             # v18uix_LITbasis.py
             fragfile = [
                 ln
-                for ln in open(wrkDir + 'basis_struct/Sfrags_LIT_J%s_%s.dat' %
-                               (Jstreustring, streukanal))
+                for ln in open(wrkDir +
+                               'basis_struct/Sfrags_LIT_%s.dat' % streukanal)
             ]
 
             lfrags2 = [fr.split(' ')[1].strip() for fr in fragfile]
             sfrags2 = [fr.split(' ')[0] for fr in fragfile]
             intwLIT = [
                 np.array(ln.split()).astype(float).tolist()
-                for ln in open(wrkDir + 'basis_struct/Sintw3heLIT_J%s_%s.dat' %
-                               (Jstreustring, streukanal))
+                for ln in open(wrkDir +
+                               'basis_struct/Sintw3heLIT_%s.dat' % streukanal)
             ]
             relwLIT = [
                 np.array(ln.split()).astype(float).tolist()
-                for ln in open(wrkDir + 'basis_struct/Srelw3heLIT_J%s_%s.dat' %
-                               (Jstreustring, streukanal))
+                for ln in open(wrkDir +
+                               'basis_struct/Srelw3heLIT_%s.dat' % streukanal)
             ]
 
             if 'dbg' in cal:
@@ -125,15 +126,15 @@ for nB in range(anzStreuBases):
                 he_iw_2 = [
                     np.array(ln.split()).astype(float).tolist()
                     for ln in open(helionpath +
-                                   'basis_struct/Sintw3heLIT_J%s_%s.dat' %
-                                   (Jstreustring, boundstatekanal))
+                                   'basis_struct/Sintw3heLIT_%s.dat' %
+                                   boundstatekanal)
                 ]
 
                 he_rw_2 = [
                     np.array(ln.split()).astype(float).tolist()
                     for ln in open(helionpath +
-                                   'basis_struct/Srelw3heLIT_J%s_%s.dat' %
-                                   (Jstreustring, boundstatekanal))
+                                   'basis_struct/Srelw3heLIT_%s.dat' %
+                                   boundstatekanal)
                 ]
 
                 for lit_zerl in range(len(lfrags2)):
@@ -340,9 +341,9 @@ for nB in range(anzStreuBases):
                 In = float(streukanal.split('^')[0])
                 Jstreustring = '%s' % str(In)[:3]
                 fragfile = [
-                    ln for ln in open(wrkDir +
-                                      'basis_struct/Sfrags_LIT_J%s_%s.dat' %
-                                      (Jstreustring, streukanal))
+                    ln
+                    for ln in open(wrkDir + 'basis_struct/Sfrags_LIT_%s.dat' %
+                                   streukanal)
                 ]
 
                 lfrags2 = [fr.split(' ')[1].strip() for fr in fragfile]
@@ -436,8 +437,8 @@ for nB in range(anzStreuBases):
 
             fragfile = [
                 ln
-                for ln in open(wrkDir + 'basis_struct/Sfrags_LIT_J%s_%s.dat' %
-                               (Jstreustring, streukanal))
+                for ln in open(wrkDir +
+                               'basis_struct/Sfrags_LIT_%s.dat' % streukanal)
             ]
 
             lfrags = [fr.split(' ')[1].strip() for fr in fragfile]
@@ -445,8 +446,8 @@ for nB in range(anzStreuBases):
 
             intwLIT = [
                 np.array(ln.split()).astype(float)
-                for ln in open(wrkDir + 'basis_struct/Sintw3heLIT_J%s_%s.dat' %
-                               (Jstreustring, streukanal))
+                for ln in open(wrkDir +
+                               'basis_struct/Sintw3heLIT_%s.dat' % streukanal)
             ]
 
             anzLITbv = sum([len(frgm) for frgm in intwLIT])
@@ -458,8 +459,8 @@ for nB in range(anzStreuBases):
 
             relwLIT = [
                 np.array(ln.split()).astype(float)
-                for ln in open(wrkDir + 'basis_struct/Srelw3heLIT_J%s_%s.dat' %
-                               (Jstreustring, streukanal))
+                for ln in open(wrkDir +
+                               'basis_struct/Srelw3heLIT_%s.dat' % streukanal)
             ]
 
             if 'dbg' in cal:
@@ -616,8 +617,8 @@ for nB in range(anzStreuBases):
             litbas2 = [[
                 int(line.split()[0]), [int(rwn) for rwn in line.split()[1:]]
             ] for line in open(wrkDir +
-                               'basis_struct/SLITbas_full_J%s_%s.dat' %
-                               (Jstreustring, streukanal))]
+                               'basis_struct/SLITbas_full_%s.dat' % streukanal)
+                       ]
             lb = []
             for bv in litbas2:
                 for rw in range(len(bv[1])):
@@ -680,8 +681,8 @@ for nB in range(anzStreuBases):
 
             intwLIT = [
                 np.array(ln.split()).astype(float).tolist()
-                for ln in open(wrkDir + 'basis_struct/Sintw3heLIT_J%s_%s.dat' %
-                               (Jstreustring, streukanal))
+                for ln in open(wrkDir +
+                               'basis_struct/Sintw3heLIT_%s.dat' % streukanal)
             ]
 
             bv_pro_zerl = [len(zset) for zset in intwLIT]
@@ -691,21 +692,20 @@ for nB in range(anzStreuBases):
 
             relwLIT = [
                 np.array(ln.split()).astype(float).tolist()
-                for ln in open(wrkDir + 'basis_struct/Srelw3heLIT_J%s_%s.dat' %
-                               (Jstreustring, streukanal))
+                for ln in open(wrkDir +
+                               'basis_struct/Srelw3heLIT_%s.dat' % streukanal)
             ]
 
             fragfile = [
                 ln
-                for ln in open(wrkDir + 'basis_struct/Sfrags_LIT_J%s_%s.dat' %
-                               (Jstreustring, streukanal))
+                for ln in open(wrkDir +
+                               'basis_struct/Sfrags_LIT_%s.dat' % streukanal)
             ]
 
             lfrags = [fr.split(' ')[1].strip() for fr in fragfile]
 
-            litbas = np.loadtxt(wrkDir +
-                                'basis_struct/SLITbas_full_J%s_%s.dat' %
-                                (Jstreustring, streukanal)).astype(int)
+            litbas = np.loadtxt(wrkDir + 'basis_struct/SLITbas_full_%s.dat' %
+                                streukanal).astype(int)
             litbas = [bv for bv in np.unique(litbas, axis=0) if bv[1] != 0]
 
             print('He3 structure: anz[int,rel]weiten:', np.sum(he_frgs,
@@ -722,8 +722,8 @@ for nB in range(anzStreuBases):
                 os.chdir(wrkDir + 'tmp_%d' % lit_zerl)
 
                 litbas = np.loadtxt(wrkDir +
-                                    'basis_struct/SLITbas_full_J%s_%s.dat' %
-                                    (Jstreustring, streukanal)).astype(int)
+                                    'basis_struct/SLITbas_full_%s.dat' %
+                                    streukanal).astype(int)
                 litbas = [bv for bv in np.unique(litbas, axis=0) if bv[1] != 0]
 
                 print('werkle in fragment %s' % os.getcwd())
