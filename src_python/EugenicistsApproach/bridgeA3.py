@@ -75,7 +75,7 @@ mpii = '137'
 
 potnn = os.getenv(
     "HOME"
-) + '/kette_repo/ComptonLIT/data/AV4.14'  #'/data/AV18'  #'/data/BONN'  #
+) + '/kette_repo/ComptonLIT/data/AV18'  #'/data/BONN'  #/data/AV4.14'  #'
 potnnn = os.getenv("HOME") + '/kette_repo/ComptonLIT/data/urbana9_AK_neu'
 
 new_helion = True
@@ -83,43 +83,36 @@ new_helion = True
 channels = {
     # helion
     'npp0.5^+': [
-        #['000', ['he_no1', 'he_no1y', 'he_no6', 'he_no6y']],
         ['000', ['he_no1', 'he_no6']],
-        #['000', ['he_no1']],
+        ['022', ['he_no2']],  #, 'he_no2i'
+        ['202', ['he_no2']],  #, 'he_no2i'
+        #['111', ['he_no3', 'he_no5']],
+        #['112', ['he_no5']],
         #['220', ['he_no1', 'he_no6']],
         #['221', ['he_no1', 'he_no2', 'he_no6']],
-        #['111', ['he_no3', 'he_no3i', 'he_no3ii', 'he_no5', 'he_no5i']],
-        #['022', ['he_no2', 'he_no2i']],
-        #['202', ['he_no2', 'he_no2i']],
         #['222', ['he_no2']],
-        #['112', ['he_no5', 'he_no5i']],
     ],
     #          [l1l2L,[compatible (iso)spin configurations]]
     '0.5^-': [
-        #['011', ['he_no1', 'he_no1y', 'he_no6', 'he_no6y']],
-        #['101', ['he_no3', 'he_no3y']],
         ['011', ['he_no1', 'he_no6']],
         ['101', ['he_no3']],
-        #[
-        #    '211',
-        #    ['he_no1', 'he_no1i', 'he_no2', 'he_no2i', 'he_no6', 'he_no6i']
-        #],
-        #['121', ['he_no3', 'he_no3i', 'he_no3ii', 'he_no5', 'he_no5i']],
-        #['212', ['he_no2', 'he_no2i']],
-        #['122', ['he_no5', 'he_no5i']],
+        ['211', ['he_no2']],  #'he_no1',  'he_no6']],
+        ['212', ['he_no2']],
+        #['121', ['he_no3', 'he_no5']],
+        #['122', ['he_no5']],
     ],
     '1.5^-': [
         ['011', ['he_no1', 'he_no2', 'he_no6']],
-        ['101', ['he_no3']],  #, 'he_no4i', 'he_no5'
-        #['211', ['he_no1', 'he_no1y', 'he_no2', 'he_no6']],
-        #['212', ['he_no2']],  #,'he_no1',  'he_no6']],
-        #['213', ['he_no2']],  #,'he_no6',  'he_no1']],
-        #['121', ['he_no3']],  #, 'he_no4i', 'he_no5'
-        #['122', ['he_no5']],  #, 'he_no4i'
+        ['101', ['he_no3']],
+        ['211', ['he_no1', 'he_no2', 'he_no6']],
+        ['212', ['he_no2']],
+        ['213', ['he_no2']],
+        ['121', ['he_no3']],
+        ['122', ['he_no5']],
     ]
 }
 
-streukas = ['0.5^-', '1.5^-']
+streukas = ['0.5^-', '1.5^-']  #
 
 #                  realistic    L>0 (only)         deuteron
 boundstatekanal = 'npp0.5^+'

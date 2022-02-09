@@ -350,6 +350,7 @@ for nB in range(anzStreuBases):
 
                 mLmJl, mLrange, mJlrange = non_zero_couplings(
                     multipolarity, J0, In)
+                print(multipolarity, J0, In, ':', mJlrange)
                 for mJ in mJlrange:
                     firstmJ = True
                     for mL in mLrange:
@@ -768,8 +769,7 @@ for nB in range(anzStreuBases):
     os.chdir(wrkDir)
     os.system('find . -name \"T*OUT.*\" -print0 | xargs -0 rm')
 
-resdest = os.getenv(
-    "HOME") + '/kette_repo/ComptonLIT/systems/latestresults_FSon'
+resdest = os.getenv("HOME") + '/kette_repo/ComptonLIT/systems/latestresults'
 resdestbkp = resdest + '%s' % (datetime.now().strftime("%d-%b-%Y--%H-%M-%S"))
 if os.path.isdir(resdest) == True:
     os.system('mv %s %s' % (resdest, resdestbkp))
