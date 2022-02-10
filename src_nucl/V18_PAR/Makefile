@@ -1,7 +1,7 @@
 CC          = mpicc
 F77         = mpif77
 
-FOPTS  =       -Ofast -ffpe-summary=none -mcmodel=large
+FOPTS  =       -Ofast -ffpe-summary=none -mcmodel=medium
 
 #COPTS       = -O2 -Wall -ggdb3
 #COPTS       = -O2
@@ -41,7 +41,7 @@ mpi_quaf_eft_pi: mpi_quaf_eft_pi.o
 	$(F77) $(FOPTS) $(MAKRO) -o $@ mpi_quaf_eft_pi.o   $(LIBS) $(MPI) 
 
 sammel: sammel.o
-	$(F77) $(FOPTS) $(MAKRO) -o $@ sammel.o $(LIBS)
+	mpif77 -Ofast -ffpe-summary=none -mcmodel=medium -o $@ sammel.o $(LIBS)
 
 clean:
 	$(RM) *.o *.exe pvm_tniq *~

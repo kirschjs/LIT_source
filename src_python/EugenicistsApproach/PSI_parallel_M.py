@@ -373,13 +373,14 @@ def span_initial_basis(
     suche_fehler()
 
     ew_threshold = 10**(-8)
-    #    subprocess.call('cp MATOUTB %smat_%s' % (resultpath, basisType),
-    #                    shell=True)
-    #matout = [line for line in open('MATOUTB')]
+
     matout = np.core.records.fromfile('MATOUTB', formats='f8', offset=4)
 
-    goodEVs = smart_ev(matout, ew_threshold)
-    print('the good, big, and the smallest: ', np.real(goodEVs[:4]), ' ... ',
-          np.real(goodEVs[-3:]))
-    print('#E < 0                         : ',
-          len([dg for dg in np.real(goodEVs) if float(dg) <= 0.0]))
+    return matout
+
+
+#    goodEVs = smart_ev(matout, ew_threshold)
+#    print('the good, big, and the smallest: ', np.real(goodEVs[:4]), ' ... ',
+#          np.real(goodEVs[-3:]))
+#    print('#E < 0                         : ',
+#          len([dg for dg in np.real(goodEVs) if float(dg) <= 0.0]))

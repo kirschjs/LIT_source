@@ -13,7 +13,7 @@ os.chdir(litpath3He)
 
 dbg = False
 
-bastypes = [boundstatekanal] + streukas
+bastypes = [boundstatekanal]  #+ streukas
 
 for bastype in bastypes:
     # number of final-state bases which are grown with the above-set criteria
@@ -58,7 +58,7 @@ for bastype in bastypes:
     maxOnPurge = 22
     muta_initial = 0.75
     # nRaces := |i|
-    nRaces = 2 if bastype == boundstatekanal else 2
+    nRaces = 12 if bastype == boundstatekanal else 22
     nbrOff = 6
     MaxOff = 12
 
@@ -70,15 +70,60 @@ for bastype in bastypes:
 
         os.chdir(wrkDir)
 
-        span_initial_basis(
+        seedMat = span_initial_basis(
             basisType=bastype,
-            ini_grid_bounds=[0.06, 6.25, 0.04, 7.5, 0.005, 4.25, 0.001, 5.5],
-            ini_dims=[6, 8, 6, 8],
+            ini_grid_bounds=[0.006, 6.25, 0.004, 7.5, 0.005, 8.25, 0.001, 7.5],
+            ini_dims=[4, 6, 4, 6],
             coefstr=costr,
             anzOp=zop)
 
+        dim = int(np.sqrt(len(seedMat) * 0.5))
+
+        # read Norm and Hamilton matrices
+        normat = np.reshape(
+            np.array(seedMat[:dim**2]).astype(float), (dim, dim))
+        hammat = np.reshape(
+            np.array(seedMat[dim**2:]).astype(float), (dim, dim))
+        # diagonalize normalized norm (using "eigh(ermitian)" to speed-up the computation)
+        ewN, evN = eigh(normat)
+        idx = ewN.argsort()[::-1]
+        ewN = [eww for eww in ewN[idx]]
+        evN = evN[:, idx]
+        #    print('lowest eigen values (N): ', ewN[-4:])
+
+        try:
+            ewH, evH = eigh(hammat, normat)
+            idx = ewH.argsort()[::-1]
+            ewH = [eww for eww in ewH[idx]]
+            evH = evH[:, idx]
+
+        except:
+            print(
+                'failed to solve generalized eigenvalue problem (norm ev\'s < 0 ?)'
+            )
+            attractiveness = 0.
+            basCond = 0.
+            gsEnergy = 0.
+            ewH = []
+
+        if ewH != []:
+
+            anzSigEV = len([
+                bvv for bvv in ewH
+                if denseEVinterval[0] < bvv < denseEVinterval[1]
+            ])
+
+            gsEnergy = ewH[-1]
+
+            basCond = np.min(np.abs(ewN)) / np.max(np.abs(ewN))
+
+            attractiveness = loveliness(gsEnergy, basCond, anzSigEV, minCond)
+
         print('\n>>> Basistype: %s\n >> Basis Set number: %d/%d ' %
               (bastype, nB + 1, anzStreuBases))
+        print(' >> seed basis: E0 = %f   cond=|Emin|/|Emax| = %f' %
+              (gsEnergy, basCond))
+
         # 1) calculation for ONE trail channel, only.
         angu = channels[bastype]
         Jay = float(bastype.split('^')[0][-3:])
@@ -180,7 +225,7 @@ for bastype in bastypes:
                     basQ(ewN, ewH, minCond, denseEVinterval))
 
                 # sift through the parents and purge it of 'ideling' individuals
-                # which yield reduce the fitness
+                # which reduce the fitness
 
                 D0 = Civilizations[-1][3]
 
@@ -199,7 +244,7 @@ for bastype in bastypes:
                 print('              commencing purges (%s) ' % (pur[pwpurge]),
                       end='\n')
 
-                goPurge = True
+                goPurge = True if (nCivi + 1) % 4 == 1 else False
 
                 while goPurge:
 

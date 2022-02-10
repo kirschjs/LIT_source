@@ -33,6 +33,7 @@ def blunt_ev(cfgs,
         os.chdir(tmp_path)
 
     #print('diaging in ', os.getcwd())
+
     lfrag = np.array(cfgs)[:, 1].tolist()
     sfrag = np.array(cfgs)[:, 0].tolist()
     insam(len(lfrag))
