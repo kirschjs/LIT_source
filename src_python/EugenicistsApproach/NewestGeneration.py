@@ -13,25 +13,25 @@ os.chdir(litpath3He)
 
 dbg = False
 
-bastypes = [boundstatekanal]  #+ streukas
+bastypes = [boundstatekanal] + streukas
 
 for bastype in bastypes:
     # number of final-state bases which are grown with the above-set criteria
-    anzStreuBases = 1
+    anzStreuBases = 21
 
     costr = ''
     zop = 31 if tnni == 11 else 14
     for nn in range(1, zop):
         if bastype == boundstatekanal:
-            cf = 1.0 if (1 < nn < 28) else 0.0
+            cf = 1.0 if (1 <= nn <= 28) else 0.0
         else:
-            cf = 1.0 if (1 < nn < 28) else 0.0
+            cf = 1.0 if (1 <= nn <= 28) else 0.0
         costr += '%12.7f' % cf if (nn % 7 != 0) else '%12.7f\n' % cf
 
     if bastype == boundstatekanal:
         if os.path.isdir(helionpath) != False:
             print('an optimized initial state is already present')
-            exit()
+            #exit()
         else:
             os.mkdir(helionpath)
             os.mkdir(helionpath + 'basis_struct/')
@@ -52,13 +52,15 @@ for bastype in bastypes:
     maxParLen = 18
 
     # evolution criteria
-    minCond = 10**-10
+    minCond = 10**-9
     denseEVinterval = [-10., 150.0]
     removalGainFactor = 1.5
-    maxOnPurge = 22
+    maxOnPurge = 43
     muta_initial = 0.75
+
     # nRaces := |i|
     nRaces = 12 if bastype == boundstatekanal else 22
+
     nbrOff = 6
     MaxOff = 12
 
@@ -72,8 +74,8 @@ for bastype in bastypes:
 
         seedMat = span_initial_basis(
             basisType=bastype,
-            ini_grid_bounds=[0.006, 6.25, 0.004, 7.5, 0.005, 8.25, 0.001, 7.5],
-            ini_dims=[4, 6, 4, 6],
+            ini_grid_bounds=[0.06, 6.25, 0.04, 7.5, 0.005, 8.25, 0.001, 7.5],
+            ini_dims=[4, 8, 4, 6],
             coefstr=costr,
             anzOp=zop)
 
@@ -121,7 +123,7 @@ for bastype in bastypes:
 
         print('\n>>> Basistype: %s\n >> Basis Set number: %d/%d ' %
               (bastype, nB + 1, anzStreuBases))
-        print(' >> seed basis: E0 = %f   cond=|Emin|/|Emax| = %f' %
+        print(' >> seed basis: E0 = %f   cond=|Emin|/|Emax| = %e' %
               (gsEnergy, basCond))
 
         # 1) calculation for ONE trail channel, only.
@@ -213,15 +215,16 @@ for bastype in bastypes:
 
                 ewN, ewH = NormHamDiag(ma)
 
-                #print('parents: \n', Civilizations[-1])
+                parCond = np.min(np.abs(ewN)) / np.max(np.abs(ewN))
 
                 if ewH == []:
                     print('parent basis unstable:\n', Civilizations[-1][3])
                     exit()
 
                 print(
-                    'civ-%d)          parents: Dim = %d) B(GS) = %8.4f  fit = '
-                    % (nCivi, basisDim(Civilizations[-1][3]), ewH[-1]),
+                    'civ-%d)          parents: Dim = %d) B(GS) = %8.4f  C-number: %4.3e   fit = '
+                    %
+                    (nCivi, basisDim(Civilizations[-1][3]), ewH[-1], parCond),
                     basQ(ewN, ewH, minCond, denseEVinterval))
 
                 # sift through the parents and purge it of 'ideling' individuals
@@ -241,10 +244,15 @@ for bastype in bastypes:
                     (int(denseEVinterval[0]), int(denseEVinterval[1])), 'B(GS)'
                 ]
 
-                print('              commencing purges (%s) ' % (pur[pwpurge]),
-                      end='\n')
+                if ((nCivi + 1) % 4 == 1 | (parCond < minCond)):
+                    goPurge = True
+                    print('              commencing purges (%s) ' %
+                          (pur[pwpurge]),
+                          end='\n')
+                else:
+                    goPurge = False
 
-                goPurge = True if (nCivi + 1) % 4 == 1 else False
+                # >>> for unstable parents, purge the parents! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
                 while goPurge:
 
@@ -256,8 +264,8 @@ for bastype in bastypes:
 
                     cpy = copy.deepcopy(D0flat)
                     ParaSets.append([
-                        cpy, Jay, costr, zop, 10, [0, 0], BINBDGpath, minCond,
-                        denseEVinterval
+                        rectify_basis(cpy), Jay, costr, zop, 10, [0, 0],
+                        BINBDGpath, minCond, denseEVinterval
                     ])
 
                     for bvTrail in D0flat:
@@ -284,7 +292,7 @@ for bastype in bastypes:
                     if not 0 in tst:
                         tst = tst.tolist() + [0]
 
-                    if maxOnPurge > len(ParaSets):
+                    if maxOnPurge < len(ParaSets):
                         tkkg = [ParaSets[t] for t in tst]
                         ParaSets = tkkg
 
@@ -340,48 +348,50 @@ for bastype in bastypes:
                         D0 = rectify_basis(cand_ladder[-1][4])
                         print('1/%d ' % basisDim(D0), end='\n')
 
+                # >>> end of purges; the removal of any BV will now reduce the population's fitness <<<<<<<<<
                 removalGainFactor *= 1.1
 
                 #        D0 = rectify_basis(D0flat)
 
-                # -- end of purges; the removal of any BV will now reduce the population's fitness
+                # obtain spectra only if the parents were purged
+                if Civilizations[-1][3] != D0:
 
-                n3_inen_bdg(D0,
-                            Jay,
-                            costr,
-                            fn='INEN',
-                            pari=0,
-                            nzop=zop,
-                            tni=tnni)
+                    n3_inen_bdg(D0,
+                                Jay,
+                                costr,
+                                fn='INEN',
+                                pari=0,
+                                nzop=zop,
+                                tni=tnni)
 
-                subprocess.run([BINBDGpath + 'TDR2END_NORMAL.exe'],
-                               capture_output=True,
-                               text=True)
+                    subprocess.run([BINBDGpath + 'TDR2END_NORMAL.exe'],
+                                   capture_output=True,
+                                   text=True)
 
-                matout = np.core.records.fromfile('MATOUTB',
-                                                  formats='f8',
-                                                  offset=4)
+                    matout = np.core.records.fromfile('MATOUTB',
+                                                      formats='f8',
+                                                      offset=4)
 
-                ewN, ewH = NormHamDiag(matout)
+                    ewN, ewH = NormHamDiag(matout)
 
-                Civilizations[-1][3] = D0
+                    print(
+                        '\nciv-%d) (purged) parents: Dim = %d) B(GS) = %8.4f  fit = %8.4f'
+                        % (nCivi, basisDim(D0), ewH[-1],
+                           basQ(ewN, ewH, minCond, denseEVinterval)[0]))
+
+                    Civilizations[-1][3] = D0
 
                 parBV = D0[-1][0]
 
                 Ais = copy.deepcopy(Civilizations[-1])
 
                 # generate a pair of offspring from a randomly selected couple
-                newRW = True if nCivi % 2 != 0 else False
-                newBV = True if nCivi % 2 == 0 else False
-                growthType = 'relative widths to a CFG' if newRW else 'an additional CFG'
+                newRW = True if nCivi % 4 != 1 else False
+                newBV = True if nCivi % 4 == 1 else False
+                growthType = 'add relative widths to a CFG' if newRW else 'add an additional CFG'
 
-                print(
-                    '\nciv-%d) (purged) parents: Dim = %d) B(GS) = %8.4f  fit = %8.4f\n        >>> adding %s <<<'
-                    %
-                    (nCivi, basisDim(D0), ewH[-1],
-                     basQ(ewN, ewH, minCond, denseEVinterval)[0], growthType))
+                print('\nciv-%d)  growthType: %s' % (nCivi, growthType))
 
-                bvsPerCfg = 12
                 # bv with new int an relw. => append new offspring cfg's
 
                 if newBV:
@@ -562,7 +572,8 @@ for bastype in bastypes:
                 pipe_list = []
 
                 for chunk in Parchunks:
-                    pool = ThreadPool(max(min(MaxProc, len(ParaSets)), 2))
+                    pool = ThreadPool(
+                        max(min(MaxProc, len(childishParaSets)), 2))
                     jobs = []
                     for procnbr in range(len(chunk)):
                         recv_end, send_end = multiprocessing.Pipe(False)

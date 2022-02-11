@@ -257,51 +257,54 @@ def endmat(para, send_end):
 
     try:
         NormHam = np.core.records.fromfile(maoutf, formats='f8', offset=4)
+        dim = int(np.sqrt(len(NormHam) * 0.5))
+
+        # read Norm and Hamilton matrices
+        normat = np.reshape(
+            np.array(NormHam[:dim**2]).astype(float), (dim, dim))
+        hammat = np.reshape(
+            np.array(NormHam[dim**2:]).astype(float), (dim, dim))
+        # diagonalize normalized norm (using "eigh(ermitian)" to speed-up the computation)
+        ewN, evN = eigh(normat)
+        idx = ewN.argsort()[::-1]
+        ewN = [eww for eww in ewN[idx]]
+        evN = evN[:, idx]
+        #    print('lowest eigen values (N): ', ewN[-4:])
+
+        try:
+            ewH, evH = eigh(hammat, normat)
+            idx = ewH.argsort()[::-1]
+            ewH = [eww for eww in ewH[idx]]
+            evH = evH[:, idx]
+
+        except:
+            print(
+                'failed to solve generalized eigenvalue problem (norm ev\'s < 0 ?)'
+            )
+            attractiveness = 0.
+            basCond = 0.
+            gsEnergy = 0.
+            ewH = []
+
+        if ewH != []:
+
+            anzSigEV = len(
+                [bvv for bvv in ewH if para[8][0] < bvv < para[8][1]])
+
+            gsEnergy = ewH[-1]
+
+            basCond = np.min(np.abs(ewN)) / np.max(np.abs(ewN))
+
+            minCond = para[7]
+
+            attractiveness = loveliness(gsEnergy, basCond, anzSigEV, minCond)
+
+        os.system('rm -rf ./%s' % inenf)
+        os.system('rm -rf ./%s' % outf)
+        os.system('rm -rf ./%s' % maoutf)
+
+        send_end.send([basCond, attractiveness, gsEnergy, para[5], para[0]])
+
     except:
         print(maoutf)
-        exit()
-
-    dim = int(np.sqrt(len(NormHam) * 0.5))
-
-    # read Norm and Hamilton matrices
-    normat = np.reshape(np.array(NormHam[:dim**2]).astype(float), (dim, dim))
-    hammat = np.reshape(np.array(NormHam[dim**2:]).astype(float), (dim, dim))
-    # diagonalize normalized norm (using "eigh(ermitian)" to speed-up the computation)
-    ewN, evN = eigh(normat)
-    idx = ewN.argsort()[::-1]
-    ewN = [eww for eww in ewN[idx]]
-    evN = evN[:, idx]
-    #    print('lowest eigen values (N): ', ewN[-4:])
-
-    try:
-        ewH, evH = eigh(hammat, normat)
-        idx = ewH.argsort()[::-1]
-        ewH = [eww for eww in ewH[idx]]
-        evH = evH[:, idx]
-
-    except:
-        print(
-            'failed to solve generalized eigenvalue problem (norm ev\'s < 0 ?)'
-        )
-        attractiveness = 0.
-        basCond = 0.
-        gsEnergy = 0.
-        ewH = []
-
-    if ewH != []:
-
-        anzSigEV = len([bvv for bvv in ewH if para[8][0] < bvv < para[8][1]])
-
-        gsEnergy = ewH[-1]
-
-        basCond = np.min(np.abs(ewN)) / np.max(np.abs(ewN))
-
-        minCond = para[7]
-
-        attractiveness = loveliness(gsEnergy, basCond, anzSigEV, minCond)
-
-    os.system('rm -rf ./%s' % inenf)
-    os.system('rm -rf ./%s' % outf)
-    os.system('rm -rf ./%s' % maoutf)
-
-    send_end.send([basCond, attractiveness, gsEnergy, para[5], para[0]])
+        send_end.send([0.0, 0.0, -42.7331, para[5], para[0]])
