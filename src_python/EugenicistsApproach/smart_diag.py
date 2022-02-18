@@ -269,6 +269,7 @@ def endmat(para, send_end):
         idx = ewN.argsort()[::-1]
         ewN = [eww for eww in ewN[idx]]
         evN = evN[:, idx]
+
         #    print('lowest eigen values (N): ', ewN[-4:])
 
         try:
@@ -306,5 +307,7 @@ def endmat(para, send_end):
         send_end.send([basCond, attractiveness, gsEnergy, para[5], para[0]])
 
     except:
+
+        print(para[5], child_id)
         print(maoutf)
         send_end.send([0.0, 0.0, -42.7331, para[5], para[0]])

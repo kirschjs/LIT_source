@@ -45,7 +45,7 @@ cal = [
 
 suffix = 'miwchan'
 DC = True if time.tzname[0] == 'EST' else False
-MaxProc = int(len(os.sched_getaffinity(0)) / 2)
+MaxProc = 1  #int(len(os.sched_getaffinity(0)) / 2)
 
 if DC:
     pathbase = os.getenv("HOME") + '/kette_repo/ComptonLIT/systems'
@@ -102,17 +102,18 @@ channels = {
         ['122', ['he_no5']],
     ],
     '1.5^-': [
-        ['011', ['he_no1', 'he_no2', 'he_no6']],
+        #['011', ['he_no1', 'he_no2', 'he_no6']],
         ['101', ['he_no3']],
-        ['211', ['he_no1', 'he_no2', 'he_no6']],
-        ['212', ['he_no2']],
-        ['213', ['he_no2']],
-        ['121', ['he_no3']],
-        ['122', ['he_no5']],
+        #['211', ['he_no1', 'he_no2', 'he_no6']],
+        #['212', ['he_no2']],
+        #['121', ['he_no3', 'he_no5']],
+        #['122', ['he_no3', 'he_no5']],
+        #['213', ['he_no2']],
+        #['123', ['he_no2']],
     ]
 }
 
-streukas = ['0.5^-', '1.5^-']
+streukas = ['1.5^-']
 
 #                  realistic    L>0 (only)         deuteron
 boundstatekanal = 'npp0.5^+'
@@ -135,7 +136,7 @@ opME_th_up = 10**24
 # basis ------------------------------------------------------------------
 
 # maximal number of basis vectors per calculation block (numerical parameter)
-bvma = 6
+bvma = 12
 
 # maximal number of radial Gauss widths for the expansion of the coordinate
 # between the two fragments which are associated with a basis vector (numerical

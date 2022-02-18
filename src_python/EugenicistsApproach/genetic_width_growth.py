@@ -344,4 +344,78 @@ def intertwining(p1, p2, mutation_rate=0.0, wMin=0.001, wMax=20., dbg=False):
     return Fc1, Fc2
 
 
-#intertwining(0.1, 0.01, 0.1, True)
+def essentialize_basis(basis, MaxBVsPERcfg=4):
+    # basis = [[cfg1L,cfg1S],...,[cfgNL,cfgNS]],
+    #          [iw1,...,iwN],
+    #          [[[rw111,...,rw11M],...,[rw1|iw1|1,...,rw1|iw1|M]],...,[[rwN11,...,rwN1M],...,[rwN|iw1|1,...,rwN|iw1|M]]],
+    #          [[bv1,[rwin1]],...,[bvK,[rwinK]]]
+    #         ]
+
+    bvIndices = [bv[0] for bv in basis[3]]
+    dim = len(np.reshape(np.array(basis[1]).flatten(), (1, -1))[0])
+    ws2remove = [bv for bv in range(1, dim + 1) if bv not in bvIndices]
+
+    #if ws2remove != []:
+    #    print('remove indices:', ws2remove)
+
+    # remove all bv width sets which are not included in basis
+    emptyCfg = []
+
+    nBV = 1
+    for nCfg in range(len(basis[0])):
+
+        ncBV = 0
+        for bvn in range(len(basis[1][nCfg])):
+            if nBV not in bvIndices:
+                #            print('removing BV:', nBV, '=', ncBV, ' in FRG')
+                basis[1][nCfg][ncBV] = -42
+                basis[2][nCfg][ncBV] = [-42]
+
+            basis[2][nCfg][bvn] = [rw for rw in basis[2][nCfg][ncBV] if rw > 0]
+            ncBV += 1
+            nBV += 1
+
+        basis[1][nCfg] = [iw for iw in basis[1][nCfg] if iw > 0]
+        basis[2][nCfg] = [rws for rws in basis[2][nCfg] if rws != []]
+
+        if basis[1][nCfg] == []:
+            basis[0].pop(nCfg)
+
+    # adapt basis indices to reduced widths
+    savBas = basis[3]
+    basis[3] = []
+
+    nbv = 0
+    for nCfg in range(len(basis[0])):
+        nbvc = 0
+        for bv in basis[1][nCfg]:
+            nbv += 1
+            nbvc += 1
+            basis[3] += [[nbv, savBas[nbv - 1][1]]]
+
+    tmpCFGs = []
+    tmpIWs = []
+    tmpRWs = []
+    for nCfg in range(len(basis[0])):
+
+        split_points = [
+            n * MaxBVsPERcfg
+            for n in range(1 + int(len(basis[1][nCfg]) / MaxBVsPERcfg))
+        ] + [len(basis[1][nCfg]) + 42]
+
+        tmpIW = [
+            basis[1][nCfg][split_points[n]:split_points[n + 1]]
+            for n in range(len(split_points) - 1)
+        ]
+
+        tmpIW = [iw for iw in tmpIW if iw != []]
+        tmpIWs += tmpIW
+
+        tmpRWs += [
+            basis[2][nCfg][split_points[n]:split_points[n + 1]]
+            for n in range(len(split_points) - 1)
+        ]
+        tmpRWs = [rw for rw in tmpRWs if rw != []]
+        tmpCFGs += [basis[0][nCfg]] * len(tmpIW)
+
+    return [tmpCFGs, tmpIWs, tmpRWs, basis[3]]

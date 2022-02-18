@@ -13,11 +13,11 @@ os.chdir(litpath3He)
 
 dbg = False
 
-bastypes = [boundstatekanal] + streukas
+bastypes = streukas  #[boundstatekanal] +
 
 for bastype in bastypes:
     # number of final-state bases which are grown with the above-set criteria
-    anzStreuBases = 21
+    anzStreuBases = 1
 
     costr = ''
     zop = 31 if tnni == 11 else 14
@@ -31,7 +31,7 @@ for bastype in bastypes:
     if bastype == boundstatekanal:
         if os.path.isdir(helionpath) != False:
             print('an optimized initial state is already present')
-            #exit()
+            continue
         else:
             os.mkdir(helionpath)
             os.mkdir(helionpath + 'basis_struct/')
@@ -41,10 +41,11 @@ for bastype in bastypes:
             litpath3He[:-1] + '-%d/' % nB for nB in range(anzStreuBases)
         ]
         for finalStatePath in finalStatePaths:
-            if os.path.isdir(finalStatePath) == False:
-                os.mkdir(finalStatePath)
-                os.mkdir(finalStatePath + 'LITstate/')
-                os.mkdir(finalStatePath + 'basis_struct/')
+            if os.path.isdir(finalStatePath) == True:
+                os.system('rm -rf ' + finalStatePath)
+
+            os.mkdir(finalStatePath)
+            os.mkdir(finalStatePath + 'basis_struct/')
 
     # numerical stability
     minDiffwidthsINT = 10**-2
@@ -59,10 +60,10 @@ for bastype in bastypes:
     muta_initial = 0.75
 
     # nRaces := |i|
-    nRaces = 12 if bastype == boundstatekanal else 22
+    nRaces = 1 if bastype == boundstatekanal else 5
 
-    nbrOff = 6
-    MaxOff = 12
+    nbrOff = 16
+    MaxOff = 22
 
     for nB in range(anzStreuBases):
 
@@ -75,7 +76,7 @@ for bastype in bastypes:
         seedMat = span_initial_basis(
             basisType=bastype,
             ini_grid_bounds=[0.06, 6.25, 0.04, 7.5, 0.005, 8.25, 0.001, 7.5],
-            ini_dims=[4, 8, 4, 6],
+            ini_dims=[2, 2, 3, 3],
             coefstr=costr,
             anzOp=zop)
 
