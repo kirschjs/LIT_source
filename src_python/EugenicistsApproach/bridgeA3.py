@@ -45,7 +45,7 @@ cal = [
 
 suffix = 'miwchan'
 DC = True if time.tzname[0] == 'EST' else False
-MaxProc = 1  #int(len(os.sched_getaffinity(0)) / 2)
+MaxProc = int(len(os.sched_getaffinity(0)) / 2)
 
 if DC:
     pathbase = os.getenv("HOME") + '/kette_repo/ComptonLIT/systems'
@@ -86,11 +86,11 @@ channels = {
         ['000', ['he_no1', 'he_no6']],  # 1,2
         ['022', ['he_no2']],  # 3
         ['202', ['he_no2']],  # 4
-        ['111', ['he_no3', 'he_no5']],  # 5,6
-        ['112', ['he_no5']],  # 7
-        ['220', ['he_no1', 'he_no6']],  # 8,9
-        ['221', ['he_no1', 'he_no2', 'he_no6']],  # 10,11,12
-        ['222', ['he_no2']],  # 13
+        #        ['111', ['he_no3', 'he_no5']],  # 5,6
+        #        ['112', ['he_no5']],  # 7
+        #        ['220', ['he_no1', 'he_no6']],  # 8,9
+        #        ['221', ['he_no1', 'he_no2', 'he_no6']],  # 10,11,12
+        #        ['222', ['he_no2']],  # 13
     ],
     #          [l1l2L,[compatible (iso)spin configurations]]
     '0.5^-': [
@@ -102,8 +102,8 @@ channels = {
         ['122', ['he_no5']],
     ],
     '1.5^-': [
-        #['011', ['he_no1', 'he_no2', 'he_no6']],
-        ['101', ['he_no3']],
+        ['011', ['he_no1', 'he_no2', 'he_no6']],
+        #['101', ['he_no3']],
         #['211', ['he_no1', 'he_no2', 'he_no6']],
         #['212', ['he_no2']],
         #['121', ['he_no3', 'he_no5']],

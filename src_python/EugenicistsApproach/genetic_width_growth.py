@@ -355,56 +355,66 @@ def essentialize_basis(basis, MaxBVsPERcfg=4):
     dim = len(np.reshape(np.array(basis[1]).flatten(), (1, -1))[0])
     ws2remove = [bv for bv in range(1, dim + 1) if bv not in bvIndices]
 
-    #if ws2remove != []:
-    #    print('remove indices:', ws2remove)
-
     # remove all bv width sets which are not included in basis
     emptyCfg = []
 
+    tmpBas = copy.deepcopy(basis)
+
     nBV = 1
-    for nCfg in range(len(basis[0])):
+    for nCfg in range(len(tmpBas[0])):
 
         ncBV = 0
-        for bvn in range(len(basis[1][nCfg])):
-            if nBV not in bvIndices:
-                #            print('removing BV:', nBV, '=', ncBV, ' in FRG')
-                basis[1][nCfg][ncBV] = -42
-                basis[2][nCfg][ncBV] = [-42]
+        for bvn in range(len(tmpBas[1][nCfg])):
+            if (nBV in bvIndices) == False:
+                tmpBas[1][nCfg][ncBV] = np.nan
+                tmpBas[2][nCfg][ncBV] = [np.nan]
 
-            basis[2][nCfg][bvn] = [rw for rw in basis[2][nCfg][ncBV] if rw > 0]
             ncBV += 1
             nBV += 1
 
-        basis[1][nCfg] = [iw for iw in basis[1][nCfg] if iw > 0]
-        basis[2][nCfg] = [rws for rws in basis[2][nCfg] if rws != []]
+    newBas = [[], [], [], []]
 
-        if basis[1][nCfg] == []:
-            basis[0].pop(nCfg)
+    for ncfg in range(len(tmpBas[0])):
+        if sum([np.isnan(iw)
+                for iw in tmpBas[1][ncfg]]) != len(tmpBas[1][ncfg]):
+            newBas[0].append(tmpBas[0][ncfg])
+            newBas[1].append([])
+            newBas[2].append([])
 
+            for niw in range(len(tmpBas[1][ncfg])):
+                if np.isnan(tmpBas[1][ncfg][niw]) == False:
+                    newBas[1][-1] += [tmpBas[1][ncfg][niw]]
+                    newBas[2][-1] += [tmpBas[2][ncfg][niw]]
+
+    #        tmp = copy.deepcopy(tmpBas[1][nCfg])
+    #        tmpBas[1][nCfg] = [iw for iw in tmp if np.isnan(iw) == False]
+    #        tmp = copy.deepcopy(tmpBas[1][nCfg])
+    #        tmpBas[2][nCfg] = [rws for rws in tmp if rws != []]
+
+    #    basis[0] = [basis[0][n] for n in range(len(basis[0])) if n not in emptyCfg]
     # adapt basis indices to reduced widths
-    savBas = basis[3]
-    basis[3] = []
+    savBas = tmpBas[3]
 
     nbv = 0
-    for nCfg in range(len(basis[0])):
+    for nCfg in range(len(newBas[0])):
         nbvc = 0
-        for bv in basis[1][nCfg]:
+        for bv in newBas[1][nCfg]:
             nbv += 1
             nbvc += 1
-            basis[3] += [[nbv, savBas[nbv - 1][1]]]
+            newBas[3] += [[nbv, savBas[nbv - 1][1]]]
 
     tmpCFGs = []
     tmpIWs = []
     tmpRWs = []
-    for nCfg in range(len(basis[0])):
+    for nCfg in range(len(newBas[0])):
 
         split_points = [
             n * MaxBVsPERcfg
-            for n in range(1 + int(len(basis[1][nCfg]) / MaxBVsPERcfg))
-        ] + [len(basis[1][nCfg]) + 42]
+            for n in range(1 + int(len(newBas[1][nCfg]) / MaxBVsPERcfg))
+        ] + [len(newBas[1][nCfg]) + 1024]
 
         tmpIW = [
-            basis[1][nCfg][split_points[n]:split_points[n + 1]]
+            newBas[1][nCfg][split_points[n]:split_points[n + 1]]
             for n in range(len(split_points) - 1)
         ]
 
@@ -412,10 +422,10 @@ def essentialize_basis(basis, MaxBVsPERcfg=4):
         tmpIWs += tmpIW
 
         tmpRWs += [
-            basis[2][nCfg][split_points[n]:split_points[n + 1]]
+            newBas[2][nCfg][split_points[n]:split_points[n + 1]]
             for n in range(len(split_points) - 1)
         ]
         tmpRWs = [rw for rw in tmpRWs if rw != []]
-        tmpCFGs += [basis[0][nCfg]] * len(tmpIW)
+        tmpCFGs += [newBas[0][nCfg]] * len(tmpIW)
 
-    return [tmpCFGs, tmpIWs, tmpRWs, basis[3]]
+    return [tmpCFGs, tmpIWs, tmpRWs, newBas[3]]
