@@ -13,7 +13,7 @@ os.chdir(litpath3He)
 
 dbg = False
 
-bastypes = [boundstatekanal]  #streukas  #+
+bastypes = streukas  #+[boundstatekanal]  #
 
 # > optimize the various basis types, e.g., in case of the npp system:
 # > helion ground state, final J=1/2- and J=3/2- states
@@ -23,7 +23,7 @@ for bastype in bastypes:
     Jaystring = '%s' % str(Jay)[:3]
 
     # number of final-state bases which are grown with the above-set criteria
-    anzStreuBases = 1
+    anzStreuBases = 3
 
     costr = ''
     zop = 31 if tnni == 11 else 14
@@ -36,7 +36,7 @@ for bastype in bastypes:
 
     if bastype == boundstatekanal:
         if os.path.isdir(helionpath) != False:
-            print('an optimized initial state is already present')
+            print('<ECCE> working in an existing helion folder.')
             #continue
         else:
             os.mkdir(helionpath)
@@ -57,7 +57,23 @@ for bastype in bastypes:
     minDiffwidthsINT = 10**-2
     minDiffwidthsREL = 10**-3
     maxParLen = 18
+
+    # rating criterion in order to stratify the initial seed basis
+    # default and reasonable for an unstable, random seed =0 (C-nbr)
     pwpurge = 0
+
+    # rating criterion in order to stratify the *stabilized* initial seed basis
+    # ensuing the one-time optimization of each of its configurations
+    # here, we want to sort out idling vectors, i.e, such which do neither harm by causing
+    # small C-nbrs nor increase the fitness significantly
+    pwSig = 1
+
+    # rating criterion for the offspring, i.e., based on what measure is a single basis-vector block
+    # added to the parent population?
+    # at present, any function of the norm/Hamiltonian matrices/spectra are conceivable
+    # ECCE: criteria derived from the overlap with some input initial state, e.g., E1|A-body bound state>
+    #       is not yet implemented!
+    pwopt = 1
     purgeStr = ['Condition number', 'pulchritude',
                 'Ground-state energy'][pwpurge]
 
@@ -67,14 +83,13 @@ for bastype in bastypes:
     removalGainFactor = 1.5
     maxOnPurge = 43
     maxOnTrail = 10**2
-    muta_initial = 0.15
-    pwopt = 1
+    muta_initial = 0.5
 
     CgfCycles = 3
     # nRaces := |i|
-    nRaces = 5 if bastype == boundstatekanal else 5
+    nRaces = 3 if bastype == boundstatekanal else 2
 
-    cradleCapacity = 60
+    cradleCapacity = 40
 
     # > nState > produce/optimize/grow multiple bases with pseudo-random initial seeds
     for nB in range(anzStreuBases):
@@ -87,8 +102,8 @@ for bastype in bastypes:
 
         seedMat = span_initial_basis(
             basisType=bastype,
-            ini_grid_bounds=[0.06, 6.25, 0.04, 7.5, 0.005, 8.25, 0.001, 7.5],
-            ini_dims=[5, 7, 12, 4],
+            ini_grid_bounds=[0.06, 13.25, 0.04, 13.5, 0.005, 8.25, 0.001, 7.5],
+            ini_dims=[8, 4, 8, 4],
             coefstr=costr,
             anzOp=zop)
 
@@ -151,6 +166,17 @@ for bastype in bastypes:
             rw0 += len(intwLIT[cfg])
 
         initialCiv = [cfgs, intwLIT, rws, []]
+
+        # set of unique angular, spin, and isospin configurations
+        # ecce: each of these cfg's might appear multiple times if the
+        # number of radial widths associated with it exceeds <bvma>
+        unisA = []
+        for ncfg in range(len(initialCiv[0])):
+            if initialCiv[0][ncfg] in unisA:
+                continue
+            else:
+                unisA.append(initialCiv[0][ncfg])
+
         nbv = 0
         for cfg in range(len(initialCiv[0])):
             nbvc = 0
@@ -166,10 +192,18 @@ for bastype in bastypes:
         # > nState > nBasis > stabilize the seed basis
         goPurge = True
 
+        #print('\n\nSeed Basis (naive):\n\n', initialCiv)
+
+        initialCiv = condense_basis(initialCiv, MaxBVsPERcfg=10)
+
+        #print('\n\nSeed Basis (condensed):\n\n', initialCiv, '\n\n')
+
         D0 = initialCiv[3]
 
         # purge just entire bv sets with identical internal width
-        print('Stratifying the initial seed -- criterion: %s' % purgeStr)
+        print(
+            '\n> basType %s > basSet %d/%d: Stratifying the initial seed -- criterion: %s'
+            % (bastype, nB + 1, anzStreuBases, purgeStr))
         while goPurge:
             newpopList = []
             goPurge = False
@@ -213,9 +247,11 @@ for bastype in bastypes:
 
             cand_list = []
 
-            print(
-                'checking each vector in %d-dim basis on its effect on the stability,'
-                % len(ParaSets))
+            if dbg:
+                print(
+                    '   rating basis vectors in %d-dim basis on their effect on the stability,'
+                    % len(ParaSets))
+
             for chunk in Parchunks:
                 pool = ThreadPool(max(min(MaxProc, len(ParaSets)), 2))
                 jobs = []
@@ -236,35 +272,42 @@ for bastype in bastypes:
             reff = [[bvm[0], bvm[1], bvm[2]] for bvm in cand_ladder
                     if bvm[3] == [0, 0]][0]
 
-            for cand in cand_ladder[-3:]:
-                print(cand[:4])
+            if dbg:
+                for cand in cand_ladder[-3:]:
+                    print(cand[:4])
 
             print(
-                '\n> basType %s > basSet %d/%d: purged seed: E0 = %f   cond=|Emin|/|Emax| = %e'
+                '\n> basType %s > basSet %d/%d: purged seed: E0 = %f   C-nbr=|Emin|/|Emax| = %e'
                 % (bastype, nB + 1, anzStreuBases, cand_ladder[-1][2],
                    cand_ladder[-1][0]))
 
-            print('    best =  %2.3e , %2.3e , %2.3e' %
-                  (cand_ladder[-1][0], cand_ladder[-1][1], cand_ladder[-1][2]))
-            print('    worst=  %2.3e , %2.3e , %2.3e' %
-                  (cand_ladder[0][0], cand_ladder[0][1], cand_ladder[0][2]))
+            if dbg:
+                print('    best =  %2.3e , %2.3e , %2.3e' %
+                      (cand_ladder[-1][0], cand_ladder[-1][1],
+                       cand_ladder[-1][2]))
+                print(
+                    '    worst=  %2.3e , %2.3e , %2.3e' %
+                    (cand_ladder[0][0], cand_ladder[0][1], cand_ladder[0][2]))
 
+            # only if the removal of a basis-vector block (see [Kir Dipl, p.38])
+            # 1) increases the cond. number significantly, or,
+            # 2) in case of a prohibitively unstable reference, any removal which
+            #    stabilizes the set above a preset threshold (minCond) is acceptable
             if ((removalGainFactor * np.abs(reff[pwpurge]) < np.abs(
                     cand_ladder[-1][pwpurge])) |
                 ((np.abs(cand_ladder[-1][pwpurge]) < minCond) &
                  (reff[0] < minCond))):
                 goPurge = True
                 D0 = rectify_basis(cand_ladder[-1][4])
-                print('1/%d ' % basisDim(D0), end='\n')
+                print(
+                    '                   removal of 1/%d basis-vector blocks is advantageous.'
+                    % len(D0),
+                    end='')
 
         initialCiv[3] = rectify_basis(cand_ladder[-1][4])
         # > nState > nBasis > end of stabilization
 
-        print('\niniCivSeed:\n', initialCiv)
-
         initialCiv = essentialize_basis(initialCiv, MaxBVsPERcfg=bvma)
-
-        print('\niniCivSeed (strat):\n', initialCiv)
 
         ma = blunt_ev(initialCiv[0],
                       initialCiv[1],
@@ -289,33 +332,36 @@ for bastype in bastypes:
         parCond = np.min(np.abs(ewN)) / np.max(np.abs(ewN))
 
         print(
-            '>\n>\n>\n> stabilized initial basis: C-nbr = %4.4e E0 = %4.4e\n>\n>\n>'
-            % (parCond, ewH[-1]))
+            '\n> basType %s > basSet %d/%d: stabilized initial basis: C-nbr = %4.4e E0 = %4.4e\n\n>>> COMMENCING OPTIMIZATION <<<\n'
+            % (bastype, nB + 1, anzStreuBases, parCond, ewH[-1]))
+
+        # count unique cfg's after purge and exit() if the purge removed one of them
+        # entirely
+        unis = []
+        for ncfg in range(len(initialCiv[0])):
+            if initialCiv[0][ncfg] in unis:
+                continue
+            else:
+                unis.append(initialCiv[0][ncfg])
+        if len(unis) != len(unisA):
+            print(
+                'Elemental cfg of the seed was removed entirely during purge.\n RESTART!'
+            )
+            exit()
 
         # > nState > nBasis > optimize each orb-ang, spin-iso cfg in a number of cycles
         for nCgfCycle in range(CgfCycles):
 
             # > nState > nBasis > nCfgCycle > optimize a single angular-momentum configuration, e.g. l1=1,l2=1,L=2,s12=....
-            unis = []
-            for ncfg in range(len(initialCiv[0])):
-                if initialCiv[0][ncfg] in unis:
-                    continue
-                else:
-                    unis.append(initialCiv[0][ncfg])
 
             for nUcfg in range(len(unis)):
 
                 print(
-                    '\n> basType %s > basSet %d/%d > nUcfg %d/%d > : Optimizing cfg: '
-                    % (bastype, nB + 1, anzStreuBases, nUcfg + 1, len(unis)),
-                    unis[nUcfg])
+                    '> basType %s > basSet %d/%d > cfgCycle %d/%d > nUcfg %d/%d > : Optimizing cfg: '
+                    % (bastype, nB + 1, anzStreuBases, nCgfCycle + 1,
+                       CgfCycles, nUcfg + 1, len(unis)), unis[nUcfg])
                 # > nState > nBasis > nCfgCycle > nUcfg > allow each cfg to evolve over nRaces
                 for nGen in range(nRaces):
-
-                    print(
-                        '\n> basType %s > basSet %d/%d > nCfg %d/%d > nGen %d/%d: breeding...'
-                        % (bastype, nB + 1, anzStreuBases, nUcfg + 1,
-                           len(unis), nGen + 1, nRaces))
 
                     Ais = copy.deepcopy(initialCiv)
 
@@ -356,6 +402,12 @@ for bastype in bastypes:
                     Ais[2].append([])
 
                     nCh = 1
+
+                    print(
+                        '\n> basType %s > basSet %d/%d > cfgCycle %d/%d > nUcfg %d/%d > nGen %d/%d: breeding %d basis-vector blocks from %d parent blocks.'
+                        % (bastype, nB + 1, anzStreuBases, nCgfCycle + 1,
+                           CgfCycles, nUcfg + 1, len(unis), nGen + 1, nRaces,
+                           cradleCapacity, len(parentIWs)))
 
                     while nCh < cradleCapacity:
 
@@ -418,28 +470,6 @@ for bastype in bastypes:
                     maxBVinCfg = np.cumsum(bvPerCfg)
                     anzBV = sum(bvPerCfg)
 
-                    #bvLowerBnd = 0 if nCfg == 0 else maxBVinCfg[nCfg - 1]
-                    #bvUpperBnd = maxBVinCfg[nCfg]
-
-                    # now we have to rate all BV's for this cfg
-                    # we do this by removing the BV, and test how well the cfg performs w/o it
-                    # we remove the one which does make the least difference
-                    #                    chID = 1
-                    #                    tmpBas.sort()
-                    #                    for bvTrail in [
-                    #                            bv for bv in tmpBas
-                    #                            if bvLowerBnd < bv[0] <= bvUpperBnd
-                    #                    ]:
-                    #                        childidentifier = [chID]
-                    #                        cpy = copy.deepcopy(tmpBas)
-                    #                        cpy.remove(bvTrail)
-                    #                        cpy = rectify_basis(cpy)
-                    #                        childishParaSets.append([
-                    #                            cpy, Jay, costr, zop, 10, childidentifier,
-                    #                            BINBDGpath, minCond, denseEVinterval
-                    #                        ])
-                    #                        chID += 1
-
                     parBVs = Ais[3][:anzBV - nCh + 1]
                     chBVs = Ais[3][anzBV - nCh + 1:]
 
@@ -489,16 +519,15 @@ for bastype in bastypes:
 
                     ewN, ewH = NormHamDiag(ma)
 
-                    parCond = np.min(np.abs(ewN)) / np.max(np.abs(ewN))
+                    parLove, parCond = basQ(ewN, ewH, minCond, denseEVinterval)
 
                     if ewH == []:
                         print('old generation already unstable:\n', Ais)
                         exit()
 
                     print(
-                        'reference for the new gen: Dim(all children + parents) = %d) B(GS, parents) = %8.4f  C-number (parents): %4.3e\nfitness (parents)  = '
-                        % (basisDim(Ais[3]), ewH[-1], parCond),
-                        basQ(ewN, ewH, minCond, denseEVinterval))
+                        'reference for the new gen: Dim(parents+offspring) = %d; parents: B(GS) = %8.4f  C-nbr = %4.3e  fitness = %4.3e'
+                        % (basisDim(Ais[3]), ewH[-1], parCond, parLove))
 
                     tst = np.random.choice(np.arange(len(childishParaSets)),
                                            size=min(maxOnTrail,
@@ -551,38 +580,161 @@ for bastype in bastypes:
                     # ranking following condition-number (0) or quality (1)  or E(GS) (2)
                     cand_ladder.sort(key=lambda tup: np.abs(tup[pwopt]))
 
-                    for cand in cand_ladder[-3:]:
-                        print(cand[:4])
+                    if dbg:
+                        for cand in cand_ladder[-3:]:
+                            print(cand[:4])
                     # optimum when deleting one
 
-                    for cand in cand_ladder[::-1]:
-                        if ((cand[3] != [-1]) & (cand[0] > minCond)):
-                            parvenue = cand
-                            break
+                    cand = cand_ladder[-1]
 
-                    if parvenue == []:
-                        continue
+                    if ((cand[3] != [-1]) & (cand[0] > minCond)):
+                        parvenue = cand
 
-                    print('\nparvenue:\n', parvenue)
+                        if dbg: print('\nparents:\n', parLove, parCond)
+                        print('\nparvenue:\n', parvenue[:4])
+                        Ais[3] = parvenue[-1]
 
-                    Ais[3] = parvenue[-1]
+                        initialCivL = essentialize_basis(Ais,
+                                                         MaxBVsPERcfg=bvma)
 
-                    #print(Ais[0], Ais[3])
+                        #print('\n\niniciV+optChild (naive):\n\n', initialCivL)
 
-                    initialCiv = essentialize_basis(Ais, MaxBVsPERcfg=bvma)
+                        initialCiv = condense_basis(initialCivL,
+                                                    MaxBVsPERcfg=bvma)
 
-                    #print(initialCiv[0], initialCiv[3])
+                        #print('\n\niniciV+optChild (strat):\n\n', initialCiv)
+                    else:
+                        Ais[3] = parBVs
+                        print(
+                            'All children are spoiled. Starting anew with the initial civilization.\n'
+                        )
 
-                    initialCiv = condense_Basis(initialCiv,
-                                                unis,
-                                                bvsPERcfg=bvma)
+            initialCivL = essentialize_basis(initialCiv, MaxBVsPERcfg=bvma)
 
-                    #print(initialCiv[0], initialCiv[3])
+            initialCiv = condense_basis(initialCivL, MaxBVsPERcfg=bvma)
 
-        exit()
+            # after having evolved each configuration, stabilize the basis
+            # and remove its least siginificant vectors before repeating
+            # the optimization of the individual configurations
+            ma = blunt_ev(initialCiv[0],
+                          initialCiv[1],
+                          initialCiv[2],
+                          initialCiv[3],
+                          wrkdir='',
+                          nzopt=zop,
+                          costring=costr,
+                          bin_path=BINBDGpath,
+                          mpipath=MPIRUN,
+                          einzel_file_path=wrkDir,
+                          potNN=potnn,
+                          potNNN=potnnn,
+                          parall=-1,
+                          anzcores=max(2, min(len(initialCiv[0]), MaxProc)),
+                          tnni=10,
+                          jay=Jay,
+                          dia=False)
 
-        # after having evolved each configuration, stabilize the basis
-        # and remove its least siginificant vectors
+            D0 = initialCiv[3]
+            # purge just entire bv sets with identical internal width
+
+            print(
+                '\n> basType %s > basSet %d/%d > cfgCycle %d/%d: Final stabilization, i.e, removal of insignificant(%s) basis-vector blocks.'
+                % (bastype, nB + 1, anzStreuBases, nCgfCycle + 1, CgfCycles,
+                   purgeStr))
+
+            goPurge = True
+            while goPurge:
+                newpopList = []
+                goPurge = False
+                ParaSets = []
+                ParaSets.append([
+                    D0, Jay, costr, zop, 10, [0, 0], BINBDGpath, minCond,
+                    denseEVinterval
+                ])
+                for bvTrail in D0:
+                    bvID = [
+                        int(bvTrail[0]),
+                        int(''.join(map(str, bvTrail[1])))
+                    ]
+                    cpy = copy.deepcopy(D0)
+                    cpy.remove(bvTrail)
+                    ParaSets.append([
+                        cpy, Jay, costr, zop, 10, bvID, BINBDGpath, minCond,
+                        denseEVinterval
+                    ])
+
+                tst = np.random.choice(np.arange(len(ParaSets)),
+                                       size=min(maxOnPurge, len(ParaSets)),
+                                       replace=False)
+                if not 0 in tst:
+                    tst = tst.tolist() + [0]
+                if maxOnPurge < len(ParaSets):
+                    tkkg = [ParaSets[t] for t in tst]
+                    ParaSets = tkkg
+                # x) the parallel environment is set up in sets(chunks) of bases
+                #    in order to limit the number of files open simultaneously
+                split_points = [
+                    n * maxParLen
+                    for n in range(1 + int(len(ParaSets) / maxParLen))
+                ] + [len(ParaSets) + 1024]
+                Parchunks = [
+                    ParaSets[split_points[i]:split_points[i + 1]]
+                    for i in range(len(split_points) - 1)
+                ]
+                cand_list = []
+                print(
+                    'checking each vector in %d-dim basis on its effect on the stability,'
+                    % len(ParaSets))
+                for chunk in Parchunks:
+                    pool = ThreadPool(max(min(MaxProc, len(ParaSets)), 2))
+                    jobs = []
+                    for procnbr in range(len(chunk)):
+                        recv_end, send_end = multiprocessing.Pipe(False)
+                        pars = chunk[procnbr]
+                        p = multiprocessing.Process(target=endmat,
+                                                    args=(pars, send_end))
+                        jobs.append(p)
+                        cand_list.append(recv_end)
+                        p.start()
+                    for proc in jobs:
+                        proc.join()
+                cand_ladder = [x.recv() for x in cand_list]
+                # ranking following condition-number (0) or quality (1)
+                cand_ladder.sort(key=lambda tup: np.abs(tup[pwSig]))
+                reff = [[bvm[0], bvm[1], bvm[2]] for bvm in cand_ladder
+                        if bvm[3] == [0, 0]][0]
+                for cand in cand_ladder[-3:]:
+                    print(cand[:4])
+                print(
+                    '\n> basType %s > basSet %d/%d: purged seed: E0 = %f   cond=|Emin|/|Emax| = %e'
+                    % (bastype, nB + 1, anzStreuBases, cand_ladder[-1][2],
+                       cand_ladder[-1][0]))
+                print('    best =  %2.3e , %2.3e , %2.3e' %
+                      (cand_ladder[-1][0], cand_ladder[-1][1],
+                       cand_ladder[-1][2]))
+                print(
+                    '    worst=  %2.3e , %2.3e , %2.3e' %
+                    (cand_ladder[0][0], cand_ladder[0][1], cand_ladder[0][2]))
+
+                # more fastidious significance threshold because we subjected the vectors
+                # added to the initial seed already to a vetting process
+                removalGainFactor2 = 2 * removalGainFactor
+
+                if ((removalGainFactor2 * np.abs(reff[pwSig]) < np.abs(
+                        cand_ladder[-1][pwSig])) |
+                    ((np.abs(cand_ladder[-1][pwSig]) < minCond) &
+                     (reff[0] < minCond))):
+                    goPurge = True
+                    D0 = rectify_basis(cand_ladder[-1][4])
+                    print('removing 1/%d basis-vector blocks.' % len(D0),
+                          end='\n')
+
+            initialCiv[3] = rectify_basis(cand_ladder[-1][4])
+            # > nState > nBasis > end of stabilization
+            initialCivL = essentialize_basis(initialCiv, MaxBVsPERcfg=bvma)
+
+            initialCiv = condense_basis(initialCivL, MaxBVsPERcfg=bvma)
+
         ma = blunt_ev(initialCiv[0],
                       initialCiv[1],
                       initialCiv[2],
@@ -601,85 +753,60 @@ for bastype in bastypes:
                       jay=Jay,
                       dia=False)
 
-        D0 = initialCiv[3]
-        # purge just entire bv sets with identical internal width
-        print('Stratifying generation (%d) -- criterion: %s' %
-              (nGen, purgeStr))
+        ewN, ewH = NormHamDiag(ma)
 
-        while goPurge:
-            newpopList = []
-            goPurge = False
-            ParaSets = []
-            ParaSets.append([
-                D0, Jay, costr, zop, 10, [0, 0], BINBDGpath, minCond,
-                denseEVinterval
-            ])
-            for bvTrail in D0:
-                bvID = [int(bvTrail[0]), int(''.join(map(str, bvTrail[1])))]
-                cpy = copy.deepcopy(D0)
-                cpy.remove(bvTrail)
-                ParaSets.append([
-                    cpy, Jay, costr, zop, 10, bvID, BINBDGpath, minCond,
-                    denseEVinterval
-                ])
+        optLove, optCond = basQ(ewN, ewH, minCond, denseEVinterval)
 
-            tst = np.random.choice(np.arange(len(ParaSets)),
-                                   size=min(maxOnPurge, len(ParaSets)),
-                                   replace=False)
-            if not 0 in tst:
-                tst = tst.tolist() + [0]
-            if maxOnPurge < len(ParaSets):
-                tkkg = [ParaSets[t] for t in tst]
-                ParaSets = tkkg
-            # x) the parallel environment is set up in sets(chunks) of bases
-            #    in order to limit the number of files open simultaneously
-            split_points = [
-                n * maxParLen
-                for n in range(1 + int(len(ParaSets) / maxParLen))
-            ] + [len(ParaSets) + 1024]
-            Parchunks = [
-                ParaSets[split_points[i]:split_points[i + 1]]
-                for i in range(len(split_points) - 1)
-            ]
-            cand_list = []
-            print(
-                'checking each vector in %d-dim basis on its effect on the stability,'
-                % len(ParaSets))
-            for chunk in Parchunks:
-                pool = ThreadPool(max(min(MaxProc, len(ParaSets)), 2))
-                jobs = []
-                for procnbr in range(len(chunk)):
-                    recv_end, send_end = multiprocessing.Pipe(False)
-                    pars = chunk[procnbr]
-                    p = multiprocessing.Process(target=endmat,
-                                                args=(pars, send_end))
-                    jobs.append(p)
-                    cand_list.append(recv_end)
-                    p.start()
-                for proc in jobs:
-                    proc.join()
-            cand_ladder = [x.recv() for x in cand_list]
-            # ranking following condition-number (0) or quality (1)
-            cand_ladder.sort(key=lambda tup: np.abs(tup[pwpurge]))
-            reff = [[bvm[0], bvm[1], bvm[2]] for bvm in cand_ladder
-                    if bvm[3] == [0, 0]][0]
-            for cand in cand_ladder[-3:]:
-                print(cand[:4])
-            print(
-                '\n> basType %s > basSet %d/%d: purged seed: E0 = %f   cond=|Emin|/|Emax| = %e'
-                % (bastype, nB + 1, anzStreuBases, cand_ladder[-1][2],
-                   cand_ladder[-1][0]))
-            print('    best =  %2.3e , %2.3e , %2.3e' %
-                  (cand_ladder[-1][0], cand_ladder[-1][1], cand_ladder[-1][2]))
-            print('    worst=  %2.3e , %2.3e , %2.3e' %
-                  (cand_ladder[0][0], cand_ladder[0][1], cand_ladder[0][2]))
-            if ((removalGainFactor * np.abs(reff[pwpurge]) < np.abs(
-                    cand_ladder[-1][pwpurge])) |
-                ((np.abs(cand_ladder[-1][pwpurge]) < minCond) &
-                 (reff[0] < minCond))):
-                goPurge = True
-                D0 = rectify_basis(cand_ladder[-1][4])
-                print('1/%d ' % basisDim(D0), end='\n')
-        initialCiv[3] = rectify_basis(cand_ladder[-1][4])
-        # > nState > nBasis > end of stabilization
-        initialCiv = essentialize_basis(initialCiv, MaxBVsPERcfg=bvma)
+        print(
+            '\n> basType %s > basSet %d/%d: optimized basis: C-nbr = %4.4e E0 = %4.4e fitness = %4.4e\n\n'
+            % (bastype, nB + 1, anzStreuBases, optCond, ewH[-1], optLove))
+
+        # Output on tape; further processing via A3...py
+        suf = 'ref' if bastype == boundstatekanal else 'fin'
+
+        lfrags = np.array(initialCiv[0])[:, 1].tolist()
+        sfrags = np.array(initialCiv[0])[:, 0].tolist()
+        n3_inlu(8, fn=basisPath + 'INLU_%s' % suf, fr=lfrags, indep=-1)
+        n3_inlu(8, fn=basisPath + 'INLUCN_%s' % suf, fr=lfrags, indep=-1)
+        n3_inob(sfrags, 8, fn=basisPath + 'INOB_%s' % suf, indep=-1)
+        n3_inob(sfrags, 15, fn=basisPath + 'DRINOB_%s' % suf, indep=-1)
+
+        os.system('cp INQUA_M ' + basisPath + 'INQUA_V18_%s' % suf)
+        os.system('cp INEN ' + basisPath + 'INEN_%s' % suf)
+        os.system('cp INSAM ' + basisPath)
+
+        os.system('rm -rf ./inen_*')
+        os.system('rm -rf ./endout_*')
+        os.system('rm -rf ./MATOUTB_*')
+        os.system('rm -rf ./T*OUT.*')
+        os.system('rm -rf ./D*OUT.*')
+
+        fullBasfile, actBasfile = write_basis_on_tape(initialCiv,
+                                                      Jay,
+                                                      bastype,
+                                                      baspath=basisPath)
+
+        if bastype != boundstatekanal:
+            AbasOutStr = respath + 'Ssigbasv3heLIT_%s_BasNR-%d.dat' % (bastype,
+                                                                       nB)
+            FbasOutStr = respath + 'SLITbas_full_%s_BasNR-%d.dat' % (bastype,
+                                                                     nB)
+            subprocess.call('cp %s %s' % (fullBasfile, FbasOutStr), shell=True)
+            subprocess.call('cp %s %s' % (actBasfile, AbasOutStr), shell=True)
+        else:
+            AbasOutStr = respath + 'Ssigbasv3heLIT_%s.dat' % bastype
+            FbasOutStr = respath + 'SLITbas_full_%s.dat' % bastype
+            subprocess.call('cp %s %s' % (fullBasfile, FbasOutStr), shell=True)
+            subprocess.call('cp %s %s' % (actBasfile, AbasOutStr), shell=True)
+
+        matoutstr = '%smat_%s' % (
+            respath, bastype + '_BasNR-%d' % nB
+        ) if bastype != boundstatekanal else '%smat_%s' % (respath, bastype)
+        subprocess.call('cp MATOUTB %s' % matoutstr, shell=True)
+        print(
+            'channel %s: Basis structure, Norm, and Hamiltonian written into %s'
+            % (bastype, respath + 'mat_' + bastype))
+
+        # for the bound-state/initial-state channel, consider only one basis set
+        if bastype == boundstatekanal:
+            break

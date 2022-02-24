@@ -1495,7 +1495,7 @@ c     *   FORM='UNFORMATTED')
 c      CLOSE(UNIT=29,STATUS='KEEP')      
 c --- if this line is reached, hamilton and norm matrix were stored
 
-      STOP 'NORM, HAMILTONIAN MATRICES WRITTEN.'
+      STOP 'TDR2END_PYpool.f:   NORM, HAMILTONIAN MATRICES WRITTEN.'
 
 C     NAGLIB-AUFRUF
 C      CALL F02AEF(H,NDIMD,EN,NDIMD,NX,Q,ZH,NDIMD,FC1,FC2,IERR)

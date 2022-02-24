@@ -24,15 +24,21 @@ def span_initial_basis(
     sfrags = []
     lfrags2 = []
     sfrags2 = []
+
     for lcfg in range(len(angu)):
         sfrags = sfrags + angu[lcfg][1]
         for scfg in angu[lcfg][1]:
             lfrags = lfrags + [angu[lcfg][0]]
+
     he_iw = he_rw = he_frgs = ob_stru = lu_stru = sbas = []
-    grd_type = 'geo'
-    diag = 1
+
+    # minimal distance allowed for between width parameters
     mindist_int = 0.001
+
+    # lower bound for width parameters '=' IR cutoff (broadest state)
     rWmin = 0.0001
+
+    # orbital-angular-momentum dependent upper bound '=' UV cutoff (narrowest state)
     iLcutoff = [12., 4., 3.]
     rLcutoff = [12., 4., 3.]
     if basisType == boundstatekanal:
@@ -147,8 +153,10 @@ def span_initial_basis(
         widi += tmp2
         widr += tmp3
     anzBV = sum([len(zer) for zer in widi])
-    print('# Basisvektoren = %d' % anzBV)
-    print(lfrags2, sfrags2)
+    print(
+        'seed state with (%d) basis-vector blocks with [orbital][(iso)spin] configurations:'
+        % anzBV)
+    print(lfrags2, sfrags2, '\n')
     if ((basisType != boundstatekanal) | (new_helion)):
         sbas = []
         bv = 1
@@ -316,7 +324,6 @@ def span_initial_basis(
 
     os.chdir(wrkDir)
 
-    print(lfrags2)
     n3_inlu(8, fn='INLU', fr=lfrags2, indep=parall)
     os.system(BINBDGpath + 'DRLUD.exe')
     n3_inlu(8, fn='INLUCN', fr=lfrags2, indep=parall)

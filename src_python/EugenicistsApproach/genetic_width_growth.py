@@ -104,13 +104,20 @@ def rectify_basis(basis):
     return rectbas
 
 
-def condense_Basis(inputBasis, independentCfgs, bvsPERcfg=12):
+def condense_basis(inputBasis, MaxBVsPERcfg=12):
+
+    unisA = []
+    for ncfg in range(len(inputBasis[0])):
+        if inputBasis[0][ncfg] in unisA:
+            continue
+        else:
+            unisA.append(inputBasis[0][ncfg])
 
     bounds = np.add.accumulate([len(iws) for iws in inputBasis[1]])
 
     D0s = [[], [], [], []]
 
-    for spinCFG in independentCfgs:
+    for spinCFG in unisA:
 
         D0s[0].append(spinCFG)
         D0s[1].append([])
@@ -121,15 +128,32 @@ def condense_Basis(inputBasis, independentCfgs, bvsPERcfg=12):
             cfgOFbv = sum([bound < inputBasis[3][bv][0] for bound in bounds])
 
             if inputBasis[0][cfgOFbv] == spinCFG:
+                try:
+                    D0s[1][-1].append(
+                        sum(inputBasis[1], [])[inputBasis[3][bv][0] - 1])
+                    D0s[2][-1].append(
+                        np.array(
+                            sum(inputBasis[2],
+                                [])[inputBasis[3][bv][0] -
+                                    1])[np.array(inputBasis[3][bv][1]) -
+                                        1].tolist())
+                except:
+                    print('\n\n', unisA, bounds, bv, spinCFG, cfgOFbv)
+                    print(D0s)
+                    print(inputBasis)
+                    exit()
 
-                D0s[1][-1].append(
-                    sum(inputBasis[1], [])[inputBasis[3][bv][0] - 1])
-                D0s[2][-1].append(
-                    np.array(sum(inputBasis[2],
-                                 [])[inputBasis[3][bv][0] -
-                                     1])[np.array(inputBasis[3][bv][1]) -
-                                         1].tolist())
+        #Dtmp = copy.deepcopy(D0s[2][-1])
+        #D0s[2][-1].sort(key=lambda rws: len(rws))
+        #rearrangeIDX = [D0s[2][-1].index(rws) for rws in Dtmp]
+        #print('condense: ', rearrangeIDX)
+        #D0s[1][-1] = [D0s[1][-1][i] for i in rearrangeIDX]
 
+    #print(D0s[2])
+    #print(D0s[1])
+    #exit()
+
+    #print(inputBasis)
     D0st = [[], [], [], []]
 
     for cfg in range(len(D0s[0])):
@@ -153,16 +177,18 @@ def condense_Basis(inputBasis, independentCfgs, bvsPERcfg=12):
     D0ss = [[], [], [], []]
 
     for nCFG in range(len(D0st[0])):
-        anzfrg = int(np.ceil(len(D0st[1][nCFG]) / bvsPERcfg))
+        anzfrg = int(np.ceil(len(D0st[1][nCFG]) / MaxBVsPERcfg))
         D0ss[0] += anzfrg * [D0st[0][nCFG]]
         D0ss[1] += [
-            D0st[1][nCFG][n * bvsPERcfg:min((n + 1) *
-                                            bvsPERcfg, len(D0st[1][nCFG]))]
+            D0st[1][nCFG][n *
+                          MaxBVsPERcfg:min((n + 1) *
+                                           MaxBVsPERcfg, len(D0st[1][nCFG]))]
             for n in range(anzfrg)
         ]
         D0ss[2] += [
-            D0st[2][nCFG][n * bvsPERcfg:min((n + 1) *
-                                            bvsPERcfg, len(D0st[2][nCFG]))]
+            D0st[2][nCFG][n *
+                          MaxBVsPERcfg:min((n + 1) *
+                                           MaxBVsPERcfg, len(D0st[2][nCFG]))]
             for n in range(anzfrg)
         ]
 
