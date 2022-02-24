@@ -157,7 +157,7 @@ def span_initial_basis(
         'seed state with (%d) basis-vector blocks with [orbital][(iso)spin] configurations:'
         % anzBV)
     print(lfrags2, sfrags2, '\n')
-    if ((basisType != boundstatekanal) | (new_helion)):
+    if (basisType != boundstatekanal):
         sbas = []
         bv = 1
         for n in range(len(lfrags2)):

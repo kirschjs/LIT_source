@@ -13,7 +13,7 @@ os.chdir(litpath3He)
 
 dbg = False
 
-bastypes = streukas  #+[boundstatekanal]  #
+bastypes = streukas + [boundstatekanal]
 
 # > optimize the various basis types, e.g., in case of the npp system:
 # > helion ground state, final J=1/2- and J=3/2- states

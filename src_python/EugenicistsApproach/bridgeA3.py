@@ -71,14 +71,11 @@ BINLITpath = os.getenv("HOME") + '/kette_repo/ComptonLIT/source/src_elma_pol/'
 tnni = 10
 parall = -1
 
-mpii = '137'
-
 potnn = os.getenv(
     "HOME"
 ) + '/kette_repo/ComptonLIT/data/AV18'  #'/data/BONN'  #/data/AV4.14'  #'
 potnnn = os.getenv("HOME") + '/kette_repo/ComptonLIT/data/urbana9_AK_neu'
 
-new_helion = True
 # convention: bound-state-expanding BVs: (1-8), i.e., 8 states per rw set => nzf0*8
 channels = {
     # helion
@@ -94,12 +91,12 @@ channels = {
     ],
     #          [l1l2L,[compatible (iso)spin configurations]]
     '0.5^-': [
-        ['011', ['he_no1', 'he_no6']],
-        ['101', ['he_no3']],
-        ['211', ['he_no2']],  #'he_no1',  'he_no6']],
-        ['212', ['he_no2']],
-        ['121', ['he_no3', 'he_no5']],
-        ['122', ['he_no5']],
+        #['011', ['he_no1', 'he_no6']],
+        #['101', ['he_no3']],
+        ['211', ['he_no2', 'he_no1', 'he_no6']],
+        #['212', ['he_no2']],
+        #['121', ['he_no3', 'he_no5']],
+        #['122', ['he_no5']],
     ],
     '1.5^-': [
         ['011', ['he_no1', 'he_no2', 'he_no6']],
@@ -112,14 +109,10 @@ channels = {
     ]
 }
 
-streukas = ['1.5^-']
+streukas = ['0.5^-', '1.5^-']
 
 #                  realistic    L>0 (only)         deuteron
 boundstatekanal = 'npp0.5^+'
-
-bastypes = streukas
-bastypes = [boundstatekanal]
-bastypes = [boundstatekanal] + streukas
 
 J0 = float(boundstatekanal.split('^')[0][-3:])
 
@@ -128,9 +121,6 @@ multipolarity = 1
 anz_phot_e = 1
 phot_e_0 = 0.1  #  enems_e converts to fm^-1, but HERE the value is in MeV
 phot_e_d = 1.0  #  delta E
-
-opME_th_low = 10**(-24)
-opME_th_up = 10**24
 
 # basis ------------------------------------------------------------------
 
