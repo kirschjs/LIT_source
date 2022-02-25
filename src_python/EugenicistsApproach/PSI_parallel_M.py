@@ -157,28 +157,23 @@ def span_initial_basis(
         'seed state with (%d) basis-vector blocks with [orbital][(iso)spin] configurations:'
         % anzBV)
     print(lfrags2, sfrags2, '\n')
-    if (basisType != boundstatekanal):
-        sbas = []
-        bv = 1
-        for n in range(len(lfrags2)):
-            bvv = 0
-            for m in range(len(widi[n])):
-                bvv += 1
-                #sbas += [[bv, [(bvv) % (1 + len(widr[n][m]))]]]
-                sbas += [[
-                    bv,
-                    [
-                        x
-                        for x in range(1, 1 +
-                                       max([len(wid) for wid in widr[n]]), 1)
-                    ]
-                ]]
-                bv += 1
-    else:
-        sfrags2 = ob_stru
-        lfrags2 = lu_stru
-        widi = he_iw
-        widr = he_rw
+
+    sbas = []
+    bv = 1
+    for n in range(len(lfrags2)):
+        bvv = 0
+        for m in range(len(widi[n])):
+            bvv += 1
+            #sbas += [[bv, [(bvv) % (1 + len(widr[n][m]))]]]
+            sbas += [[
+                bv,
+                [
+                    x for x in range(1, 1 + max([len(wid)
+                                                 for wid in widr[n]]), 1)
+                ]
+            ]]
+            bv += 1
+
     path_bas_dims = wrkDir + '/basis_struct/LITbas_dims_%s.dat' % basisType
     with open(path_bas_dims, 'wb') as f:
         np.savetxt(f, [np.size(wid) for wid in widr], fmt='%d')
