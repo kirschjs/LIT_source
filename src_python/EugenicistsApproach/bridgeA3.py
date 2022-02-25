@@ -43,18 +43,19 @@ cal = [
     'rhs-couple',
 ]
 
-suffix = 'miwchan_finalDC'
 DC = True if time.tzname[0] == 'EST' else False
 MaxProc = int(len(os.sched_getaffinity(0)) / 2)
 
+orig_dir = os.getcwd()
+
 if DC:
-    pathbase = os.getenv("HOME") + '/kette_repo/ComptonLIT/systems'
+    pathbase = '/tmp'  #os.getenv("HOME")
     MPIRUN = '/usr/local/bin/mpirun'
 else:
     pathbase = '/tmp'
     MPIRUN = '/usr/lib64/mpich/bin/mpirun'
 
-litpath3He = pathbase + '/mul_helion_' + suffix + '/'
+litpath3He = pathbase + '/mul_helion'
 respath = litpath3He + 'results/'
 if os.path.isdir(litpath3He) == False:
     os.mkdir(litpath3He)
@@ -64,18 +65,15 @@ if os.path.isdir(litpath3He) == False:
 
 helionpath = litpath3He + 'he3/'
 
-BINBDGpath = os.getenv("HOME") + '/kette_repo/ComptonLIT/source/src_nucl/'
-BINLITpath = os.getenv("HOME") + '/kette_repo/ComptonLIT/source/src_elma_pol/'
+BINBDGpath = orig_dir + '/../../src_nucl/'
+BINLITpath = orig_dir + '/../../src_elma_pol/'
 
 # NN: tnni=10   NN+NNN: tnni=11
 tnni = 10
 parall = -1
 
-potnn = os.getenv(
-    "HOME"
-) + '/kette_repo/ComptonLIT/source/data/AV18'  #'/data/BONN'  #/data/AV4.14'  #'
-potnnn = os.getenv(
-    "HOME") + '/kette_repo/ComptonLIT/source/data/urbana9_AK_neu'
+potnn = orig_dir + '/../../data/AV18'  #'/data/BONN'  #/data/AV4.14'  #'
+potnnn = orig_dir + '/../../data/urbana9_AK_neu'
 
 # convention: bound-state-expanding BVs: (1-8), i.e., 8 states per rw set => nzf0*8
 channels = {
