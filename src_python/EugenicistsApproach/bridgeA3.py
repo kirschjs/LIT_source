@@ -73,8 +73,9 @@ parall = -1
 
 potnn = os.getenv(
     "HOME"
-) + '/kette_repo/ComptonLIT/data/AV18'  #'/data/BONN'  #/data/AV4.14'  #'
-potnnn = os.getenv("HOME") + '/kette_repo/ComptonLIT/data/urbana9_AK_neu'
+) + '/kette_repo/ComptonLIT/source/data/AV18'  #'/data/BONN'  #/data/AV4.14'  #'
+potnnn = os.getenv(
+    "HOME") + '/kette_repo/ComptonLIT/source/data/urbana9_AK_neu'
 
 # convention: bound-state-expanding BVs: (1-8), i.e., 8 states per rw set => nzf0*8
 channels = {
@@ -91,12 +92,12 @@ channels = {
     ],
     #          [l1l2L,[compatible (iso)spin configurations]]
     '0.5^-': [
-        #['011', ['he_no1', 'he_no6']],
-        #['101', ['he_no3']],
+        ['011', ['he_no1', 'he_no6']],
+        ['101', ['he_no3']],
         ['211', ['he_no2', 'he_no1', 'he_no6']],
-        #['212', ['he_no2']],
-        #['121', ['he_no3', 'he_no5']],
-        #['122', ['he_no5']],
+        ['212', ['he_no2']],
+        ['121', ['he_no3', 'he_no5']],
+        ['122', ['he_no5']],
     ],
     '1.5^-': [
         ['011', ['he_no1', 'he_no2', 'he_no6']],
