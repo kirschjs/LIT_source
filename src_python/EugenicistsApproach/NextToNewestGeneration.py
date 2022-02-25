@@ -100,6 +100,9 @@ for bastype in bastypes:
 
         os.chdir(wrkDir)
 
+        os.system('cp %s .' % potnn)
+        os.system('cp %s .' % potnnn)
+
         seedMat = span_initial_basis(
             basisType=bastype,
             ini_grid_bounds=[0.06, 13.25, 0.04, 13.5, 0.005, 8.25, 0.001, 7.5],
@@ -107,6 +110,7 @@ for bastype in bastypes:
             coefstr=costr,
             anzOp=zop)
 
+        exit()
         dim = int(np.sqrt(len(seedMat) * 0.5))
 
         # read Norm and Hamilton matrices
@@ -319,8 +323,8 @@ for bastype in bastypes:
                       bin_path=BINBDGpath,
                       mpipath=MPIRUN,
                       einzel_file_path=wrkDir,
-                      potNN=potnn,
-                      potNNN=potnnn,
+                      potNN='./%s' % nnStr,
+                      potNNN='./%s' % nnnStr,
                       parall=-1,
                       anzcores=max(2, min(len(initialCiv[0]), MaxProc)),
                       tnni=10,
@@ -509,8 +513,8 @@ for bastype in bastypes:
                                   bin_path=BINBDGpath,
                                   mpipath=MPIRUN,
                                   einzel_file_path=wrkDir,
-                                  potNN=potnn,
-                                  potNNN=potnnn,
+                                  potNN='./%s' % nnStr,
+                                  potNNN='./%s' % nnnStr,
                                   parall=-1,
                                   anzcores=max(2, min(len(Ais[0]), MaxProc)),
                                   tnni=10,
@@ -626,8 +630,8 @@ for bastype in bastypes:
                           bin_path=BINBDGpath,
                           mpipath=MPIRUN,
                           einzel_file_path=wrkDir,
-                          potNN=potnn,
-                          potNNN=potnnn,
+                          potNN='./%s' % nnStr,
+                          potNNN='./%s' % nnnStr,
                           parall=-1,
                           anzcores=max(2, min(len(initialCiv[0]), MaxProc)),
                           tnni=10,
@@ -745,8 +749,8 @@ for bastype in bastypes:
                       bin_path=BINBDGpath,
                       mpipath=MPIRUN,
                       einzel_file_path=wrkDir,
-                      potNN=potnn,
-                      potNNN=potnnn,
+                      potNN='./%s' % nnStr,
+                      potNNN='./%s' % nnnStr,
                       parall=-1,
                       anzcores=max(2, min(len(initialCiv[0]), MaxProc)),
                       tnni=10,

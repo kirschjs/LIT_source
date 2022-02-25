@@ -332,7 +332,7 @@ def span_initial_basis(
     os.system(BINBDGpath + 'KOBER.exe')
     n3_inob(sfrags2, 15, fn='INOB', indep=parall)
     os.system(BINBDGpath + 'DROBER.exe')
-    he3inquaBS(intwi=widi, relwi=widr, potf=potnn)
+    he3inquaBS(intwi=widi, relwi=widr, potf='./%s' % nnStr)
     parallel_mod_of_3inqua(lfrags2,
                            sfrags2,
                            infile='INQUA_M',
@@ -355,7 +355,7 @@ def span_initial_basis(
     else:
         subprocess.run([BINBDGpath + 'QUAFL_M.exe'])
     if tnni == 11:
-        he3inquaBS(intwi=widi, relwi=widr, potf=potnnn)
+        he3inquaBS(intwi=widi, relwi=widr, potf='./%s' % nnnStr)
         parallel_mod_of_3inqua(lfrags2,
                                sfrags2,
                                infile='INQUA_M',

@@ -55,7 +55,7 @@ else:
     pathbase = '/tmp'
     MPIRUN = '/usr/lib64/mpich/bin/mpirun'
 
-litpath3He = pathbase + '/mul_helion'
+litpath3He = pathbase + '/mul_helion/'
 respath = litpath3He + 'results/'
 if os.path.isdir(litpath3He) == False:
     os.mkdir(litpath3He)
@@ -72,8 +72,10 @@ BINLITpath = orig_dir + '/../../src_elma_pol/'
 tnni = 10
 parall = -1
 
-potnn = orig_dir + '/../../data/AV18'  #'/data/BONN'  #/data/AV4.14'  #'
-potnnn = orig_dir + '/../../data/urbana9_AK_neu'
+nnStr = 'AV18'  #'BONN'  #AV4.14'
+potnn = orig_dir + '/../../data/%s' % nnStr
+nnnStr = 'urbana9_AK_neu'
+potnnn = orig_dir + '/../../data/%s' % nnnStr
 
 # convention: bound-state-expanding BVs: (1-8), i.e., 8 states per rw set => nzf0*8
 channels = {
