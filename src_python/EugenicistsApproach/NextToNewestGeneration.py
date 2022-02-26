@@ -48,10 +48,11 @@ for bastype in bastypes:
         ]
         for finalStatePath in finalStatePaths:
             if os.path.isdir(finalStatePath) == True:
-                os.system('rm -rf ' + finalStatePath)
-
-            os.mkdir(finalStatePath)
-            os.mkdir(finalStatePath + 'basis_struct/')
+                print('<ECCE> working in an existing final-state folder.')
+                #os.system('rm -rf ' + finalStatePath)
+            else:
+                os.mkdir(finalStatePath)
+                os.mkdir(finalStatePath + 'basis_struct/')
 
     # numerical stability
     minDiffwidthsINT = 10**-2

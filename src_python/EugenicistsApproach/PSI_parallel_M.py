@@ -181,8 +181,8 @@ def span_initial_basis(
         f.truncate()
     f.close()
     path_bas_int_rel_pairs = wrkDir + '/basis_struct/LITbas_full_%s.dat' % basisType
-    #if os.path.exists(path_bas_int_rel_pairs):
-    #    os.remove(path_bas_int_rel_pairs)
+    if os.path.exists(path_bas_int_rel_pairs):
+        os.remove(path_bas_int_rel_pairs)
     with open(path_bas_int_rel_pairs, 'w') as oof:
         #np.savetxt(f, [[jj[0], kk] for jj in sbas for kk in jj[1]], fmt='%d')
         #f.seek(NEWLINE_SIZE_IN_BYTES, 2)
@@ -196,7 +196,7 @@ def span_initial_basis(
         oof.write(so)
     oof.close()
     path_frag_stru = wrkDir + '/basis_struct/frags_LIT_%s.dat' % basisType
-    #if os.path.exists(path_frag_stru): os.remove(path_frag_stru)
+    if os.path.exists(path_frag_stru): os.remove(path_frag_stru)
 
     with open(path_frag_stru, 'wb') as f:
         np.savetxt(f,
@@ -208,7 +208,7 @@ def span_initial_basis(
         f.truncate()
     f.close()
     path_intw = wrkDir + '/basis_struct/intw3heLIT_%s.dat' % basisType
-    #if os.path.exists(path_intw): os.remove(path_intw)
+    if os.path.exists(path_intw): os.remove(path_intw)
     with open(path_intw, 'wb') as f:
         for ws in widi:
             np.savetxt(f, [ws], fmt='%12.6f', delimiter=' ')
@@ -216,7 +216,7 @@ def span_initial_basis(
         f.truncate()
     f.close()
     path_relw = wrkDir + '/basis_struct/relw3heLIT_%s.dat' % basisType
-    #if os.path.exists(path_relw): os.remove(path_relw)
+    if os.path.exists(path_relw): os.remove(path_relw)
     with open(path_relw, 'wb') as f:
         for wss in widr:
             for ws in wss:
