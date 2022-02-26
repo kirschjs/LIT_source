@@ -1463,7 +1463,7 @@ C
 c      EN(N,M) =  DM(N,M,2,1)
 c 322  H(N,M) =  DM(N,M,2,2)
       EN(N,M) =  DM(N,M,2,1)/SQRT(DM(M,M,2,1)*DM(N,N,2,1))
-  322 H(N,M) =  DM(N,M,2,2)/SQRT(DM(M,M,2,1)*DM(N,N,2,1))
+  322 H(N,M)  =  DM(N,M,2,2)/SQRT(DM(M,M,2,1)*DM(N,N,2,1))
       IERR=0
 c      WRITE(NOUT,*) ' TRANSFORMIERTE NORM/HAMILTON-MATRIX MIT NORM-EW'
 c      CALL SCHEMA (EN,NX,NX,NDIMD,5)
