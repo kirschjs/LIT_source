@@ -86,11 +86,11 @@ for bastype in bastypes:
     maxOnTrail = 10**2
     muta_initial = 0.5
 
-    CgfCycles = 1
+    CgfCycles = 2
     # nRaces := |i|
-    nRaces = 1 if bastype == boundstatekanal else 2
+    nRaces = 2 if bastype == boundstatekanal else 3
 
-    cradleCapacity = 10
+    cradleCapacity = 40
 
     # > nState > produce/optimize/grow multiple bases with pseudo-random initial seeds
     for nB in range(anzStreuBases):
@@ -107,7 +107,7 @@ for bastype in bastypes:
         seedMat = span_initial_basis(
             basisType=bastype,
             ini_grid_bounds=[0.06, 13.25, 0.04, 13.5, 0.005, 8.25, 0.001, 7.5],
-            ini_dims=[4, 4, 4, 4],
+            ini_dims=[8, 4, 8, 4],
             coefstr=costr,
             anzOp=zop)
 
