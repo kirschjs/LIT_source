@@ -562,7 +562,7 @@ C
   702 PAR(M,N) = PAQ(M,J)
       LWERT(4,N)=MLWERT(4,J)
       READ(INPUT,1002) (LUM(M,N),M=1,MM)
-      WRITE(NOUT,1011)    (LUM(M,N),M=1,MM)
+      IF(IDRU.GT.0) WRITE(NOUT,1011) (LUM(M,N),M=1,MM)
       J1=0
       DO 410  M=1,MM
       IF(LUM(M,N).LE.0) GOTO 410

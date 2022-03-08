@@ -528,9 +528,9 @@ def n3_inen_bdg(bas, jay, co, fn='INEN', pari=0, nzop=31, tni=11, idum=2):
 
     out = ''
     if idum == 2:
-        out += '%4d%4d   1   0%4d\n' % (int(2 * jay), len(bas), pari)
+        out += '%4d%4d   1  -1%4d\n' % (int(2 * jay), len(bas), pari)
     else:
-        out += '%3d%3d  1  0%3d\n' % (int(2 * jay), len(bas), pari)
+        out += '%3d%3d  1 -1%3d\n' % (int(2 * jay), len(bas), pari)
 
     relset = False
 

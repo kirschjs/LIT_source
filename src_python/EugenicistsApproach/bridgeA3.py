@@ -6,6 +6,7 @@ import sympy as sy
 # CG(j1, m1, j2, m2, j3, m3)
 from sympy.physics.quantum.cg import CG
 from datetime import datetime
+import time
 
 from parameters_and_constants import *
 from rrgm_functions import *
@@ -51,9 +52,13 @@ orig_dir = os.getcwd()
 MPIRUN = subprocess.run(["which", "mpirun"],
                         capture_output=True).stdout.strip().decode()
 
-pathbase = '/tmp'  #os.getenv("HOME")
+bkpdir = os.getenv("HOME") + '/compton_tmp'
+if os.path.isdir(bkpdir) == False:
+    os.mkdir(bkpdir)
 
-litpath3He = pathbase + '/mul_helion/'
+pathbase = '/tmp'
+suffi = '/mul_helion/'
+litpath3He = pathbase + suffi
 respath = litpath3He + 'results/'
 if os.path.isdir(litpath3He) == False:
     os.mkdir(litpath3He)
@@ -80,31 +85,31 @@ channels = {
     # helion
     'npp0.5^+': [
         ['000', ['he_no1', 'he_no6']],  # 1,2
-        ['022', ['he_no2']],  # 3
-        ['202', ['he_no2']],  # 4
-        ['111', ['he_no3', 'he_no5']],  # 5,6
-        ['112', ['he_no5']],  # 7
-        ['220', ['he_no1', 'he_no6']],  # 8,9
-        ['221', ['he_no1', 'he_no2', 'he_no6']],  # 10,11,12
-        ['222', ['he_no2']],  # 13
+        #['022', ['he_no2']],  # 3
+        #['202', ['he_no2']],  # 4
+        #['111', ['he_no3', 'he_no5']],  # 5,6
+        #['112', ['he_no5']],  # 7
+        #['220', ['he_no1', 'he_no6']],  # 8,9
+        #['221', ['he_no1', 'he_no2', 'he_no6']],  # 10,11,12
+        #['222', ['he_no2']],  # 13
     ],
     #          [l1l2L,[compatible (iso)spin configurations]]
     '0.5^-': [
         ['011', ['he_no1', 'he_no6']],
-        ['101', ['he_no3']],
-        ['211', ['he_no2', 'he_no1', 'he_no6']],
-        ['212', ['he_no2']],
-        ['121', ['he_no3', 'he_no5']],
-        ['122', ['he_no5']],
+        #['101', ['he_no3']],
+        #['211', ['he_no2', 'he_no1', 'he_no6']],
+        #['212', ['he_no2']],
+        #['121', ['he_no3', 'he_no5']],
+        #['122', ['he_no5']],
     ],
     '1.5^-': [
         ['011', ['he_no1', 'he_no2', 'he_no6']],
-        ['101', ['he_no3']],
-        ['211', ['he_no1', 'he_no2', 'he_no6']],
-        ['212', ['he_no2']],
-        ['121', ['he_no3', 'he_no5']],
-        ['122', ['he_no3', 'he_no5']],
-        ['213', ['he_no2']],
+        #['101', ['he_no3']],
+        #['211', ['he_no1', 'he_no2', 'he_no6']],
+        #['212', ['he_no2']],
+        #['121', ['he_no3', 'he_no5']],
+        #['122', ['he_no3', 'he_no5']],
+        #['213', ['he_no2']],
     ]
 }
 

@@ -20,7 +20,10 @@ from scipy.io import FortranFile
 RHSofBV = {}
 RHSofmJ = {}
 
-os.chdir(litpath3He)
+os.chdir(bkpdir)
+
+respath = bkpdir + suffi + 'results/'
+helionpath = bkpdir + suffi + 'he3/'
 
 if os.path.isfile(respath + 'kRange.dat') == True:
     os.system('rm ' + respath + 'kRange.dat')
@@ -40,7 +43,7 @@ anzStreuBases = len(
     [f for f in glob.glob(respath + 'mat_%s_BasNR-*' % streukas[0])])
 
 finalStatePaths = [
-    litpath3He[:-1] + '-%d/' % nB for nB in range(anzStreuBases)
+    bkpdir + suffi[:-1] + '-%d/' % nB for nB in range(anzStreuBases)
 ]
 
 for nB in range(anzStreuBases):

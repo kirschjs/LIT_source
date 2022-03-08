@@ -36,11 +36,11 @@ for bastype in bastypes:
 
     if bastype == boundstatekanal:
         if os.path.isdir(helionpath) != False:
-            print('<ECCE> working in an existing helion folder.')
-            #continue
-        else:
-            os.mkdir(helionpath)
-            os.mkdir(helionpath + 'basis_struct/')
+            print('<ECCE> removing an existing helion folder.')
+            os.system('rm -rf ' + helionpath)
+
+        os.mkdir(helionpath)
+        os.mkdir(helionpath + 'basis_struct/')
 
     else:
         finalStatePaths = [
@@ -48,11 +48,11 @@ for bastype in bastypes:
         ]
         for finalStatePath in finalStatePaths:
             if os.path.isdir(finalStatePath) == True:
-                print('<ECCE> working in an existing final-state folder.')
-                #os.system('rm -rf ' + finalStatePath)
-            else:
-                os.mkdir(finalStatePath)
-                os.mkdir(finalStatePath + 'basis_struct/')
+                print('<ECCE> rmoving an existing final-state folder.')
+                os.system('rm -rf ' + finalStatePath)
+
+            os.mkdir(finalStatePath)
+            os.mkdir(finalStatePath + 'basis_struct/')
 
     # numerical stability
     minDiffwidthsINT = 10**-2
@@ -86,11 +86,11 @@ for bastype in bastypes:
     maxOnTrail = 10**2
     muta_initial = 0.5
 
-    CgfCycles = 2
+    CgfCycles = 1
     # nRaces := |i|
-    nRaces = 2 if bastype == boundstatekanal else 3
+    nRaces = 1 if bastype == boundstatekanal else 1
 
-    cradleCapacity = 40
+    cradleCapacity = 10
 
     # > nState > produce/optimize/grow multiple bases with pseudo-random initial seeds
     for nB in range(anzStreuBases):
@@ -104,12 +104,17 @@ for bastype in bastypes:
         os.system('cp %s .' % potnn)
         os.system('cp %s .' % potnnn)
 
+        t0 = time.perf_counter()
+
         seedMat = span_initial_basis(
             basisType=bastype,
             ini_grid_bounds=[0.06, 13.25, 0.04, 13.5, 0.005, 8.25, 0.001, 7.5],
             ini_dims=[8, 4, 8, 4],
             coefstr=costr,
             anzOp=zop)
+
+        t1 = time.perf_counter()
+        print(f"Seed basis generateion in {t0 - t1:0.4f} seconds.")
 
         dim = int(np.sqrt(len(seedMat) * 0.5))
 
@@ -208,6 +213,7 @@ for bastype in bastypes:
         print(
             '\n> basType %s > basSet %d/%d: Stratifying the initial seed -- criterion: %s'
             % (bastype, nB + 1, anzStreuBases, purgeStr))
+        t0 = time.perf_counter()
         while goPurge:
             newpopList = []
             goPurge = False
@@ -307,6 +313,9 @@ for bastype in bastypes:
                     '                   removal of 1/%d basis-vector blocks is advantageous.'
                     % len(D0),
                     end='')
+
+        t1 = time.perf_counter()
+        print(f"Seed basis generateion stabilized in {t0 - t1:0.4f} seconds.")
 
         initialCiv[3] = rectify_basis(cand_ladder[-1][4])
         # > nState > nBasis > end of stabilization
@@ -811,6 +820,10 @@ for bastype in bastypes:
             'channel %s: Basis structure, Norm, and Hamiltonian written into %s'
             % (bastype, respath + 'mat_' + bastype))
 
+        srcDir = litpath3He[:-1]
+        os.system('rsync -r -u %s %s' % (srcDir, bkpdir))
+        if bastype != boundstatekanal:
+            os.system('rsync -r -u %s %s' % (wrkDir[:-1], bkpdir))
         # for the bound-state/initial-state channel, consider only one basis set
         if bastype == boundstatekanal:
             break
