@@ -52,7 +52,8 @@ orig_dir = os.getcwd()
 MPIRUN = subprocess.run(["which", "mpirun"],
                         capture_output=True).stdout.strip().decode()
 
-bkpdir = os.getenv("HOME") + '/compton_tmp'
+bkpdir = os.getenv("HOME") + '/compton_tmp' if os.path.isdir(
+    '/scratch') == False else '/scratch/compton_tmp'
 if os.path.isdir(bkpdir) == False:
     os.mkdir(bkpdir)
 
@@ -85,31 +86,31 @@ channels = {
     # helion
     'npp0.5^+': [
         ['000', ['he_no1', 'he_no6']],  # 1,2
-        #['022', ['he_no2']],  # 3
-        #['202', ['he_no2']],  # 4
-        #['111', ['he_no3', 'he_no5']],  # 5,6
-        #['112', ['he_no5']],  # 7
-        #['220', ['he_no1', 'he_no6']],  # 8,9
-        #['221', ['he_no1', 'he_no2', 'he_no6']],  # 10,11,12
-        #['222', ['he_no2']],  # 13
+        ['022', ['he_no2']],  # 3
+        ['202', ['he_no2']],  # 4
+        ['111', ['he_no3', 'he_no5']],  # 5,6
+        ['112', ['he_no5']],  # 7
+        ['220', ['he_no1', 'he_no6']],  # 8,9
+        ['221', ['he_no1', 'he_no2', 'he_no6']],  # 10,11,12
+        ['222', ['he_no2']],  # 13
     ],
     #          [l1l2L,[compatible (iso)spin configurations]]
     '0.5^-': [
         ['011', ['he_no1', 'he_no6']],
-        #['101', ['he_no3']],
-        #['211', ['he_no2', 'he_no1', 'he_no6']],
-        #['212', ['he_no2']],
-        #['121', ['he_no3', 'he_no5']],
-        #['122', ['he_no5']],
+        ['101', ['he_no3']],
+        ['211', ['he_no2', 'he_no1', 'he_no6']],
+        ['212', ['he_no2']],
+        ['121', ['he_no3', 'he_no5']],
+        ['122', ['he_no5']],
     ],
     '1.5^-': [
         ['011', ['he_no1', 'he_no2', 'he_no6']],
-        #['101', ['he_no3']],
-        #['211', ['he_no1', 'he_no2', 'he_no6']],
-        #['212', ['he_no2']],
-        #['121', ['he_no3', 'he_no5']],
-        #['122', ['he_no3', 'he_no5']],
-        #['213', ['he_no2']],
+        ['101', ['he_no3']],
+        ['211', ['he_no1', 'he_no2', 'he_no6']],
+        ['212', ['he_no2']],
+        ['121', ['he_no3', 'he_no5']],
+        ['122', ['he_no3', 'he_no5']],
+        ['213', ['he_no2']],
     ]
 }
 
