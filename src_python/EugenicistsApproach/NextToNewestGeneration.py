@@ -86,9 +86,11 @@ for bastype in bastypes:
     maxOnTrail = 10**2
     muta_initial = 0.5
 
-    CgfCycles = 2
+    chThreshold = 1.0
+
+    CgfCycles = 1
     # nRaces := |i|
-    nRaces = 3 if bastype == boundstatekanal else 5
+    nRaces = 2 if bastype == boundstatekanal else 2
 
     cradleCapacity = 40
 
@@ -104,9 +106,9 @@ for bastype in bastypes:
         os.system('cp %s .' % potnn)
         os.system('cp %s .' % potnnn)
 
-        gsEnergy = 0.0
+        gsEnergy = 10.0
 
-        while gsEnergy >= 0:
+        while gsEnergy >= chThreshold:
 
             t0 = time.perf_counter()
 
@@ -120,7 +122,7 @@ for bastype in bastypes:
                                          anzOp=zop)
 
             t1 = time.perf_counter()
-            print(f"Seed basis generateion in {t0 - t1:0.4f} seconds.")
+            print(f"Seed basis generateion in {np.abs(t0 - t1):0.4f} seconds.")
 
             dim = int(np.sqrt(len(seedMat) * 0.5))
 
@@ -332,7 +334,7 @@ for bastype in bastypes:
 
             t1 = time.perf_counter()
             print(
-                f"Seed basis generateion stabilized in {t0 - t1:0.4f} seconds."
+                f"Seed basis generateion stabilized in {np.abs(t0 - t1):0.4f} seconds."
             )
 
             initialCiv[3] = rectify_basis(cand_ladder[-1][4])
