@@ -9,11 +9,41 @@ from itertools import permutations, product
 
 from PSI_parallel_M import span_initial_basis
 
+if os.path.isdir(bkpdir) == True:
+    os.system('rm -rf ' + bkpdir)
+os.mkdir(bkpdir)
+
+if os.path.isdir(litpath3He) == True:
+    os.system('rm -rf ' + litpath3He)
+os.mkdir(litpath3He)
+os.mkdir(respath)
+with open(respath + 'dtype.dat', 'w') as outf:
+    outf.write(dt)
+
 os.chdir(litpath3He)
 
 dbg = False
 
 bastypes = [boundstatekanal] + streukas
+
+anzStreuBases = 2
+
+if os.path.isdir(helionpath) != False:
+    print('<ECCE> removing the existing helion folder\n%s.' % helionpath)
+    os.system('rm -rf ' + helionpath)
+os.mkdir(helionpath)
+os.mkdir(helionpath + 'basis_struct/')
+
+finalStatePaths = [
+    litpath3He[:-1] + '-%d/' % nB for nB in range(anzStreuBases)
+]
+for finalStatePath in finalStatePaths:
+    if os.path.isdir(finalStatePath) == True:
+        print('<ECCE> removing the existing final-state folder\n%s' %
+              finalStatePath)
+        os.system('rm -rf ' + finalStatePath)
+    os.mkdir(finalStatePath)
+    os.mkdir(finalStatePath + 'basis_struct/')
 
 # > optimize the various basis types, e.g., in case of the npp system:
 # > helion ground state, final J=1/2- and J=3/2- states
@@ -23,7 +53,6 @@ for bastype in bastypes:
     Jaystring = '%s' % str(Jay)[:3]
 
     # number of final-state bases which are grown with the above-set criteria
-    anzStreuBases = 3
 
     costr = ''
     zop = 31 if tnni == 11 else 14
@@ -33,26 +62,6 @@ for bastype in bastypes:
         else:
             cf = 1.0 if (1 <= nn <= 28) else 0.0
         costr += '%12.7f' % cf if (nn % 7 != 0) else '%12.7f\n' % cf
-
-    if bastype == boundstatekanal:
-        if os.path.isdir(helionpath) != False:
-            print('<ECCE> removing an existing helion folder.')
-            os.system('rm -rf ' + helionpath)
-
-        os.mkdir(helionpath)
-        os.mkdir(helionpath + 'basis_struct/')
-
-    else:
-        finalStatePaths = [
-            litpath3He[:-1] + '-%d/' % nB for nB in range(anzStreuBases)
-        ]
-        for finalStatePath in finalStatePaths:
-            if os.path.isdir(finalStatePath) == True:
-                print('<ECCE> removing an existing final-state folder.')
-                os.system('rm -rf ' + finalStatePath)
-
-            os.mkdir(finalStatePath)
-            os.mkdir(finalStatePath + 'basis_struct/')
 
     # numerical stability
     minDiffwidthsINT = 10**-2
@@ -86,7 +95,7 @@ for bastype in bastypes:
     maxOnTrail = 10**2
     muta_initial = 0.5
 
-    chThreshold = 1.0
+    chThreshold = 5.0
 
     CgfCycles = 1
     # nRaces := |i|

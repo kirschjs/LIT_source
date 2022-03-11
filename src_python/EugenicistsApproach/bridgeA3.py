@@ -54,18 +54,11 @@ MPIRUN = subprocess.run(["which", "mpirun"],
 
 bkpdir = os.getenv("HOME") + '/compton_tmp' if os.path.isdir(
     '/scratch') == False else '/scratch/compton_tmp'
-if os.path.isdir(bkpdir) == False:
-    os.mkdir(bkpdir)
 
 pathbase = '/tmp'
 suffi = '/mul_helion/'
 litpath3He = pathbase + suffi
 respath = litpath3He + 'results/'
-if os.path.isdir(litpath3He) == False:
-    os.mkdir(litpath3He)
-    os.mkdir(respath)
-    with open(respath + 'dtype.dat', 'w') as outf:
-        outf.write(dt)
 
 helionpath = litpath3He + 'he3/'
 

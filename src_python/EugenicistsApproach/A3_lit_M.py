@@ -433,6 +433,6 @@ resdest = bkpdir + '/latestresults'
 resdestbkp = resdest + '%s' % (datetime.now().strftime("%d-%b-%Y--%H-%M-%S"))
 if os.path.isdir(resdest) == True:
     os.system('mv %s %s' % (resdest, resdestbkp))
+
 os.system('cp -r %s %s' % (respath[:-1], resdest))
-print('\n\nECCE! Results written. Set <resultsDir> in mathematica.nb to\n%s' %
-      resdest)
+print('\n\nECCE! Results copied from\n%s\nto\n%s' % (respath[:-1], resdest))
