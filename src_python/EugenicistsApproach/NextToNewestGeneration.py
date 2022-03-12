@@ -26,7 +26,7 @@ dbg = False
 
 bastypes = [boundstatekanal] + streukas
 
-anzStreuBases = 2
+anzStreuBases = 13
 
 if os.path.isdir(helionpath) != False:
     print('<ECCE> removing the existing helion folder\n%s.' % helionpath)
@@ -95,9 +95,9 @@ for bastype in bastypes:
     maxOnTrail = 10**2
     muta_initial = 0.5
 
-    chThreshold = 5.0
+    chThreshold = 0.0
 
-    CgfCycles = 1
+    CgfCycles = 2
     # nRaces := |i|
     nRaces = 2 if bastype == boundstatekanal else 2
 
@@ -115,7 +115,7 @@ for bastype in bastypes:
         os.system('cp %s .' % potnn)
         os.system('cp %s .' % potnnn)
 
-        gsEnergy = 10.0
+        gsEnergy = 42.0
 
         while gsEnergy >= chThreshold:
 
