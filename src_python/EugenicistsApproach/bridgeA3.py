@@ -66,7 +66,7 @@ BINBDGpath = orig_dir + '/../../src_nucl/'
 BINLITpath = orig_dir + '/../../src_elma_pol/'
 
 # NN: tnni=10   NN+NNN: tnni=11
-tnni = 10
+tnni = 11
 parall = -1
 
 nnStr = 'AV18'  #'BONN'  #AV4.14'

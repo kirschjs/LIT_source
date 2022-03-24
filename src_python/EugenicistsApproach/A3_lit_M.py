@@ -176,9 +176,9 @@ for nB in range(anzStreuBases):
             def cal_rhs_lu_ob_qua(para, procnbr):
 
                 slave_pit = wrkDir + 'tmp_%d' % para
-                cmdlu = BINLITpath + 'juelma.exe'
-                cmdob = BINLITpath + 'jobelma.exe'
-                cmdqu = BINLITpath + 'jquelma.exe'
+                cmdlu = BINLITpath + 'juelmanoo.exe'
+                cmdob = BINLITpath + 'jobelmanoo.exe'
+                cmdqu = BINLITpath + 'jquelmanoo.exe'
                 print('%s in %s' % (cmdlu, slave_pit))
                 plu = subprocess.Popen(shlex.split(cmdlu),
                                        stdout=subprocess.PIPE,
@@ -235,7 +235,7 @@ for nB in range(anzStreuBases):
                                JWSR=J0,
                                outfile=slave_pit + inenf)
 
-                cmdend = BINLITpath + 'jenelmas.exe %s %s %s' % (
+                cmdend = BINLITpath + 'jenelmasnoo.exe %s %s %s' % (
                     inenf, outfseli, outfsbare)
 
                 pend = subprocess.Popen(shlex.split(cmdend),
@@ -333,6 +333,11 @@ for nB in range(anzStreuBases):
                     pool.close()
                     pool.join()
 
+                    #tmps = wrkDir + 'tmp_%d' % lit_zerl
+                    #subprocess.call('mv %s %s' % (tmps, respath), shell=True)
+                    #os.chdir(wrkDir)
+                    #subprocess.call('rm  -rf %s' % tmps, shell=True)
+
                 os.system('mv ' + wrkDir + 'tmp_*/*_S_* ' + respath)
 
         if 'rhs-couple' in cal:
@@ -426,8 +431,9 @@ for nB in range(anzStreuBases):
                     rhsInMInF.tofile(fortranOut)
                     fortranOut.close()
 
-    os.chdir(wrkDir)
-    os.system('find . -name \"T*OUT.*\" -print0 | xargs -0 rm')
+    os.chdir(bkpdir)
+    subprocess.call('rm  -rf %s' % wrkDir, shell=True)
+    #os.system('find . -name \"T*OUT.*\" -print0 | xargs -0 rm')
 
 resdest = bkpdir + '/latestresults'
 resdestbkp = resdest + '%s' % (datetime.now().strftime("%d-%b-%Y--%H-%M-%S"))

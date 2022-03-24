@@ -26,7 +26,7 @@ dbg = False
 
 bastypes = [boundstatekanal] + streukas
 
-anzStreuBases = 13
+anzStreuBases = 5
 
 if os.path.isdir(helionpath) != False:
     print('<ECCE> removing the existing helion folder\n%s.' % helionpath)
@@ -95,13 +95,13 @@ for bastype in bastypes:
     maxOnTrail = 10**2
     muta_initial = 0.5
 
-    chThreshold = 0.0
+    chThreshold = 42.0
 
-    CgfCycles = 2
+    CgfCycles = 1
     # nRaces := |i|
-    nRaces = 2 if bastype == boundstatekanal else 2
+    nRaces = 1 if bastype == boundstatekanal else 1
 
-    cradleCapacity = 40
+    cradleCapacity = 14
 
     # > nState > produce/optimize/grow multiple bases with pseudo-random initial seeds
     for nB in range(anzStreuBases):
@@ -365,7 +365,7 @@ for bastype in bastypes:
                           potNNN='./%s' % nnnStr,
                           parall=-1,
                           anzcores=max(2, min(len(initialCiv[0]), MaxProc)),
-                          tnni=10,
+                          tnnii=tnni,
                           jay=Jay,
                           dia=False)
 
@@ -557,7 +557,7 @@ for bastype in bastypes:
                                   potNNN='./%s' % nnnStr,
                                   parall=-1,
                                   anzcores=max(2, min(len(Ais[0]), MaxProc)),
-                                  tnni=10,
+                                  tnnii=tnni,
                                   jay=Jay,
                                   dia=False)
 
@@ -674,7 +674,7 @@ for bastype in bastypes:
                           potNNN='./%s' % nnnStr,
                           parall=-1,
                           anzcores=max(2, min(len(initialCiv[0]), MaxProc)),
-                          tnni=10,
+                          tnnii=tnni,
                           jay=Jay,
                           dia=False)
 
@@ -793,7 +793,7 @@ for bastype in bastypes:
                       potNNN='./%s' % nnnStr,
                       parall=-1,
                       anzcores=max(2, min(len(initialCiv[0]), MaxProc)),
-                      tnni=10,
+                      tnnii=tnni,
                       jay=Jay,
                       dia=False)
 

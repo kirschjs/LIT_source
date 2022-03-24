@@ -17,7 +17,7 @@ def blunt_ev(cfgs,
              potNN,
              potNNN='',
              parall=-1,
-             tnni=10,
+             tnnii=10,
              jay=0.5,
              anzcores=6,
              wrkdir='',
@@ -50,7 +50,7 @@ def blunt_ev(cfgs,
                            outfile='INQUA_M',
                            einzel_path=einzel_file_path)
 
-    n3_inen_bdg(basis, jay, costring, fn='INEN', pari=0, nzop=nzopt, tni=tnni)
+    n3_inen_bdg(basis, jay, costring, fn='INEN', pari=0, nzop=nzopt, tni=tnnii)
 
     if parall == -1:
         subprocess.run([
@@ -61,15 +61,15 @@ def blunt_ev(cfgs,
     else:
         subprocess.run([bin_path + 'QUAFL_M.exe'])
 
-    if tnni == 11:
+    if tnnii == 11:
         n3_inlu(8, fn='INLU', fr=lfrag, indep=parall)
         os.system(bin_path + 'DRLUD.exe')
         n3_inob(sfrag, 15, fn='INOB', indep=parall)
         os.system(bin_path + 'DROBER.exe')
 
         he3inquaBS(intwi=intws, relwi=relws, potf=potNNN, inquaout='INQUA_M_0')
-        parallel_mod_of_3inqua(lfrags,
-                               sfrags,
+        parallel_mod_of_3inqua(lfrag,
+                               sfrag,
                                infile='INQUA_M_0',
                                outfile='INQUA_M',
                                tni=1,
@@ -87,7 +87,7 @@ def blunt_ev(cfgs,
         else:
             subprocess.run([bin_path + 'DRQUA_AK_M.exe'])
             subprocess.run([bin_path + 'DR2END_AK.exe'])
-    elif tnni == 10:
+    elif tnnii == 10:
         if parall == -1:
             subprocess.run([bin_path + 'TDR2END_NORMAL.exe'],
                            capture_output=True,
@@ -235,7 +235,7 @@ def endmat(para, send_end):
     #           jay
     #           costring
     #           nzopt
-    #           tnni
+    #           tnnii
 
     n3_inen_bdg(para[0],
                 para[1],
@@ -245,7 +245,7 @@ def endmat(para, send_end):
                 nzop=para[3],
                 tni=para[4])
 
-    cmdend = para[6] + 'TDR2END_PYpool.exe %s %s %s' % (inenf, outf, maoutf)
+    cmdend = para[6] + 'TDR2END_PYpoolnoo.exe %s %s %s' % (inenf, outf, maoutf)
 
     pend = subprocess.Popen(shlex.split(cmdend),
                             stdout=subprocess.PIPE,

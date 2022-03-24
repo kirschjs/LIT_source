@@ -521,7 +521,7 @@ def n3_inen_rhs(bas, jay, co, rw, fn='INEN', pari=0, nzop=31, tni=11, anzb=0):
 
 def n3_inen_bdg(bas, jay, co, fn='INEN', pari=0, nzop=31, tni=11, idum=2):
     # idum=2 -> I4 for all other idum's -> I3
-    head = '%3d%3d 12%3d  1  0 +2  0  0 -1  0  1\n' % (tni, idum, nzop)
+    head = '%3d%3d 12%3d  1  0 +0  0  0 -1  0  1\n' % (tni, idum, nzop)
     head += '  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1\n'
 
     head += co + '\n'

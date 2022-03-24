@@ -30,13 +30,25 @@ enelmas: enelmas.o par/enelmas
 juelma: juelma.o par/juelma
 	$(F77) $(FFLAGS) -o juelma.exe juelma.o $(LIBS)
 
+juelmanoo: juelmanoo.o par/juelma
+	$(F77) $(FFLAGS) -o juelmanoo.exe juelmanoo.o $(LIBS)
+
 jobelma: jobelma.o par/jobelma
 	$(F77) $(FFLAGS) -o jobelma.exe jobelma.o $(LIBS)
+
+jobelmanoo: jobelmanoo.o par/jobelma
+	$(F77) $(FFLAGS) -o jobelmanoo.exe jobelmanoo.o $(LIBS)
 
 jquelma: jquelma.o par/jquelma
 	$(F77) $(FFLAGS) -o jquelma.exe jquelma.o
 
+jquelmanoo: jquelmanoo.o par/jquelma
+	$(F77) $(FFLAGS) -o jquelmanoo.exe jquelmanoo.o
+
 jenelmas: jenelmas.o par/jenelmas
 	$(F77) $(FFLAGS) -o jenelmas.exe jenelmas.o  $(LIBS)
 
-all: juelma jobelma jquelma jenelmas clean
+jenelmasnoo: jenelmasnoo.o par/jenelmas
+	$(F77) $(FFLAGS) -o jenelmasnoo.exe jenelmasnoo.o  $(LIBS)
+
+all: juelma jobelma jquelma jenelmas jenelmasnoo clean
