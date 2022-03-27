@@ -1,0 +1,54 @@
+\tikzset{
+desicion/.style={
+    diamond,
+    draw,
+    text width=4em,
+    text badly centered,
+    inner sep=0pt
+},
+block/.style={
+    rectangle,
+    draw,
+    text width=20em,
+    text centered,
+    rounded corners
+},
+cloud/.style={
+    draw,
+    ellipse,
+    minimum height=2em
+},
+descr/.style={
+    fill=white,
+    inner sep=2.5pt
+},
+connector/.style={
+    -latex,
+    font=\scriptsize
+},
+rectangle connector/.style={
+    connector,
+    to path={(\tikztostart) -- ++(#1,0pt) \tikztonodes |- (\tikztotarget) },
+    pos=0.5
+},
+rectangle connector/.default=-2cm,
+straight connector/.style={
+    connector,
+    to path=--(\tikztotarget) \tikztonodes
+}
+}
+
+\begin{tikzpicture}
+\matrix (m)[matrix of nodes, column  sep=2cm,row  sep=8mm, align=center, nodes={rectangle,draw, anchor=center} ]{
+    |[block]| {Def. $\mathbb{B}_0$, \eg, $P^x_\text{Laplace}=\frac{1}{b}~e^{-|x-\mu|/b}$}               &  \\
+    |[block]| {Remove all BV from $\mathbb{B}_0$ with insignificant
+     contribution to $\Psi_0$}               &  $\gamma_{\text{clean}}$ &                                             \\
+    |[block]| {Def. $\mathbb{B}_\text{LIT}$, \eg, $P^x_\text{log}=\frac{\log x}{b(\log b-1)-a(\log a-1)}$}               &  \\
+    |[block]| {Remove all BV from $\mathbb{B}_\text{LIT}$ with $|\gamma_\text{LIT}-\gamma_\text{clean}|<\epsilon$}               &  $\gamma_{\text{LIT}}$ &                                             \\     
+};
+\path [>=latex,->] (m-1-1) edge (m-2-1);
+\path [>=latex,->] (m-2-1) edge (m-2-2);
+\path [>=latex,->] (m-3-1) edge (m-4-1);
+\path [>=latex,->] (m-4-1) edge (m-4-2);
+
+\end{tikzpicture}

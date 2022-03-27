@@ -1,0 +1,578 @@
+\documentclass[onecolumn,preprint,superscriptaddress,nofootinbib,notitlepage,10pt,linenumbers]{revtex4-1}
+
+\usepackage[perpage]{footmisc}
+\usepackage{epstopdf}
+\usepackage{epsfig}
+\usepackage{color}
+\usepackage{hyperref}
+\usepackage{mathbbol}
+%\usepackage{bookmark}
+\usepackage{tikz}
+\usetikzlibrary{matrix,shapes,arrows,positioning,chains}
+\usepackage{dutchcal}
+\usepackage{calligra}
+
+\DeclareMathAlphabet{\mathcalligra}{T1}{calligra}{m}{n}
+\DeclareFontShape{T1}{calligra}{m}{n}{<->s*[2.2]callig15}{}
+
+\usepackage{mathtools}
+\usepackage{bbold}
+\usepackage{amsmath,array}
+\usepackage{amssymb}
+\usepackage{slashed}
+\usepackage{nicefrac}
+\usepackage{tikz-feynman}
+\usepackage{cjhebrew}
+\usepackage{enumitem}
+\usepackage{listings}
+\lstset{language=[90]Fortran,
+  basicstyle=\ttfamily,
+  keywordstyle=\color{red},
+  commentstyle=\color{green},
+  morecomment=[l]{!\ }% Comment only with space after !
+}
+
+\setlength{\topmargin}{-1.0cm}
+\setlength{\headheight}{0.1cm} \setlength{\footskip}{1.cm}
+\setlength{\headsep}{.1cm}
+\setlength{\textheight}{.8\paperheight}
+\setlength{\textwidth}{.8\paperwidth}
+\setlength{\oddsidemargin}{-.5cm}
+\setlength{\evensidemargin}{0.0cm}
+\setlength{\marginparwidth}{0.0cm}
+\setlength{\marginparsep}{0.0cm}
+
+\definecolor{blue}{HTML}{4169E1}
+\definecolor{red}{HTML}{DC143C}
+\definecolor{green}{HTML}{2E8B57}
+\definecolor{black}{HTML}{000000}
+\definecolor{g1}{HTML}{A9A9A9}
+\definecolor{g2}{HTML}{696969}
+\definecolor{g3}{HTML}{7F7F7F}
+\definecolor{g4}{HTML}{D3D3D3}
+
+\newcommand{\xdownarrow}[1]{%
+  {\left\downarrow\vbox to #1{}\right.\kern-\nulldelimiterspace}
+}
+
+\newcommand*{\mprime}{^{\prime}\mkern-1.2mu}
+\newcommand*{\mdprime}{^{\prime\prime}\mkern-1.2mu}
+\newcommand*{\mtprime}{^{\prime\prime\prime}\mkern-1.2mu}
+\newcommand*{\ethr}{e_\text{th}}
+\newcommand{\black}[1]{\textcolor{black}{#1}}
+\newcommand{\red}[1]{\textcolor{red}{#1}}
+\newcommand{\blue}[1]{\textcolor{blue}{#1}}
+\newcommand{\green}[1]{\textcolor{green}{#1}}
+\newcommand{\caf}{\text{\cjRL{b}}}
+\newcommand{\he}{${}^4$He}
+\newcommand{\hes}{${}^3$He}
+\newcommand{\tr}{${}^3$H}
+\newcommand{\ls}{\ve{L}\cdot\ve{S}}
+\newcommand{\eps}{\epsilon}
+\newcommand{\cfg}{\texttt{cfg}}
+\newcommand{\bv}{\texttt{bv}}
+\newcommand{\as}{a_s}
+\newcommand{\at}{a_t}
+\newcommand{\ecm}{E_\textrm{\small c.m.}}
+\newcommand{\dq}{\mbox{d\hspace{-.55em}$^-$}}
+\newcommand{\mpis}{$m_\pi=137~${\small MeV}}
+\newcommand{\mpim}{$m_\pi=450~${\small MeV}}
+\newcommand{\mpil}{$m_\pi=806~${\small MeV}}
+\newcommand{\muh}{\mu_{^3\text{\scriptsize He}}}
+\newcommand{\mut}{\mu_{^3\text{\scriptsize H}}}
+\newcommand{\mud}{\mu_\text{\scriptsize D}}
+\newcommand{\pode}{\beta_{\text{\scriptsize D},\pm1}}
+\newcommand{\poh}{\beta_{^3\text{\scriptsize He}}}
+\newcommand{\pot}{\beta_{^3\text{\scriptsize H}}}
+\newcommand{\com}[1]{{\scriptsize \sffamily \bfseries \color{red}{#1}}}
+\newcommand{\eg}{\textit{e.g.}\;}
+\newcommand{\ie}{\textit{i.e.}\;}
+\newcommand{\cf}{\textit{cf.}\;}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\la}{\label}
+\newcommand{\ber}{\begin{eqnarray}}
+\newcommand{\eer}{\end{eqnarray}}
+\newcommand{\nn}{\nonumber}
+\newcommand{\half}{\frac{1}{2}}
+\newcommand{\thalf}{\nicefrac[]{3}{2}}
+\newcommand{\bs}[1]{\ensuremath{\boldsymbol{#1}}}
+\newcommand{\bea}{\begin{eqnarray}}
+\newcommand{\eea}{\end{eqnarray}}
+\newcommand{\beq}{\begin{align}}
+\newcommand{\eeq}{\end{align}}
+\newcommand{\bk}{\bs k}
+\newcommand{\bt}{B_{^{3}\text{H}}}
+\newcommand{\bh}{B_{^{3}\text{He}}}
+\newcommand{\bd}{B_\text{D}}
+\newcommand{\ba}{B_\alpha}
+\newcommand{\rgm}{$\mathbb{R}$GM}
+\newcommand{\ev}[1] {|\bra #1  \ket |^2}
+\newcommand{\parg}[1] {\paragraph*{-\,\textit{#1}\,-}}
+\newcommand{\nopi}{\pi\hspace{-6pt}/}
+\newcommand{\ve}[1]{\ensuremath{\boldsymbol{#1}}}
+\newcommand{\xvec}{\bs{x}}
+\newcommand{\rvec}{\bs{r}}
+\newcommand{\sgve}{\ensuremath{\boldsymbol{\sigma}}}
+\newcommand{\tave}{\ensuremath{\boldsymbol{\tau}}}
+\newcommand{\na}{\nabla}
+\newcommand{\bra}[1] {\left\langle~#1~\right|}
+\newcommand{\ket}[1] {\left|~#1~\right\rangle}
+\newcommand{\bet}[1] {\left|#1\right|}
+\newcommand{\overlap}[2] {\left\langle\,#1\,\left|\,#2\,\right.\right\rangle}
+\newcommand{\me}[3] {\left\langle\,#1\,\left|\left.\,#2\,\right|\,#3\,\right.\right\rangle}
+\newcommand{\redme}[3] {\left\langle\,#1\,\middle|\right|\,#2\,\left|\middle|\,#3\,\right\rangle}
+\newcommand{\lam}[1]{$\Lambda=#1~$fm$^{-1}$}\newcommand{\tx}{\tilde{x}}
+\newcommand{\eftnopi}{\mbox{EFT($\slashed{\pi}$)}}
+\newcommand{\threej}[6]{\ensuremath{\begin{pmatrix}#1 & #2 & #3\\#4&#5&#6 \end{pmatrix}}}
+\newcommand{\clg}[6]{\ensuremath{\left\langle\left.\,#1#2\,;\,#3#4\,\right\vert\right.\left.\,#5#6\,\right\rangle}}
+\newcommand{\re}[1] {\mathcal{R}\left[#1\right]}
+\newcommand{\im}[1] {\mathcal{I}\left[#1\right]}
+\newcommand{\E}{\mathcal{E}}
+\newcommand{\eqr}[1] {Eq.~\eqref{#1}}
+\newcommand{\op}[1] {\hat{\mathcal{O}}_{\text{\small #1}}}
+
+\usepackage{pifont}
+\renewcommand\thefootnote{\ding{\numexpr171+\value{footnote}}}
+\let\endtitlepage\relax
+
+\begin{document}
+
+\title{Lorentz and Siegert offer Compton their assistance.}
+\author{Jean Luc Picard}
+\email{jeanluc@1701.ncc}
+\affiliation{Starfleet Academy, Fort Baker, San Francisco, Earth}
+\date{\today}
+
+\begin{abstract}
+We study (elastic) Compton scattering off nuclei as a function of the
+nucleon number. We consider processes with an initial state comprised of
+photons, pions, protons, and neutrons at energies which are insufficient to
+create particles that are not composites of these basic degrees of freedom.
+The appropriate theory for amplitudes at momentum scales of the order of the pion mass
+is constrained by Galilean, chiral, and $U(1)$-gauge symmetries.
+The systematic ordering of the interactions thence admissible, allows us to
+resolve the various correlations between observables in systems of different
+size, kinematics, level of excitation, {\it etc.}. Thereby, we investigate to what
+extent properties of large systems can be understood as consequences of the
+two- and three-body interaction, but we also address the practical problem, \eg,
+to assess the induced uncertainty in a few-body observable due to that in a
+one-body quantity -- {\it To what extent does our poor knowledge about the neutron
+polarizability affect predictions of deuteron and helium properties?}
+
+An intriguing problem in its own right is the correct application of the
+coupling of the two photons to the hadrons and the meson as specified and well
+understood in {\it chiral perturbation theory} -- a relativistic quantum field theory --
+in a solution of the non-relativistic few-nucleon problem.
+\end{abstract}
+
+%\maketitle
+
+
+\paragraph{The ``LIT equation''}
+\be\la{eq.liteq}
+\left(\hat{H}_\text{nuclear}\underbrace{-E_0-\re{\sigma}-i~\im{\sigma}}_{:=-\E}\right)\Psi_\text{LIT}^{J^\pi m_j}=
+\left[\hat{\mathcal{O}}_{Lm_L}\left\lbrace\bet{\ve{k}},\ve{j}_{v}\right\rbrace\otimes\Psi_0^{J_0^{\pi_0}}\right]^{J^\pi m_j}\;\;.
+\ee
+with
+\begin{align}\la{eq.liteq.descr}
+v(\text{ertex})\in&\left\lbrace~\ve{j}_o(\ve{x})=\ldots~,~\ve{j}_s(\ve{x})=\ldots~,~\ve{j}_{mec}(\ve{x})=\ldots~,~\ldots\right\rbrace\;\;;
+\end{align}
+
+\paragraph{The variational basis}
+\be\la{eq.basis}
+\Psi_\text{LIT}^{J^\pi m_j}=\sum\limits_nu_n~\phi^{J^\pi m_j}_n\;\;.
+\ee
+with
+\begin{align}\la{eq.basis.descr}
+\phi^{J^\pi m_j}_n\in\left\lbrace~\left.
+\left[\xi_{S_n}\otimes\mathcal{Y}_{l_n}(\ve{\rho})\right]^{J m_j}~
+e^{-\gamma_n\ve{\rho}^2}~
+\right\vert~\gamma\in\mathbb{R}_+~,~s\in\mathbb{N}^{A-1}+\left(\frac{\mathbb{N}}{2}\right)^{A-2}~,~l\in\mathbb{N}^{A-1}+\mathbb{N}^{A-2}~\right\rbrace
+\end{align}
+
+\paragraph{The matrix form of the ``LIT equation''}
+\be\la{eq.liteq.mat}
+\sum\limits_{s=1}^{N_\text{LIT}}\phi^{J^\pi m_j}_r\left(\hat{H}_\text{nuclear}-\E\right)\phi^{J^\pi m_j}_s~u_s=
+\sum\limits_{n=1}^{N_0}\sum\limits_{m_L}~c_n~\underbrace{\clg{L}{J_0}{m_L}{m_j-m_L}{J}{m_j}}_{\text{Eq.\eqref{eq.litinhomo}}}~\phi^{J^\pi m_j}_r\hat{\mathcal{O}}_{Lm_L}\,\phi^{J_0^{\pi_0}(m_j-m_L)}_n\;\;.
+\ee
+with
+\begin{align}\la{eq.liteq.mat.descr}
+N_\text{LIT}~:&~\text{number of basis states used to expand the LIT state, \eg,} \Psi_\text{LIT}^{2^-}\;\;\;\;;\\
+N_0\leq N_\text{LIT}~:&~\text{number of basis states used to expand the target, \eg, the deuteron;}\\
+\end{align}
+
+\paragraph{The matrix element}
+Reduced matrix elements are used where possible in order to reduce the number of numerical evaluations.
+The composite structure of the operators (spatial and spin form a scalar) demands a more general version
+of the Wigner-Eckart theorem (\cf\cite{edmonds_book}, Eq.(7.1.5)).
+\begin{align}\la{eq.me}
+\phi^{J^\pi m_j}_m~\hat{\mathcal{O}}_{Lm_L}~\phi^{J_0^{\pi_0}m_{j_0}}_n:=&
+\me{m;l_lS_lJ_lm_{j_l}}{\mathcal{A}~\mathcal{O}_{Lm_L}}{l_rS_rJ_rm_{j_r};n} \\
+=&\underbrace{(-1)^{L-J_r+J_l}\frac{\clg{L}{J_r}{m_L}{m_{j_r}}{J_l}{m_{j_l}}}{\hat{J_l}}}_
+{\blue{\texttt{enemb:600ff}}}
+\underbrace{\redme{m;l_lS_lJ_l}{\mathcal{A}~\mathcal{O}_{L}}{l_rS_rJ_r;n}}_{\xdownarrow{.75cm}}\\
+&\underbrace{\hat{J_r}\hat{J_l}\hat{L}
+\left\lbrace\begin{array}{ccc}l^m_l & l^n_r & p\\ S^m_l & S^n_r & q \\ J_l & J_r & L\end{array}\right\rbrace}_{\blue{\texttt{enemb:ecce}}}
+\sum_\text{dc}\sum_{\mathfrak{p}\in\text{dc}}
+\underbrace{\redme{m;l^m_l}{\mathcal{O}^o_p}{\mathcal{A}_\text{dc}l^n_r;n}}_{\red{\texttt{luise}}}\cdot
+\underbrace{\redme{m;S^m_l}{\mathcal{O}^s_q}{\mathcal{A}_\mathfrak{p}S^n_r;n}}_{\red{\texttt{obem}}}\\
+=&~\hat{J_r}\hat{L}\clg{\green{J_r}}{\red{L}}{\green{m_{j_r}}}{\red{m_L}}{J_l}{m_{j_l}}\cdot
+\left\lbrace\begin{array}{ccc}l^m_l & l^n_r & p\\ S^m_l & S^n_r & q \\ J_l & J_r & L\end{array}\right\rbrace\\
+&\cdot\sum_\text{dc}\sum_{\mathfrak{p}\in\text{dc}}
+\redme{m;l^m_l}{\mathcal{O}^o_p}{\mathcal{A}_\text{dc}l^n_r;n}\cdot
+\redme{m;S^m_l}{\mathcal{O}^s_q}{\mathcal{A}_\mathfrak{p}S^n_r;n}
+\end{align}
+with
+\begin{align}\la{eq.liteq.mat.descr}
+\hat{a}:=\sqrt{2a+1}\;\;;\\
+\mathcal{A}=\sum_{\mathfrak{p}\in\mathcal{S}_{A-1}}(-1)^{\text{sgn}(\mathfrak{p})}\hat{\mathfrak{p}}=\oplus_\text{dc}\\
+\text{dc ~:~ double co-set}
+\end{align}
+
+\paragraph{The calculation}
+
+\begin{enumerate}[label=(\roman*)]
+
+\item Solve $$\hat{H}_\text{nuclear}~\Psi^{J_0^{\pi_0}}=E_0~\Psi^{J_0^{\pi_0}}$$ with the ansatz
+$$\Psi^{J_0^{\pi_0}}=\sum\limits_nc_n~\phi^{J_0^{\pi_0}}_n\;\;\;.$$
+If $\hat{H}_\text{nuclear}$ is a spherical rank-0 operator -- a condition which most practical nuclear potentials satisfy --
+$\Psi^{J_0^{\pi_0}}\neq f(m_{j_0})$. We obtain $\Psi^{J_0\red{J_0}}$, in practice.
+
+\item Calculate
+$$\mathbb{H}_{rs}:=\me{\phi^{J^\pi}_r}{\hat{H}_\text{nuclear}}{\phi^{J^\pi}_s}\;\;\text{and}\;\;\mathbb{N}_{rs}:=\overlap{\phi^{J^\pi}_r}{\phi^{J^\pi}_s}\;\;\;
+\forall~|L-J_0|\leq J\leq|L+J_0|$$
+
+\item \blue{$\forall m_j\,\&\,m_L$}, calculate
+$$S^{Jm_jJ_0}_{rs,m_L}:=\me{\phi^{J^\pi m_j}_r}{\hat{\mathcal{O}}_{Lm_L}}{\phi^{J_0^{\pi_0}J_0}_s}\;\;,$$
+and superimpose these matrix elements according to Eq.\eqref{eq.liteq.mat}
+\be\la{eq.litinhomo}
+S^{Jm_j}_r:=\sum\limits_{m_L}~\clg{L}{J_0}{m_L}{\red{m_j}\black{-m_L}}{J}{m_j}~\underbrace{\sum\limits_{n}^{N_0}~c_n~S^{Jm_jJ_0}_{rn,m_L}}
+_{\text{\bf enemb.f OUT}}\;\;\;.
+\ee
+Ecce, $\Psi^{J_0^{\pi_0}}\neq f(m_{j_0})$ does not allow for an elimination of $m_j$ from this equation!
+
+\item Solve the (complex) linear matrix equation
+\be\la{eq.liteq2}
+\left(\mathbb{H}_{rs}-\E \mathbb{N}_{rs}\right)u^{Jm_j}_s=S^{Jm_j}_r
+\ee
+to obtain the LIT state
+\be\la{eq.litstate}
+\psi^{v(\text{ertex}),(\text{mu})L(\text{tipolarity})}_{J_{i(\text{nitial})/f(\text{inal})};J_{(\text{i})n(\text{termediate})}m_n}(k,\sigma)
+=\blue{\psi^{v,L}_{J_0;Jm_j}(k,\sigma)}\black{:=
+\Psi_\text{LIT}^{J^\pi m_j}\big(\underbrace{\bet{\ve{k}},v,L}_{\text{vertex}\atop\text{quantum numbers}};\underbrace{E_0,J_0}_{\text{initial/final-state}\atop\text{quantum numbers}};\re{\sigma},\im{\sigma}\big)\;\;\;.}
+\ee
+
+\item Units exemplified for the $E1$ calculation:
+\begin{gather}
+\intertext{The units of the LIT ($\psi$) and the ground state ($\phi$) are not identical, in general:}
+\op{nucl}(\text{MeV})\psi(x)=\op{E1}(0)\phi(\text{MeV}^{3/2})
+\intertext{$E1$ is implemented as $j_1Y_{1M}$ without any dimensionful prefactors, and hence}
+x=\text{MeV}^{1/2}\;\;\Rightarrow\;\;[L]=\text{MeV}^{-2}
+\intertext{To recover the physical $E1$, a factor of}
+\frac{2}{\hbar k}
+\intertext{multiplies the RHS.}
+\end{gather}
+
+\item The inner product
+\begin{align}\la{eq.litME}
+\mathcal{L}_{v'L',vL}^{J_f,J_i;J}(k',k,\sigma)=&(-1)^{J-J_i+L-L'+v'}N_{J,\sigma}\sum_{m_j}
+\underbrace{\overlap{\psi^{v',L'}_{J_f;Jm_j}(k',\sigma)}{\psi^{v,L}_{J_i;Jm_j}(k,\sigma)}}_{=\sum_{r,s}(u^{Jm_j}_r)^*u^{Jm_j}_s~\mathbb{N}_{rs}}\\
+=&\int_{\ethr}^\infty~\frac{\mathcal{F}_{v'L',vL}^{J_f,J_i;J}(k',k,\red{E})}{(E-\sigma)(E-\sigma^*)}~dE\la{eq.litMEb}
+\intertext{with $N_{J,\sigma}$ being the multiplicity of Lorentz states
+ for given $J$ and $\sigma$.}
+\end{align}
+
+\item The recovery of the (partial) strength functions --
+ The inverse Lorentz-integral transformation
+
+At this stage, the problem is to recover $\mathcal{F}$, given $\mathcal{L}$ by inverting
+the integral transformation \eqr{eq.litMEb}.
+The {\it discrete essence} of that can be written as
+\be
+\ve{L}_s=\sum_eA_{se}\ve{F}^e=\sum_nc_n\sum_eA_{se}f_n^e\;\;.
+\ee
+If the energy sum/integral can be evaluated efficiently for a set of basis vectors $f_n$
+which is suitable for a proper representation of the vector $\ve{L}$, it remains to solve
+a linear optimization problem. This is detailed below from \eqr{eq.responseexp} onwards.
+
+The choice for the basis $f_n$ is based on two ideas. Firstly, from the definition
+\be\la{eq.partstrength}
+\mathcal{F}_{v'L',vL}^{J_f,J_i;J}(k',k,\red{E})=\underbrace{N_{J,E}}_{\#J,E-\text{states}}
+\redme{J_f~E_f}{M^{\nu\mprime,L\mprime}(k\mprime)}{J~E}\,\redme{J~E}{M^{\nu,L}(k)}{J_i~E_i}\;\;,
+\ee
+the joint probability to, first, induce via $M^{\nu,L}(k)$ the transition from one eigenstate of
+a system to another, which, second is perturbed via $M^{\nu\mprime,L\mprime}(k\mprime)$ into
+some final eigenstate. Let me imagine a system with one localized bound state. Its wave
+function is folded with the perturbation, which is a polynomial in $k$ of order $L$ -- the
+multipolarity -- and the wave function of another eigenstate of the system, constrained
+by energy conservation. I think of $k$ large enough such that the latter state contains a
+free wave on some coordinate. Hence the matrix element retains a Fourier-transform character
+of a localized wave packet multiplied by a polynomial. The latter can be expanded well
+in symmetrical, peaked functions -- \eg, Gaussians -- and the polynomial skews those.
+A Fourier transform of such a skewed Gaussian will retain its shape but become
+broader/narrower. A skewed Gaussian is expected to be amenable to an expansion in
+Lorentz functions.
+
+The second, related idea for choosing a Lorentz basis is the ability to calculate
+the integral transform with a Lorentz kernel analytically (viz. \eqr{eq.ltofl}).
+
+\end{enumerate}
+
+\newpage
+
+\section{formulas and constants}
+
+\begin{alignat}{2}
+\text{(Wigner) 3-$j$ symbol:} &\hspace{1cm}& \threej{L}{S}{J}{m_l}{m_s}{-m_j}=&~(-1)^{L-S+m_j}~(2J+1)^{-\frac{1}{2}}~\clg{L}{S}{m_l}{m_s}{J}{m_j}\\
+\text{Matrix for single-axis rotation:} &\hspace{1cm}&   \mathcal{D}_{m\mprime,m}^{(j)}(0~\beta~0)\equiv&~d_{m\mprime,m}^{(j)}(\beta)\nonumber\\
+&\hspace{1cm}& =&\left[\frac{(j+m\mprime)!(j-m\mprime)!}{(j+m)!(j-m)!}\right]^\frac{1}{2}\nonumber\\
+&\hspace{1cm}&&~\cdot\sum_\sigma\left(j+m\atop j-m\mprime-\sigma\right)\left(j-m\atop \sigma\right)(-1)^{j-m\mprime-\sigma}\nonumber\\
+&\hspace{1cm}&&~\cdot\left(\cos\frac{\beta}{2}\right)^{2\sigma+m+m\mprime}\left(\sin\frac{\beta}{2}\right)^{2j-2\sigma-m-m\mprime}\\
+\end{alignat}
+
+\paragraph{The Lorentz transformation of a Lorentzian\\}\la{sec.LoOfLo}
+
+The strength functions which constitute
+the Compton amplitudes are themselves composed of scalar functions of an energy parameter.
+I assume that these functions can be expanded to any desired accuracy in a Lorentzian/Cauchy
+basis as follows:
+
+\be\la{eq.responseexp}
+r(e)=\sum_nc_n\frac{\theta(e-\ethr)}{(a_n-e)^2+b_n^2}:=\sum_nc_n\theta(e-\ethr)f_n~.
+\ee
+
+As the process is non-trivial only if the photon's energy exceeds a minimum threshold
+energy $\ethr$, it is in order to include a system-characteristic step function.
+
+In practice, we obtain an integral transformation of this quantity with a Lorentzian kernel,
+
+\be
+L(\sigma):=\int\limits^\infty_{-\infty}\,\frac{r(e)}{(\sigma_r-e)^2+\sigma_i^2}~de
+=\sum_nc_n\int\limits^\infty_{e_\text{th}}\,\frac{f_n(e)}{(\sigma_r-e)^2+\sigma_i^2}~de~.
+\ee
+
+If basis basis functions\footnote{$x\mprime:=x-\ethr$} which we define through the integral
+
+\begin{eqnarray}\la{eq.ltofl}
+\int^\infty_{\ethr}\,\frac{f_n(e)}{(\sigma_r-e)^2+\sigma_i^2}~de
+&=&\int_{\ethr}^\infty\,\frac{1}{(\sigma_r-e)^2+\sigma_i^2}\cdot
+\frac{1}{(a_n-e)^2+b_n^2}~de\nonumber\\
+&\vdots&\nonumber\\
+&=&\left[(\sigma_r-a_n)^2+(\sigma_i-b_n)^2\right]^{-1}\cdot
+\left[(\sigma_r-a_n)^2+(\sigma_i+b_n)^2\right]^{-1}\nonumber\\
+&&\cdot
+\Bigg\lbrace
+\sigma_i^{-1}\left((\sigma_r-a_n)^2+b_n^2-\sigma_i^2\right)
+\left(\frac{\pi}{2}+\tan^{-1}\left(\frac{\sigma_r\mprime}{\sigma_i}\right)\right)\nonumber\\
+&&+~
+b_n^{-1}\left((\sigma_r-a_n)^2-b_n^2+\sigma_i^2\right)
+\left(\frac{\pi}{2}+\tan^{-1}\left(\frac{a_n\mprime}{b_n}\right)\right)\nonumber\\&&+~
+(\sigma_r-a_n)~\ln\left(\frac{\sigma_r\mprime^2+\sigma_i^2}{a_n\mprime^2+b_n^2}
+\right)
+\Bigg\rbrace\nonumber\\
+&:=&L_n(\sigma,\ethr)
+\end{eqnarray}
+
+allow for an accurate expansion of a given, physical function $L(\sigma)$,
+namely for a set $\mathfrak{B}=\left\lbrace (a_n,b_n)\in\mathbb{R}_{0^+}\right\rbrace_{n=1,\ldots,d}$,
+we seek
+
+\be
+\min_{\ve{c}}\left\vert L(\sigma)-\sum_nc_nL_n(\sigma,\ethr)\right\vert:=\ve{c}^*.
+\ee
+
+The set of optimal parameters $\ve{c}^*$ represents via Eq.~\eqref{eq.responseexp} an expansion
+of the response function in Lorentzians.
+If $\mathfrak{B}$ is ``numerically'' complete, the dependence of $r(e)$ on changes
+in this basis should be negligible, \ie, the problem is {\bf not} ill-posed.
+This shall now be demonstrated for an exemplary process.
+
+
+
+\begin{table}
+\be\la{tab.constants}
+\renewcommand{\arraystretch}{2.4}
+\setlength{\tabcolsep}{8pt}
+\begin{array}{c|c|c}\hline
+\alpha=\frac{e^2}{4\pi}&\text{dimensionless}&\frac{1}{137.03604}\\
+\hbar c & & 197.32858~\text{MeV}\cdot\text{fm}^2 \\
+\hline\hline
+\end{array}
+\ee
+\caption{Implemented numerical values.}
+\end{table}
+
+\section{``How to do an integral''}
+
+\paragraph{The multipole operators}
+\begin{itemize}
+  \item convection current\footnote{Indices referring to particles are put in brackets.}
+\begin{subequations}
+  \begin{align}
+  \ve{j}_o(\ve{x})=&\frac{e}{2m}\sum\limits_i^{A}\frac{1}{2}\left(1+\tau_z(i)\right)
+  \left\lbrace\ve{p}(i)~,~\delta^{(3)}(\ve{x}-\ve{r}(i))\right\rbrace\la{eq.conc}\\
+  \text{\bf(electric)}~
+   \mathcal{O}_{Lm_L}^{o^{\text{el}}}=&\frac{e\hbar}{mc}\hat{L}^{-1}\sum\limits_i^Ag_l(i)\left[\sqrt{L}\Delta_{LM}^{L+1}(\ve{r}(i))-\sqrt{L+1}\Delta_{LM}^{L-1}(\ve{r}(i))\right]\la{eq.convcel}\\
+   \text{\bf(magnetic)}~
+\mathcal{O}_{Lm_L}^{o^{\text{mag}}}=&i\frac{e\hbar}{mc}\sum\limits_i^Ag_l(i)\Delta_{LM}^L(\ve{r}(i))\la{eq.convcmag}
+  \end{align}
+\end{subequations}
+  \item spin current
+\begin{subequations}
+  \begin{align}
+  \ve{j}_s(\ve{x})=&\frac{e\hbar}{2m}\sum\limits_i^{A}\frac{1}{2}\left(g_{s_p}\left(1+\tau_z(i)\right)+g_{s_n}\left(1-\tau_z(i)\right)\right)\ve{\sigma}(i)\times\ve{\nabla}(i)\delta^{(3)}(\ve{x}-\ve{r}(i))\la{eq.spinc}\\
+  \text{\bf(electric)}~
+\mathcal{O}_{Lm_L}^{s^{\text{el}}}=&-\frac{e\hbar\red{|\ve{k}|}}{2mc}\sum\limits_i^Ag_s(i)\sum\limits_{M,\nu}\clg{L}{1}{M}{\nu}{L}{m_L}\cdot\ve{\sigma}_\nu(i)\Phi_{LM}(\ve{r}(i))\la{eq.spincel}\\
+\text{\bf(magnetic)}~
+\mathcal{O}_{Lm_L}^{s^{\text{mag}}}=&i\frac{e\hbar\red{|\ve{k}|}}{2mc}\hat{L}^{-1}\sum\limits_i^Ag_s(i)\sum\limits_{M,\nu}
+\left[\sqrt{L}\clg{L+1}{1}{M}{\nu}{L}{m_L}\ve{\sigma}_\nu(i)\Phi_{L+1M}(\ve{r}(i))\right.\\
+&\left.-\sqrt{L+1}\clg{L-1}{1}{M}{\nu}{L}{m_L}\ve{\sigma}_\nu(i)\Phi_{L-1M}(\ve{r}(i))\right]
+\la{eq.spincmag}
+\end{align}
+\end{subequations}
+\end{itemize}
+with
+\begin{align}\la{eq.multipoleop.descr}
+\Phi_{Lm_L}(\ve{r})=&j_L(kr)~Y_{Lm_L}(\Omega_r)&&&\footnotemark\\
+\Delta_{Lm_L}^J(\ve{r})=&\sum\limits_{M,\nu}\clg{L}{1}{M}{\nu}{J}{m_L}\Phi_{Lm_L}(\ve{r})~\ve{p}_\nu\;\;.&&&\footnotemark
+\end{align}
+\addtocounter{footnote}{-1}
+\footnotetext{rank-L spherical $\ve{L}^2$ tensor}
+\stepcounter{footnote}
+\footnotetext{linear combination of spherical $\ve{L}^2$ rank-L tensors, hence, itself a rank-L spherical $\ve{L}^2$ tensor and \red{not} 
+rank-J spherical $\ve{L}^2$.}
+
+\paragraph{Siegert form}
+Linear-in-$\alpha$ coupling of a (background) photon (momentum $\ve{k}$) to a system ($j^\nu$) at $\ve{x}$:
+\begin{align}\la{eq.siegert}
+\me{f}{-\frac{1}{c}\int d\ve{x}A_\nu(\ve{x})j^\nu(\ve{x})}{i}&\stackrel{\text{transverse}}{\longrightarrow}&\me{f}{-\sum_{LM}i^L\hat{L}\sqrt{2\pi}
+\left(\mathcal{O}_{Lm_L}^{{\text{el}}}+\mu\mathcal{O}_{Lm_L}^{{\text{mag}}}\right)}{i}\\
+&\stackrel{\text{el. only}}{\longrightarrow}&-\sum_{LM}i^L\hat{L}\sqrt{2\pi}\me{f}{\left(\frac{1}{ck}\int d\ve{x}~\ve{j}(\ve{x})\cdot\ve{\nabla}_x\times\ve{L}\left[j_L(kx)Y_{LM}(\Omega_x)\right]\right)}{i}
+\\[1em]
+&\stackrel{k\to 0}{\longrightarrow}&~-\sum_{LM}\frac{i^{L+1}\hat{L}\sqrt{2\pi}}{k}\cdot\frac{L+1}{L}\me{f}{\left(\int d\ve{x}~\ve{j}(\ve{x})\cdot\ve{\nabla}_x\left[j_L(kx)Y_{LM}(\Omega_x)\right]\right)}{i}
+\\[1em]
+&=&~\sum_{LM}i^L\cdot\frac{\hat{L}\sqrt{2\pi}}{\hbar k}\cdot\frac{L+1}{L}\me{f}{\int d\ve{x}~\left[\,\rho(\ve{x})\,,\,\hat{H}_\text{nuclear}\,\right]~j_L(kx)Y_{LM}(\Omega_x)}{i}\\[1em]
+&\overset{\scriptstyle {L=1\atop \rho=\rho^{(1)}}}{=}&~\frac{2}{\hbar k}\me{f}{\sum\limits_i^A~q(i)~\left[\,j_1(kr(i))Y_{1M}(\Omega_{\ve{r}(i)})\,,\,\hat{H}_\text{nuclear}\,\right]}{i}
+\end{align}
+with
+\begin{align}\la{eq.siegert.descr}
+\ve{L}=&-i\hbar\left(\ve{x}\times\ve{\nabla}_x\right)\\
+\rho^{(1)}(\ve{x})=&\sum\limits_i^A\underbrace{\frac{e}{2}(1+\tau_z(i))}_{:=q(i)}\delta^{(3)}(\ve{x}-\ve{r}_i)\\
+\lim\limits_{x\to 0}j_l(x)=&\frac{x^l}{(2l+1)!!}\;\;.
+\end{align}
+We abstain 
+
+\paragraph{The non-trivial matrix element (which serves {\bf 2-body} currents, too)}
+\be\la{eq.theme}
+\me{m;l_lm_{l_l}}{\Phi_{Lm_L}(\ve{\rho_\nu})~e^{-\beta\ve{r}_{ij}}\prod\limits_{N}^{N_{\text{op}}}\mathcal{Y}_{L_NM_N}(\ve{r}_{ij})}{l_rm_{l_r};n}
+\ee
+
+\newpage
+\section{Obtaining a cross section}
+If one is interested in a quantification of the reaction of a nucleus being irradiated with
+an electromagnetic wave, the following formulae might help.
+
+\begin{align}
+\intertext{
+  For the total cross section for the reaction of a system initially in state $\alpha$
+  induced by a perturbation which transforms $\alpha$ into a set of final states (labeled $\alpha'$)
+  Taylor (\cf\cite{taylor_book}~Eq.(17.17)) writes
+}
+\sigma(\star\gets\alpha)=&~\sum_{\alpha'}\sigma(\alpha'\gets\alpha)\notag\\
+=&~(2\pi)^4~\frac{m}{k}~\sum_{\alpha'}\int d\ve{k}'~\delta(E'-E)\left\vert t(\ve{k}',\alpha'\gets\ve{k},\alpha)\right\vert^2\quad.\quad
+\intertext{The perturbation is implicit in the transition matrix $t$. For an electromagnetic current,}
+\end{align}
+\newpage
+\section{Notes on the \texttt{RRGM} implementation}
+
+\subsection*{The expansion of the 3-helium ground state}
+We approximate the antisymmetric nuclear three-body state with the expansion
+
+\begin{eqnarray}
+\overlap{\ve{\rho}_1,\ve{\rho}_2}{^3\text{He}}&=&\sum_i~c_i \, e^{-\gamma_i\ve{\rho}_1^2} \, e^{-\delta_i\ve{\rho}_2^2}\cdot
+\left[\left[\mathcal{Y}_{l_{1,i}}(\ve{\rho}_1)\otimes\mathcal{Y}_{l_{2,i}}(\ve{\rho}_2)\right]^{L_i}\otimes
+\left[\left[\xi_1\otimes\xi_2\right]^{\mathcalligra{s}_i}\otimes\xi_3\right]^{S_i}\right]^J\\
+&\equiv&\sum_i~c_i~\phi_i(\ve{\rho}_1,\ve{\rho}_2)\nonumber
+\;\;.
+\end{eqnarray}
+
+A single basis vector is parametrized by two width parameters $\gamma$ and $\delta$, and a (spin) angular-momentum coupling scheme
+which specifies two angular-momentum quanta $l_{1,2}$ (one for each Jacobi coordinate $\ve{\rho}_{1,2}$), a total orbital
+angular momentum $L$, an intermediate spin coupling $\mathcalligra{s}$, and the total spin $S$.
+
+In practise, we proceed as follows:
+
+\begin{enumerate}
+\item Fix an orbital-angular-momentum cutoff $l_\text{max}$ and add {\bf all} spin- and orbital coupling schemes
+to the basis with $l_{1,2}\leq l_\text{max}$ and intermediate/total angular momenta which contribute to a total $J$ and parity.
+
+The structure $\left[\left[\mathcal{Y}_{1}(\ve{\rho}_1)\otimes\mathcal{Y}_{1}(\ve{\rho}_2)\right]^{2}\otimes
+\left[\left[\xi_1\otimes\xi_2\right]^{1}\otimes\xi_3\right]^{\nicefrac{3}{2}}\right]^{\nicefrac{1}{2}^+}$, for example, would
+be included if $l_\text{max}=2$ and combines two negative-parity solid harmonics to form a of positive parity.
+\item For each of the above blocks, two sets of width parameters are chosen. At present, this means selecting upper and lower
+bounds $\gamma/\delta_{\text{min,max}}$ of geometric grids with a fixed number of nodes $n$.
+
+For a particular coupling block, one uses
+\mbox{$\gamma\in\lbrace\gamma_\text{min},\gamma_\text{max}\rbrace^{n(l_{1,2,i},L_i,\mathcalligra{s}_i,S_i)}_\text{geom}\equiv w_\gamma$} and\\
+\mbox{$\delta\in\lbrace\delta_\text{min},\delta_\text{max}\rbrace^{m(l_{1,2,i},L_i,\mathcalligra{s}_i,S_i)}_\text{geom}\equiv w_\delta$}.
+Hence, for each coupling block there are $m\cdot n$ (``in principle'') independent Gaussian prefactors. To select those combinations
+which form a numerically stable and yet complete-for-its-purpose set is an unsolved problem, if the state should be fed into a LIT
+calculation.
+\end{enumerate}
+
+\newpage
+
+\subsection*{genetic basis selection}
+
+\begin{description}
+  \item[initial basis -- {\it the first generation of parents}~]${}$\vspace{.2cm}\\
+A single basis vector is parametrized by a particular orbital- and (iso)spin angular-momentum coupling scheme,
+$\cfg_j:=\lbrace l^{(j)}_{1,2},L^{(j)},\mathcalligra{s}^{(j)},S^{(j)},\mathcalligra{t}^{(j)},T^{(j)}\rbrace$, {\bf and}
+a pair of width parameters, $\bv_i:=\lbrace\gamma^{(i)},\delta^{(i)}\rbrace$.
+
+We obtain an initial set of vectors by defining {\bf upper} and {\bf lower} bounds within which logarithmically spaced
+values are selected {\bf for each} \cfg. As $$\overlap{\cfg_n\bv_i}{\cfg_m\bv_i}\propto\delta_{mn}\qquad,$$
+\ie, choosing a basis which contains elements which differ solely in their discrete quantum numbers but have {\bf identical}
+widths, appears not to introduce linearly dependent vectors, the (anti)symmetrization of the basis,
+$$\mathbb{1}:=\me{\cfg_n\bv_i}{\mathcal{\hat{A}}}{\cfg_m\bv_j}\qquad,$$
+
+\end{description}
+
+\newpage
+
+
+
+\newpage
+
+\input{rrgm_flow.tex}
+
+\subsection*{luise.f~$\to$~qual.f}
+$P_{dc}$ and width-independent quantities of $\Gamma_{l_1m_1,\ldots,l_zm_z}$ with
+$z=n_{c_l}-1+n_{c_r}-1+n_{ww}$.
+
+\subsection*{obem.f~$\to$~qual.f}
+
+
+\subsection*{qual.f~$\to$~enemb.f}
+
+\begin{lstlisting}
+ WRITE(NBAND1) NZF,MUL,(LREG(K),K=1,NZOPER),I,(NZRHO(K),K=1,NZF)
+
+ WRITE(NBAND1) N3,MMASSE(1,N1,K),MMASSE(2,N1,K),MLAD(1,N1,K),
+1 MLAD(2,N1,K),MSS(1,N1,K),MSS(2,N1,K),MS(N1,K),
+2 (LZWERT(L,N2,K),L=1,5),(RPAR(L,K),L=1,N3),KP(MC1,N4,K)
+
+ WRITE(NBAND1) NTE,NC,ND,ITV2
+
+ WRITE(NBAND1) ((IND(MM,NN), NN=1, JRHO), MM=1, IRHO)
+
+ WRITE(NBAND1) NUML, NUMR, IK1H, JK1H, LL1,
+*               ((F(K,L),(J-1,DM(K,L,J),J=1,LL1),L=1,JK1),
+*                                                K=1,IK1)
+\end{lstlisting}
+
+\nocite{*}
+\bibliography{refs_compton}
+
+\end{document}

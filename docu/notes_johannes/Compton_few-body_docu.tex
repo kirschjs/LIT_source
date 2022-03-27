@@ -1,0 +1,386 @@
+\documentclass[onecolumn,preprint,superscriptaddress,nofootinbib,notitlepage,10pt,linenumbers]{revtex4-1}
+
+\usepackage[perpage]{footmisc}
+\usepackage{epstopdf}
+\usepackage{epsfig}
+\usepackage{color}
+\usepackage{hyperref}
+\usepackage{mathbbol}
+%\usepackage{bookmark}
+\usepackage{tikz}
+\usetikzlibrary{matrix,shapes,arrows,positioning,chains,backgrounds}
+\usepackage{dutchcal}
+\usepackage{calligra}
+
+\DeclareMathAlphabet{\mathcalligra}{T1}{calligra}{m}{n}
+\DeclareFontShape{T1}{calligra}{m}{n}{<->s*[2.2]callig15}{}
+
+\usepackage{mathtools}
+\usepackage{bbold}
+\usepackage{amsmath,array}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+
+\usepackage{tabularx}
+\usepackage{slashed}
+\usepackage{nicefrac}
+\usepackage{tikz-feynman}
+\usepackage[framemethod=TikZ]{mdframed}
+\usepackage{cjhebrew}
+\usepackage{enumitem}
+\usepackage{listings}
+\lstset{language=[90]Fortran,
+  basicstyle=\ttfamily,
+  keywordstyle=\color{red},
+  commentstyle=\color{green},
+  morecomment=[l]{!\ }% Comment only with space after !
+}
+
+\setlength{\topmargin}{-1.0cm}
+\setlength{\headheight}{0.1cm} \setlength{\footskip}{1.cm}
+\setlength{\headsep}{.1cm}
+\setlength{\textheight}{.8\paperheight}
+\setlength{\textwidth}{.8\paperwidth}
+\setlength{\oddsidemargin}{-.5cm}
+\setlength{\evensidemargin}{0.0cm}
+\setlength{\marginparwidth}{0.0cm}
+\setlength{\marginparsep}{0.0cm}
+
+\definecolor{light-gray}{gray}{0.95}
+\definecolor{blue}{HTML}{4169E1}
+\definecolor{red}{HTML}{DC143C}
+\definecolor{green}{HTML}{2E8B57}
+\definecolor{black}{HTML}{000000}
+\definecolor{g1}{HTML}{A9A9A9}
+\definecolor{g2}{HTML}{696969}
+\definecolor{g3}{HTML}{7F7F7F}
+\definecolor{g4}{HTML}{D3D3D3}
+
+\newcounter{bsp}[section]\setcounter{bsp}{0}
+\renewcommand{\thebsp}{\arabic{section}.\arabic{bsp}}
+
+\newenvironment{calc}[2][]{%
+\refstepcounter{bsp}%
+\ifstrempty{#1}%
+{\mdfsetup{%
+frametitle={%
+\tikz[baseline=(current bounding box.east),outer sep=0pt]
+\node[anchor=east,rectangle,fill=green]
+{\strut\scriptsize calculation flow~};}}
+}%
+{\mdfsetup{%
+frametitle={%
+\tikz[baseline=(current bounding box.east),outer sep=0pt]
+\node[anchor=east,rectangle,fill=green]
+{\strut\scriptsize calculation flow~#1};}}%
+}%
+\mdfsetup{innertopmargin=10pt,innerbottommargin=10pt,linecolor=green,%
+linewidth=2pt,topline=true,%
+frametitleaboveskip=\dimexpr-\ht\strutbox\relax
+}
+\begin{mdframed}[]\relax%
+\label{#2}}{\end{mdframed}}
+
+\newenvironment{code}[2][]{%
+\refstepcounter{bsp}%
+\ifstrempty{#1}%
+{\mdfsetup{%
+frametitle={%
+\tikz[baseline=(current bounding box.east),outer sep=0pt]
+\node[anchor=east,rectangle,fill=red]
+{\strut\scriptsize \small{010101}~};}}
+}%
+{\mdfsetup{%
+frametitle={%
+\tikz[baseline=(current bounding box.east),outer sep=0pt]
+\node[anchor=east,rectangle,fill=red]
+{\strut\scriptsize \small{010101}~#1};}}%
+}%
+\mdfsetup{innertopmargin=10pt,innertopmargin=10pt,linecolor=red,%
+linewidth=2pt,topline=true,%
+frametitleaboveskip=\dimexpr-\ht\strutbox\relax
+}
+\begin{mdframed}[]\relax%
+\label{#2}}{\end{mdframed}}
+
+\newcommand{\xdownarrow}[1]{%
+  {\left\downarrow\vbox to #1{}\right.\kern-\nulldelimiterspace}
+}
+
+\newcommand*{\mprime}{^{\prime}\mkern-1.2mu}
+\newcommand*{\mdprime}{^{\prime\prime}\mkern-1.2mu}
+\newcommand*{\mtprime}{^{\prime\prime\prime}\mkern-1.2mu}
+\newcommand*{\ethr}{e_\text{th}}
+\newcommand{\black}[1]{\textcolor{black}{#1}}
+\newcommand{\red}[1]{\textcolor{red}{#1}}
+\newcommand{\blue}[1]{\textcolor{blue}{#1}}
+\newcommand{\green}[1]{\textcolor{green}{#1}}
+\newcommand{\caf}{\text{\cjRL{b}}}
+\newcommand{\he}{\ket{^3\text{He}}}
+\newcommand{\fin}{\hat{\mathcal{O}}_{pq}\otimes\ket{^3\text{He}}}
+\newcommand{\hes}{${}^3$He}
+\newcommand{\tr}{${}^3$H}
+\newcommand{\ls}{\ve{L}\cdot\ve{S}}
+\newcommand{\eps}{\epsilon}
+\newcommand{\cfg}{\texttt{cfg}}
+\newcommand{\bv}{\texttt{bv}}
+\newcommand{\as}{a_s}
+\newcommand{\at}{a_t}
+\newcommand{\ecm}{E_\textrm{\small c.m.}}
+\newcommand{\dq}{\mbox{d\hspace{-.55em}$^-$}}
+\newcommand{\mpis}{$m_\pi=137~${\small MeV}}
+\newcommand{\mpim}{$m_\pi=450~${\small MeV}}
+\newcommand{\mpil}{$m_\pi=806~${\small MeV}}
+\newcommand{\muh}{\mu_{^3\text{\scriptsize He}}}
+\newcommand{\mut}{\mu_{^3\text{\scriptsize H}}}
+\newcommand{\mud}{\mu_\text{\scriptsize D}}
+\newcommand{\pode}{\beta_{\text{\scriptsize D},\pm1}}
+\newcommand{\poh}{\beta_{^3\text{\scriptsize He}}}
+\newcommand{\pot}{\beta_{^3\text{\scriptsize H}}}
+\newcommand{\com}[1]{{\scriptsize \sffamily \bfseries \color{red}{#1}}}
+\newcommand{\eg}{\textit{e.g.}\;}
+\newcommand{\ie}{\textit{i.e.}\;}
+\newcommand{\cf}{\textit{cf.}\;}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\la}{\label}
+\newcommand{\ber}{\begin{eqnarray}}
+\newcommand{\eer}{\end{eqnarray}}
+\newcommand{\nn}{\nonumber}
+\newcommand{\half}{\frac{1}{2}}
+\newcommand{\thalf}{\nicefrac[]{3}{2}}
+\newcommand{\bs}[1]{\ensuremath{\boldsymbol{#1}}}
+\newcommand{\bea}{\begin{eqnarray}}
+\newcommand{\eea}{\end{eqnarray}}
+\newcommand{\beq}{\begin{align}}
+\newcommand{\eeq}{\end{align}}
+\newcommand{\bk}{\bs k}
+\newcommand{\bt}{B_{^{3}\text{H}}}
+\newcommand{\bh}{B_{^{3}\text{He}}}
+\newcommand{\bd}{B_\text{D}}
+\newcommand{\ba}{B_\alpha}
+\newcommand{\rgm}{$\mathbb{R}$GM}
+\newcommand{\ev}[1] {|\bra #1  \ket |^2}
+\newcommand{\parg}[1] {\paragraph*{-\,\textit{#1}\,-}}
+\newcommand{\nopi}{\pi\hspace{-6pt}/}
+\newcommand{\ve}[1]{\ensuremath{\boldsymbol{#1}}}
+\newcommand{\xvec}{\bs{x}}
+\newcommand{\rvec}{\bs{r}}
+\newcommand{\sgve}{\ensuremath{\boldsymbol{\sigma}}}
+\newcommand{\tave}{\ensuremath{\boldsymbol{\tau}}}
+\newcommand{\na}{\nabla}
+\newcommand{\bra}[1] {\left\langle~#1~\right|}
+\newcommand{\ket}[1] {\left|~#1~\right\rangle}
+\newcommand{\bet}[1] {\left|#1\right|}
+\newcommand{\overlap}[2] {\left\langle\,#1\,\left|\,#2\,\right.\right\rangle}
+\newcommand{\me}[3] {\left\langle\,#1\,\left|\left.\,#2\,\right|\,#3\,\right.\right\rangle}
+\newcommand{\redme}[3] {\left\langle\,#1\,\middle|\right|\,#2\,\left|\middle|\,#3\,\right\rangle}
+\newcommand{\lam}[1]{$\Lambda=#1~$fm$^{-1}$}\newcommand{\tx}{\tilde{x}}
+\newcommand{\eftnopi}{\mbox{EFT($\slashed{\pi}$)}}
+\newcommand{\threej}[6]{\ensuremath{\begin{pmatrix}#1 & #2 & #3\\#4&#5&#6 \end{pmatrix}}}
+\newcommand{\clg}[6]{\ensuremath{\left\langle\left.\,#1#2\,;\,#3#4\,\right\vert\right.\left.\,#5#6\,\right\rangle}}
+\newcommand{\re}[1] {\mathcal{R}\left[#1\right]}
+\newcommand{\im}[1] {\mathcal{I}\left[#1\right]}
+\newcommand{\E}{\mathcal{E}}
+\newcommand{\eqr}[1]{eq.~\eqref{#1}}
+\newcommand{\figref}[1]{fig.~\ref{#1}}
+\newcommand{\tabref}[1]{table~\ref{#1}}
+\newcommand{\ccite}[1]{ref.~\cite{#1}}
+\newcommand{\op}[1] {\hat{\mathcal{O}}_{\text{\small #1}}}
+\newcommand{\fkt}[1]{\colorbox{light-gray}{\texttt{#1}}}
+\newcommand{\var}[1]{\small\textcolor{blue}{\texttt{#1}}}
+\newcommand{\comm}[1]{\small\textcolor{green}{\texttt{#1}}}
+\newcommand{\ham}{\mathbb{H}}
+\newcommand{\nor}{\mathbb{N}}
+
+\usepackage{pifont}
+\renewcommand\thefootnote{\ding{\numexpr171+\value{footnote}}}
+\let\endtitlepage\relax
+
+
+\begin{document}
+
+\title{Lorentz and Siegert offer Compton their assistance.}
+\author{Johannes Kirscher}
+\email{kirschjs@web.de}
+\affiliation{Starfleet Academy, Fort Baker, San Francisco, Earth}
+\date{\today}
+
+\begin{abstract}
+
+\end{abstract}
+
+\paragraph{}
+\dotfill\\
+\begin{calc}[]{calc:ess}
+\begin{enumerate}
+\item \comm{git clone git@github.com:kirschjs/LIT\char`_source.git}
+\item \comm{make all} in \fkt{./LIT\char`_source/src\char`_nucl/}, \fkt{./LIT\char`_source/src\char`_nucl/V18\char`_PAR/},\\
+ \fkt{./LIT\char`_source/src\char`_nucl/UIX\char`_PAR/}, and \fkt{./LIT\char`_source/src\char`_elma\char`_pol/}
+\item \comm{cd ./LIT\char`_source/src\char`_python/EugenicistsApproach}
+\item \comm{./python3.x NextToNewestGeneration.py}
+\item \comm{./python3.x A3\char`_lit\char`_M.py}
+\item \comm{mathematica ./LIT\char`_source/src\char`_mathematica/helion\char`_E1\char`_multiBas\char`_crosssection.nb}
+\item set \var{resultsDir} in 3rd cell to the directory specified by the last output of \fkt{A3\char`_lit\char`_M.py}
+\end{enumerate}
+\vspace{1cm}
+support: \texttt{kirscjo@gmail.com} or \comm{skype} to \texttt{kirschjs.dc}~; 
+\end{calc}
+
+\newpage
+
+code repository:~\comm{git clone git@github.com:kirschjs/LIT\char`_source.git}
+\begin{enumerate}
+\item optimize bases for final and initial states
+
+\begin{calc}[step (4)]{calc:steps}
+\begin{tabularx}{0.9\textwidth}{l|X}
+\multicolumn{2}{c}{\hrulefill\fkt{NextToNewestGeneration.py}\hrulefill} \\
+{argument} & {comment} \\\hline\hline
+\var{bastypes} & see \fkt{bridgeA3.py} for the defined structures, 
+\newline 
+\eg, $\he=\textsf{npp0.5+}$ (\var{channels} dictionary)\\
+\var{anzStreuBases} & nbr. of bases grown from different initial seed bases\\
+\var{CgfCycles} & nbr. of cycles each cfg. $\in$ \var{bastypes} is optimized\\
+\var{nRaces} & nbr. of generations for each \var{CgfCycle}\\
+\var{cradleCapacity} & nbr. of children produces within a \var{Race}\\
+\var{ini\char`_grid\char`_bounds} & arg. of function \fkt{seedMat}; bounds of the initial,
+\newline
+ partially randomized geometric grid;
+ \newline
+  8-element array\\
+\var{ini\char`_dims} & arg. of function \fkt{seedMat}; nbr. of width
+\newline
+ parameters per cfg. for Jacobi 1,2 ($\gamma_{1,2}$);
+ \newline 1st pair: initial state; 2nd pair: final state\\
+\var{minCond} & minimal condition number$=$ratio between
+\newline
+ absolute values of the smallest and largest norm eigenvalue;\\
+\var{denseEVinterval} & parameter to det. loveliness of a vector in\newline
+\fkt{loveliness} and \fkt{basQ} in \fkt{genetic\char`_width\char`_growth.py}\\
+\var{removalGainFactor} & while stabilizing the initial seed basis and purging
+\newline
+ an optimized basis after \var{CfgCycles} of idlers,\newline
+  the removal of one of the latter must increase the quality by this factor\\
+\var{maxOnPurge} & max. nbr. of basis vectors tested for their effect\newline on stability; ideally $=$ \textsf{dim}(basis)\\
+\var{maxOnTrail} & max. nbr. of basis vectors tested for their effect\newline on quality; ideally $=$ \textsf{dim}(basis)\\
+\var{muta\char`_initial} & mutation rate (random bit flip) during\newline offspring generation\\\hline
+%
+output & written in \texttt{respath} (set in \fkt{bridgeA3.py})\\\hline\hline
+\var{Ssigbasv3heLIT\char`_Jpi\char`_BasNR-$<$basisSet$>$.dat} & FORTRAN bookkeeping\\
+\var{SLITbas\char`_full\char`_Jpi\char`_BasNR-rndSet .dat} & *\\
+\var{Ssigbasv3heLIT\char`_Jpi .dat} & *\\
+\var{SLITbas\char`_full\char`_Jpi .dat} & *\\
+\var{mat\char`_Jpi\char`_BasNR-rndSet} & 
+Norm: $\nor=\overlap{\Phi_i}{\Phi_j}/\sqrt{\overlap{\Phi_i}{\Phi_i}\cdot\overlap{\Phi_j}{\Phi_j}}$\newline
+Hamiltonian: $\ham=\me{\Phi_i}{\hat{H}}{\Phi_j}/\sqrt{\overlap{\Phi_i}{\Phi_i}\cdot\overlap{\Phi_j}{\Phi_j}}$;
+  \newline
+   $\ham$ is specified in \fkt{bridgeA3.py} with \var{potnn(n)}, \var{tnni} \newline
+   $\nor$ is normalized such that its diagonal $=\mathbb{1}$;\newline
+\textcolor{red}{ECCE units:} $\left[\nor_{ij}\right]=0$\newline
+ $\left[\ham_{ij}\right]=\left[\hat{H}\right]=\textsf{MeV}$
+\\
+\hline\hline
+\end{tabularx}
+\end{calc}
+
+\newpage
+
+\item calculate the overlap matrix elements
+
+\begin{calc}[step (5)]{calc:steps}
+\begin{tabularx}{0.9\textwidth}{l|X}
+\multicolumn{2}{c}{\hrulefill\fkt{A3\char`_lit\char`_M.py}\hrulefill} \\
+{argument} & {comment} \\\hline\hline
+\var{multipolarity} $L$ & $j_L(kr_i)Y_{LM}(\hat{\ve{r}}_i)$ 
+\newline 
+with photon energy $k$ ()\\
+\hline
+%
+output & written in \texttt{respath} (set in \fkt{bridgeA3.py})\\\hline\hline
+\var{componentN\char`_S\char`_finalJ\char`_finalMJ\char`_multipoleM} & \\
+\hline\hline
+\end{tabularx}
+\end{calc}
+
+\item 
+\end{enumerate}
+
+\paragraph{Quantity of interest}
+\dotfill\\
+The result of the following steps is the part of the Compton-scattering amplitude (eq.~(2) in~\ccite{Bampa})
+
+\be\la{eq.cptA}
+T
+_
+{\lambda\mprime\lambda}
+^
+{if}\left(\ve{k}\mprime,\ve{k}\right)
+\;\;
+\text{with}
+\;\;
+\left\lbrace
+\begin{array}{ll}
+\lambda\mprime(\lambda) & \text{out-(in-)going photon polarization}~ \ve{e}_{\lambda}\\
+\ve{k}\mprime(\ve{k}) & \text{out-(in-)going photon 3-momentum}\\
+i(f) & \text{quantum numbers of the initial(final) nuclear target}
+\end{array}
+\right.
+\;;\quad
+\ee
+with an intermediate, zero-photon state with energy $\omega+E_i$.
+
+\paragraph{Basis optimization}
+\dotfill\\
+Initial and final nuclear states are expanded in a non-orthonormal basis. The expansion should
+approximate physical features of these states relevant at the scales at which the amplitude is
+to be calculated. This scale determines the coupling mechanism to the electromagnetic field,
+and demands a more or less accurate description of the nuclear state. But this is a different story,
+while the details of
+
+\begin{gather}\la{eq.ifexp}
+\overlap{\underline{\ve{\rho}}}{J^\pi}
+=
+\sum_n~
+c_n~
+\Phi_{n,\pi,[L_n\otimes S_n]^J}^{\text{RGM}}
+\;\;
+\text{with}
+\;\;
+\left\lbrace
+\begin{array}{ll}
+[L_n\otimes S_n]^J & \text{\ie, LS-coupling scheme}\\
+\underline{\ve{\rho}} & \text{set of $A-1$ 3-d Jacobi vectors}\\
+J,\pi & \text{total angular momentum, parity of the state}
+\end{array}
+\right.
+\;;\quad
+\intertext{and a decomposition which couples orbital- and spin-angular momenta }
+\Phi_{n,\pi,[L_n\otimes S_n]^J}^{\text{RGM}}
+=
+\left[\phi_n\otimes\Xi_n\right]^J\cdot\mathcal{T}_n
+\end{gather}
+are to be set, here. The orbital part, $\phi$ of $\Phi$ is
+
+\be\la{eq.RGMBV} 
+\phi_n= \prod_{i=1}^{A-1}e^{-\gamma_{n,i}\ve{\rho}_i^2}
+\cdot
+\mathcal{Y}_{l_{n,i}m}(\ve{\rho}_i)
+\ee
+
+\begin{code}[]{bsp:helion}
+%\begin{table}
+\begin{tabularx}{1.\textwidth}{c|l|X}
+    {basis parameter} & {implementation} & {comment} \\ \hline
+    $S_n$ &  & {total spin {\bf and} all intermediate couplings} \\
+      -   & \fkt{bridgeA3.py} & {spin-orbital configuration combinations considered in $\he$ and $\fin$} \\
+      -   & \fkt{three\char`_particle\char`_functions.py} & dictionary \var{elem\char`_spin\char`_prods\char`_3} translates, \eg, \var{he\char`_no1} $\to \left[\left[\sigma_1\otimes\sigma_2\right]^{s_{12}=1}\otimes\sigma_3\right]^{S=\nicefrac{1}{2}}\cdot\left[\left[\tau_1\otimes\tau_2\right]^{\tau_{12}=0}\otimes\tau_3\right]^{S=\nicefrac{1}{2}}$
+    \\ \hline
+\end{tabularx}
+%\end{table}
+\end{code}
+
+\nocite{*}
+\bibliography{refs_compton}
+
+\end{document}
