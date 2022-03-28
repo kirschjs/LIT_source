@@ -52,6 +52,17 @@ orig_dir = os.getcwd()
 MPIRUN = subprocess.run(["which", "mpirun"],
                         capture_output=True).stdout.strip().decode()
 
+if MPIRUN == '':
+    MPIRUN = '/usr/lib64/mpich/bin/mpirun'
+    print('<which mpirun> did not return a path.\n Checking default: %s' %
+          MPIRUN)
+
+if os.path.isfile(MPIRUN) == False:
+    print(
+        'mpi executable not found.\n hint: locate mpirun and ansure <bridgeA3.py> finds it!'
+    )
+    exit()
+
 bkpdir = os.getenv("HOME") + '/compton_tmp' if os.path.isdir(
     '/scratch') == False else '/scratch/compton_tmp'
 

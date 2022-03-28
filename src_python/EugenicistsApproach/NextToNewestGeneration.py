@@ -26,7 +26,7 @@ dbg = False
 
 bastypes = [boundstatekanal] + streukas
 
-anzStreuBases = 5
+anzStreuBases = 2
 
 if os.path.isdir(helionpath) != False:
     print('<ECCE> removing the existing helion folder\n%s.' % helionpath)
