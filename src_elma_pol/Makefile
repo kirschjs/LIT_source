@@ -51,4 +51,4 @@ jenelmas: jenelmas.o par/jenelmas
 jenelmasnoo: jenelmasnoo.o par/jenelmas
 	$(F77) $(FFLAGS) -o jenelmasnoo.exe jenelmasnoo.o  $(LIBS)
 
-all: juelma jobelma jquelma jenelmas jenelmasnoo clean
+all: juelma juelmanoo jobelma jobelmanoo jquelma jquelmanoo jenelmas jenelmasnoo clean
