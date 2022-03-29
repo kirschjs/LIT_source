@@ -26,7 +26,7 @@ dbg = False
 
 bastypes = [boundstatekanal] + streukas
 
-anzStreuBases = 2
+anzStreuBases = 5
 
 if os.path.isdir(helionpath) != False:
     print('<ECCE> removing the existing helion folder\n%s.' % helionpath)
@@ -95,13 +95,13 @@ for bastype in bastypes:
     maxOnTrail = 10**2
     muta_initial = 0.5
 
-    chThreshold = 42.0
+    chThreshold = 0.0
 
-    CgfCycles = 1
+    CgfCycles = 3
     # nRaces := |i|
     nRaces = 1 if bastype == boundstatekanal else 1
 
-    cradleCapacity = 14
+    cradleCapacity = 24
 
     # > nState > produce/optimize/grow multiple bases with pseudo-random initial seeds
     for nB in range(anzStreuBases):
