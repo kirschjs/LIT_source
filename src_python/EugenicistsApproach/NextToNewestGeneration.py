@@ -95,13 +95,14 @@ for bastype in bastypes:
     maxOnTrail = 10**2
     muta_initial = 0.5
 
-    chThreshold = 0.0
+    # get the initial, random basis seed to yield thresholds close to the reuslts in a complete basis
+    chThreshold = -6.5 if bastype == boundstatekanal else -1.5
 
     CgfCycles = 3
     # nRaces := |i|
     nRaces = 1 if bastype == boundstatekanal else 1
 
-    cradleCapacity = 24
+    cradleCapacity = 34
 
     # > nState > produce/optimize/grow multiple bases with pseudo-random initial seeds
     for nB in range(anzStreuBases):
@@ -123,10 +124,10 @@ for bastype in bastypes:
 
             seedMat = span_initial_basis(basisType=bastype,
                                          ini_grid_bounds=[
-                                             0.06, 13.25, 0.04, 13.5, 0.005,
-                                             8.25, 0.001, 7.5
+                                             0.006, 7.25, 0.004, 6.5, 0.005,
+                                             5.25, 0.001, 4.5
                                          ],
-                                         ini_dims=[8, 4, 8, 4],
+                                         ini_dims=[8, 8, 8, 8],
                                          coefstr=costr,
                                          anzOp=zop)
 
@@ -170,10 +171,11 @@ for bastype in bastypes:
                 '\n> basType %s > basSet %d/%d: seed basis: E0 = %f   cond=|Emin|/|Emax| = %e'
                 % (bastype, nB + 1, anzStreuBases, gsEnergy, basCond))
 
-            if gsEnergy >= 0.0:
+            if gsEnergy >= chThreshold:
                 print(
-                    'ECCE! seed does not expand states with E<0 => new sowing attempt.'
-                )
+                    'ECCE! seed does not expand states with E<%f => new sowing attempt.'
+                    % chThreshold)
+                continue
 
             cfgs = [
                 con.split()
