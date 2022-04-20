@@ -1,7 +1,7 @@
 # hexpresso
 F77     =       gfortran
-FFLAGS  =       -Ofast -ffpe-summary='none'# -mcmodel=medium
-LIBS    = -L -lgfortran -L/usr/lib/x86_64-linux-gnu/lapack -llapack -lblas
+FFLAGS  =       -Ofast -ffpe-summary='none' -fallow-argument-mismatch # -mcmodel=medium
+LIBS    = -L -static-libgfortran -L/usr/lib/x86_64-linux-gnu/lapack -llapack -lblas
 #LIBS    = -L${MKLROOT} -llapack -lblas  -lm -ldl
 
 #theogate

@@ -22,10 +22,14 @@ cd ${working_dir}
 
 date 
 
-mpiexec python3 NextToNewestGeneration.py 
-
-echo "done!"
+python3 NextToNewestGeneration.py $1 $1 
+echo "I finished the basis optimization."
 date
+
+python3 A3_lit_M.py $1 $1 
+echo "I calculated the coupling matrices."
+date
+
 #\rm sbatch_script.${job_name}.$$
 
 EOF

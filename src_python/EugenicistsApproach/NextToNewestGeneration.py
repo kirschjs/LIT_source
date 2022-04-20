@@ -9,9 +9,9 @@ from itertools import permutations, product
 
 from PSI_parallel_M import span_initial_basis
 
-if os.path.isdir(bkpdir) == True:
-    os.system('rm -rf ' + bkpdir)
-os.mkdir(bkpdir)
+if os.path.isdir(bkpdir) == False:
+    #os.system('rm -rf ' + bkpdir)
+    os.mkdir(bkpdir)
 
 if os.path.isdir(litpath3He) == True:
     os.system('rm -rf ' + litpath3He)
@@ -24,9 +24,16 @@ os.chdir(litpath3He)
 
 dbg = False
 
-bastypes = [boundstatekanal] + streukas
+arglist = sys.argv
 
-anzStreuBases = 2
+if arglist[1:] != []:
+    StreuBases = np.arange(int(arglist[1]), int(arglist[2]) + 1)
+    anzStreuBases = len(StreuBases)
+else:
+    anzStreuBases = 1
+    StreuBases = np.arange(1, anzStreuBases + 1)
+
+bastypes = [boundstatekanal] + streukas if StreuBases[0] == 1 else streukas
 
 if os.path.isdir(helionpath) != False:
     print('<ECCE> removing the existing helion folder\n%s.' % helionpath)
@@ -34,9 +41,7 @@ if os.path.isdir(helionpath) != False:
 os.mkdir(helionpath)
 os.mkdir(helionpath + 'basis_struct/')
 
-finalStatePaths = [
-    litpath3He[:-1] + '-%d/' % nB for nB in range(anzStreuBases)
-]
+finalStatePaths = [litpath3He[:-1] + '-%d/' % nB for nB in StreuBases]
 for finalStatePath in finalStatePaths:
     if os.path.isdir(finalStatePath) == True:
         print('<ECCE> removing the existing final-state folder\n%s' %
@@ -97,7 +102,7 @@ for bastype in bastypes:
 
     # get the initial, random basis seed to yield thresholds close to the reuslts in a complete basis
     chThreshold = -6.5 if bastype == boundstatekanal else -1.5
-
+    chThreshold = 10.1
     CgfCycles = 1
     # nRaces := |i|
     nRaces = 1 if bastype == boundstatekanal else 1
@@ -833,10 +838,10 @@ for bastype in bastypes:
                                                       baspath=basisPath)
 
         if bastype != boundstatekanal:
-            AbasOutStr = respath + 'Ssigbasv3heLIT_%s_BasNR-%d.dat' % (bastype,
-                                                                       nB)
-            FbasOutStr = respath + 'SLITbas_full_%s_BasNR-%d.dat' % (bastype,
-                                                                     nB)
+            AbasOutStr = respath + 'Ssigbasv3heLIT_%s_BasNR-%d.dat' % (
+                bastype, StreuBases[nB])
+            FbasOutStr = respath + 'SLITbas_full_%s_BasNR-%d.dat' % (
+                bastype, StreuBases[nB])
             subprocess.call('cp %s %s' % (fullBasfile, FbasOutStr), shell=True)
             subprocess.call('cp %s %s' % (actBasfile, AbasOutStr), shell=True)
         else:
@@ -846,7 +851,7 @@ for bastype in bastypes:
             subprocess.call('cp %s %s' % (actBasfile, AbasOutStr), shell=True)
 
         matoutstr = '%smat_%s' % (
-            respath, bastype + '_BasNR-%d' % nB
+            respath, bastype + '_BasNR-%d' % StreuBases[nB]
         ) if bastype != boundstatekanal else '%smat_%s' % (respath, bastype)
         subprocess.call('cp MATOUTB %s' % matoutstr, shell=True)
         print(

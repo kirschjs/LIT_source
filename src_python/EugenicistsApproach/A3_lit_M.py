@@ -25,6 +25,15 @@ os.chdir(bkpdir)
 respath = bkpdir + suffi + 'results/'
 helionpath = bkpdir + suffi + 'he3/'
 
+arglist = sys.argv
+if arglist[1:] != []:
+    StreuBases = np.arange(int(arglist[1]), int(arglist[2]) + 1)
+    anzStreuBases = len(StreuBases)
+else:
+    anzStreuBases = len(
+        [f for f in glob.glob(respath + 'mat_%s_BasNR-*' % streukas[0])])
+    StreuBases = np.arange(1, anzStreuBases + 1)
+
 if os.path.isfile(respath + 'kRange.dat') == True:
     os.system('rm ' + respath + 'kRange.dat')
 
@@ -39,12 +48,7 @@ he_iw, he_rw, he_frgs = retrieve_he3_M(helionpath + 'basis_struct/' +
                                        'INQUA_V18%s' % siffux)
 HelBasDimRef = len(sum(sum(he_rw, []), []))
 
-anzStreuBases = len(
-    [f for f in glob.glob(respath + 'mat_%s_BasNR-*' % streukas[0])])
-
-finalStatePaths = [
-    bkpdir + suffi[:-1] + '-%d/' % nB for nB in range(anzStreuBases)
-]
+finalStatePaths = [bkpdir + suffi[:-1] + '-%d/' % nB for nB in StreuBases]
 
 for nB in range(anzStreuBases):
 
@@ -56,7 +60,7 @@ for nB in range(anzStreuBases):
                                                     'INQUA_V18%s' % siffux)
     FinBasDimRef = len(sum(sum(final_rw, []), []))
 
-    with open(respath + 'BareBasDims_%d.dat' % nB, 'wb') as f:
+    with open(respath + 'BareBasDims_%d.dat' % StreuBases[nB], 'wb') as f:
         np.savetxt(f, [HelBasDimRef, FinBasDimRef], fmt='%d')
         f.seek(NEWLINE_SIZE_IN_BYTES, 2)
         f.truncate()
@@ -424,8 +428,8 @@ for nB in range(anzStreuBases):
                                 rhsInMIn = rhsInMIn + temp
 
                     print('%s -- %s' % (str(In), str(mJ)))
-                    outstr = "InMIn_%s_%s_BasNR-%d.%s" % (str(In), str(mJ), nB,
-                                                          dt)
+                    outstr = "InMIn_%s_%s_BasNR-%d.%s" % (str(In), str(mJ),
+                                                          StreuBases[nB], dt)
                     fortranOut = open(outstr, 'wb+')
                     rhsInMInF = np.asfortranarray(rhsInMIn, dt)
                     rhsInMInF.tofile(fortranOut)

@@ -1,6 +1,6 @@
 import subprocess
 import multiprocessing
-import os, fnmatch, copy, struct, time
+import os, fnmatch, copy, struct, time, sys
 import numpy as np
 import sympy as sy
 # CG(j1, m1, j2, m2, j3, m3)
@@ -49,8 +49,7 @@ MaxProc = int(len(os.sched_getaffinity(0)) / 2)
 
 orig_dir = os.getcwd()
 
-MPIRUN = subprocess.run(["which", "mpirun"],
-                        capture_output=True).stdout.strip().decode()
+MPIRUN = subprocess.getoutput("which mpirun")
 
 if MPIRUN == '':
     MPIRUN = '/usr/lib64/mpich/bin/mpirun'
@@ -90,8 +89,8 @@ channels = {
     # helion
     'npp0.5^+': [
         ['000', ['he_no1', 'he_no6']],  # 1,2
-        ['022', ['he_no2']],  # 3
-        ['202', ['he_no2']],  # 4
+        #['022', ['he_no2']],  # 3
+        #['202', ['he_no2']],  # 4
         #['111', ['he_no3', 'he_no5']],  # 5,6
         #['112', ['he_no5']],  # 7
         #['220', ['he_no1', 'he_no6']],  # 8,9
@@ -101,7 +100,7 @@ channels = {
     #          [l1l2L,[compatible (iso)spin configurations]]
     '0.5^-': [
         ['011', ['he_no1', 'he_no6']],
-        ['101', ['he_no3']],
+        #['101', ['he_no3']],
         #['211', ['he_no2', 'he_no1', 'he_no6']],
         #['212', ['he_no2']],
         #['121', ['he_no3', 'he_no5']],
@@ -109,7 +108,7 @@ channels = {
     ],
     '1.5^-': [
         ['011', ['he_no1', 'he_no2', 'he_no6']],
-        ['101', ['he_no3']],
+        #['101', ['he_no3']],
         #['211', ['he_no1', 'he_no2', 'he_no6']],
         #['212', ['he_no2']],
         #['121', ['he_no3', 'he_no5']],
@@ -118,7 +117,7 @@ channels = {
     ]
 }
 
-streukas = ['0.5^-', '1.5^-']
+streukas = ['0.5^-']  #, '1.5^-']
 
 #                  realistic    L>0 (only)         deuteron
 boundstatekanal = 'npp0.5^+'
