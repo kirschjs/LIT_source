@@ -4,7 +4,7 @@
 working_dir=${PWD}
 job_name=$1
 
-output_dir=/tmp/compton_output
+output_dir=${PWD}
 input_dir=${PWD}
 
 cat > .sbatch_script.${job_name}.$$ << EOF
