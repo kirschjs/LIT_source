@@ -26,7 +26,7 @@ dbg = False
 
 bastypes = [boundstatekanal] + streukas
 
-anzStreuBases = 5
+anzStreuBases = 2
 
 if os.path.isdir(helionpath) != False:
     print('<ECCE> removing the existing helion folder\n%s.' % helionpath)
@@ -98,7 +98,7 @@ for bastype in bastypes:
     # get the initial, random basis seed to yield thresholds close to the reuslts in a complete basis
     chThreshold = -6.5 if bastype == boundstatekanal else -1.5
 
-    CgfCycles = 3
+    CgfCycles = 1
     # nRaces := |i|
     nRaces = 1 if bastype == boundstatekanal else 1
 
@@ -127,12 +127,12 @@ for bastype in bastypes:
                                              0.006, 7.25, 0.004, 6.5, 0.005,
                                              5.25, 0.001, 4.5
                                          ],
-                                         ini_dims=[8, 8, 8, 8],
+                                         ini_dims=[4, 4, 4, 4],
                                          coefstr=costr,
                                          anzOp=zop)
 
             t1 = time.perf_counter()
-            print(f"Seed basis generateion in {np.abs(t0 - t1):0.4f} seconds.")
+            print(f"Seed basis generation in {np.abs(t0 - t1):0.4f} seconds.")
 
             dim = int(np.sqrt(len(seedMat) * 0.5))
 
