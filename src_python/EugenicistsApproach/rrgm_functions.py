@@ -1,10 +1,7 @@
 import os, re
-import matplotlib.pyplot as plt
-from matplotlib.ticker import FormatStrFormatter
 import numpy as np
 import random
 from parameters_and_constants import *
-from sklearn.cluster import KMeans
 from sympy.physics.quantum.cg import CG
 from scipy.optimize import minimize, fmin
 from scipy import special
@@ -382,7 +379,7 @@ def prep_pot_file_3N(lam3, ps3='', d10=0.0):
     return
 
 
-def parse_ev_coeffs(mult=0, infil='OUTPUT', outf='COEFF', plti=''):
+def parse_ev_coeffs(mult=0, infil='OUTPUT', outf='COEFF'):
     os.system('cp ' + infil + ' tmp')
     out = [line2 for line2 in open(infil)]
     #for n in range(1,len(out)):
@@ -424,30 +421,10 @@ def parse_ev_coeffs(mult=0, infil='OUTPUT', outf='COEFF', plti=''):
     with open(outf, 'w') as outfile:
         outfile.write(ss)
 
-    if 'plti' != '':
-        fig = plt.figure(figsize=(12, 6))
-
-        ax1 = fig.add_subplot(1, 1, 1)
-        ax1.set_title(
-            r'expansion coefficients -- %s (for not-normalized basis vectors)'
-            % plti)
-        ax1.set_xlabel('basis-vector index')
-        #ax1.set_title(r'$J^\pi=%d^%s$' % (Jstreu, streukas[i][-1]))
-
-        ax1.plot(range(bvc), coeffp)
-
-        fig.savefig('He3_coeff_unnormiert.pdf')
-        print('He3 COEFFS plotted <He3_coeff_unnormiert.pdf>')
-
-    return
-
     return
 
 
-def parse_ev_coeffs_normiert(mult=0,
-                             infil='OUTPUT',
-                             outf='COEFF_NORMAL',
-                             plti=''):
+def parse_ev_coeffs_normiert(mult=0, infil='OUTPUT', outf='COEFF_NORMAL'):
     os.system('cp ' + infil + ' tmp')
     out = [line2 for line2 in open(infil)]
 
@@ -477,21 +454,6 @@ def parse_ev_coeffs_normiert(mult=0,
         print("No coefficients found in %s" % infil)
     with open(outf, 'w') as outfile:
         outfile.write(ss)
-
-    if 'plti' != '':
-        fig = plt.figure(figsize=(12, 6))
-
-        ax1 = fig.add_subplot(1, 1, 1)
-        ax1.set_title(
-            r'expansion coefficients -- %s (for \bf{normalized} basis vectors)'
-            % plti)
-        ax1.set_xlabel('basis-vector index')
-        #ax1.set_title(r'$J^\pi=%d^%s$' % (Jstreu, streukas[i][-1]))
-
-        ax1.plot(range(bvc), coeffp)
-
-        fig.savefig('He3_coeff_normiert.pdf')
-        print('He3 COEFFS plotted <He3_coeff_normiert.pdf>')
 
     return
 
@@ -559,45 +521,6 @@ def write_phases(ph_array, filename='tmp.dat', append=0, comment=''):
     with open(filename, 'w') as outfile:
         outfile.write(outs)
     return
-
-
-def plot_phases(phase_file,
-                xlab='$E_{cm}\;\;\;\;[MeV]$',
-                ylab='$\delta({}^2n-n)\;\;\;\;[Deg]$',
-                legend_entry=''):
-
-    pltcols = {
-        '6.0': 'lightgray',
-        '8.0': 'gray',
-        '10.0': 'darkgray',
-        '12.0': 'black'
-    }
-    lab = legend_entry
-
-    en_ph_1_to_N = [line for line in open(phase_file) if line[0] != '#'][2:]
-
-    nbr_of_phases = len(en_ph_1_to_N[0].split()) - 2
-
-    fig = plt.figure()
-    ax1 = fig.add_subplot(111)
-
-    ax1.set_xlabel(r'%s' % xlab, fontsize=14)
-    ax1.set_ylabel(r'%s' % ylab, fontsize=14)
-
-    for n in range(2, 2 + nbr_of_phases):
-
-        curcol = pltcols[[l for l in open(phase_file)
-                          ][-nbr_of_phases + n - 2].split('=')[1].split('fm')
-                         [0][:-1]] if n != nbr_of_phases + 1 else 'red'
-
-        ax1.plot([float(en.split()[0]) for en in en_ph_1_to_N],
-                 [float(ph.split()[n]) for ph in en_ph_1_to_N],
-                 color=curcol)
-
-    plt.title(r'%s' % legend_entry, fontsize=16)
-
-    fig.savefig(phase_file[:-3] + 'pdf')
-    #plt.show()
 
 
 def identicalt_stru(dir, spli):
