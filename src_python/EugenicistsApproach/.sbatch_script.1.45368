@@ -20,5 +20,5 @@ python3 A3_lit_M.py 1 1
 echo "I calculated the coupling matrices."
 date
 
-#\rm sbatch_script.1.120023
+#\rm sbatch_script.1.45368
 

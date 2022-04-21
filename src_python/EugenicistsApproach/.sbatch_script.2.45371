@@ -1,0 +1,24 @@
+#!/bin/bash
+#
+
+#SBATCH --job-name=2
+#SBATCH --output=/home/kirscher/kette_repo/LIT_source/src_python/EugenicistsApproach/2.sc
+#SBATCH --error=/home/kirscher/kette_repo/LIT_source/src_python/EugenicistsApproach/2.sc
+#SBATCH --partition=core
+#SBATCH --constraint="avx"
+#SBATCH --ntasks=1
+
+cd /home/kirscher/kette_repo/LIT_source/src_python/EugenicistsApproach
+
+date 
+
+python3 NextToNewestGeneration.py 2 2 
+echo "I finished the basis optimization."
+date
+
+python3 A3_lit_M.py 2 2 
+echo "I calculated the coupling matrices."
+date
+
+#\rm sbatch_script.2.45371
+

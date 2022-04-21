@@ -9,14 +9,10 @@ from itertools import permutations, product
 
 from PSI_parallel_M import span_initial_basis
 
-if os.path.isdir(bkpdir) == False:
-    #os.system('rm -rf ' + bkpdir)
-    os.mkdir(bkpdir)
+if os.path.isdir(litpath3He) == False:
+    subprocess.check_call(['mkdir', litpath3He])
+    subprocess.check_call(['mkdir', respath])
 
-if os.path.isdir(litpath3He) == True:
-    os.system('rm -rf ' + litpath3He)
-os.mkdir(litpath3He)
-os.mkdir(respath)
 with open(respath + 'dtype.dat', 'w') as outf:
     outf.write(dt)
 
@@ -35,11 +31,12 @@ else:
 
 bastypes = [boundstatekanal] + streukas if StreuBases[0] == 1 else streukas
 
-if os.path.isdir(helionpath) != False:
-    print('<ECCE> removing the existing helion folder\n%s.' % helionpath)
-    os.system('rm -rf ' + helionpath)
-os.mkdir(helionpath)
-os.mkdir(helionpath + 'basis_struct/')
+if 1 in StreuBases:
+    if os.path.isdir(helionpath) != False:
+        print('<ECCE> removing the existing helion folder\n%s.' % helionpath)
+        os.system('rm -rf ' + helionpath)
+    subprocess.check_call(['mkdir', helionpath])
+    subprocess.check_call(['mkdir', helionpath + 'basis_struct/'])
 
 finalStatePaths = [litpath3He[:-1] + '-%d/' % nB for nB in StreuBases]
 for finalStatePath in finalStatePaths:
@@ -47,8 +44,8 @@ for finalStatePath in finalStatePaths:
         print('<ECCE> removing the existing final-state folder\n%s' %
               finalStatePath)
         os.system('rm -rf ' + finalStatePath)
-    os.mkdir(finalStatePath)
-    os.mkdir(finalStatePath + 'basis_struct/')
+    subprocess.check_call(['mkdir', finalStatePath])
+    subprocess.check_call(['mkdir', finalStatePath + 'basis_struct/'])
 
 # > optimize the various basis types, e.g., in case of the npp system:
 # > helion ground state, final J=1/2- and J=3/2- states
@@ -180,6 +177,11 @@ for bastype in bastypes:
                 print(
                     'ECCE! seed does not expand states with E<%f => new sowing attempt.'
                     % chThreshold)
+
+                subprocess.call('rm -rf DMOUT.* && rm -rf DRDMOUT.*',
+                                shell=True)
+                subprocess.call('rm -rf TQUAOUT.* && rm -rf TDQUAOUT.*',
+                                shell=True)
                 continue
 
             cfgs = [
@@ -350,8 +352,12 @@ for bastype in bastypes:
 
             t1 = time.perf_counter()
             print(
-                f"Seed basis generateion stabilized in {np.abs(t0 - t1):0.4f} seconds."
+                f"Seed basis generation stabilized in {np.abs(t0 - t1):0.4f} seconds."
             )
+
+            subprocess.call('rm -rf DMOUT.* && rm -rf DRDMOUT.*', shell=True)
+            subprocess.call('rm -rf TQUAOUT.* && rm -rf TDQUAOUT.*',
+                            shell=True)
 
             initialCiv[3] = rectify_basis(cand_ladder[-1][4])
             # > nState > nBasis > end of stabilization
@@ -626,6 +632,11 @@ for bastype in bastypes:
                         for proc in jobs:
                             proc.join()
 
+                    subprocess.call('rm -rf DMOUT.* && rm -rf DRDMOUT.*',
+                                    shell=True)
+                    subprocess.call('rm -rf TQUAOUT.* && rm -rf TDQUAOUT.*',
+                                    shell=True)
+
                     cand_ladder = [x.recv() for x in cand_list]
 
                     # ranking following condition-number (0) or quality (1)  or E(GS) (2)
@@ -780,6 +791,9 @@ for bastype in bastypes:
                     print('removing 1/%d basis-vector blocks.' % len(D0),
                           end='\n')
 
+            subprocess.call('rm -rf DMOUT.* && rm -rf DRDMOUT.*', shell=True)
+            subprocess.call('rm -rf TQUAOUT.* && rm -rf TDQUAOUT.*',
+                            shell=True)
             initialCiv[3] = rectify_basis(cand_ladder[-1][4])
             # > nState > nBasis > end of stabilization
             initialCivL = essentialize_basis(initialCiv, MaxBVsPERcfg=bvma)
@@ -822,15 +836,16 @@ for bastype in bastypes:
         n3_inob(sfrags, 8, fn=basisPath + 'INOB_%s' % suf, indep=-1)
         n3_inob(sfrags, 15, fn=basisPath + 'DRINOB_%s' % suf, indep=-1)
 
-        os.system('cp INQUA_M ' + basisPath + 'INQUA_V18_%s' % suf)
-        os.system('cp INEN ' + basisPath + 'INEN_%s' % suf)
-        os.system('cp INSAM ' + basisPath)
+        subprocess.call('cp INQUA_M ' + basisPath + 'INQUA_V18_%s' % suf,
+                        shell=True)
+        subprocess.call('cp INEN ' + basisPath + 'INEN_%s' % suf, shell=True)
+        subprocess.call('cp INSAM ' + basisPath, shell=True)
 
-        os.system('rm -rf ./inen_*')
-        os.system('rm -rf ./endout_*')
-        os.system('rm -rf ./MATOUTB_*')
-        os.system('rm -rf ./T*OUT.*')
-        os.system('rm -rf ./D*OUT.*')
+        subprocess.call('rm -rf ./inen_*', shell=True)
+        subprocess.call('rm -rf ./endout_*', shell=True)
+        subprocess.call('rm -rf ./MATOUTB_*', shell=True)
+        subprocess.call('rm -rf DMOUT.* && rm -rf DRDMOUT.*', shell=True)
+        subprocess.call('rm -rf TQUAOUT.* && rm -rf TDQUAOUT.*', shell=True)
 
         fullBasfile, actBasfile = write_basis_on_tape(initialCiv,
                                                       Jay,

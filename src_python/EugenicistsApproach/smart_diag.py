@@ -95,6 +95,9 @@ def blunt_ev(cfgs,
         else:
             subprocess.run([bin_path + 'DR2END_NORMAL.exe'])
 
+    #subprocess.call('rm -rf DMOUT.* ', shell=True)
+    #subprocess.call('rm -rf DRDMOUT.* ', shell=True)
+
     NormHam = np.core.records.fromfile('MATOUTB', formats='f8', offset=4)
 
     if dia:
@@ -307,6 +310,10 @@ def endmat(para, send_end):
         send_end.send([basCond, attractiveness, gsEnergy, para[5], para[0]])
 
     except:
+
+        os.system('rm -rf ./%s' % inenf)
+        os.system('rm -rf ./%s' % outf)
+        os.system('rm -rf ./%s' % maoutf)
 
         print(para[5], child_id)
         print(maoutf)

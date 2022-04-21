@@ -147,7 +147,8 @@ for nB in range(anzStreuBases):
                 for lit_zerl in range(len(lfrags2)):
 
                     if os.path.isdir(wrkDir + 'tmp_%d' % lit_zerl) == False:
-                        os.mkdir(wrkDir + 'tmp_%d' % lit_zerl)
+                        subprocess.check_call(
+                            ['mkdir', wrkDir + 'tmp_%d' % lit_zerl])
                     os.chdir(wrkDir + 'tmp_%d' % lit_zerl)
 
                     for file in os.listdir(os.getcwd()):
