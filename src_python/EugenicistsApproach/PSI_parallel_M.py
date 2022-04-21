@@ -225,7 +225,7 @@ def span_initial_basis(
         f.truncate()
     f.close()
     if os.path.isdir(wrkDir + '/eob/') == False:
-        subprocess.check_call(['mkdir', wrkDir + '/eob/'])
+        subprocess.check_call(['mkdir -p', wrkDir + '/eob/'])
     os.chdir(wrkDir + '/eob/')
     n3_inob([
         'he_no1',
@@ -244,7 +244,7 @@ def span_initial_basis(
             indep=+1)
     os.system(BINBDGpath + 'KOBER.exe')
     if os.path.isdir(wrkDir + '/eob-tni/') == False:
-        subprocess.check_call(['mkdir', wrkDir + '/eob-tni/'])
+        subprocess.check_call(['mkdir -p', wrkDir + '/eob-tni/'])
     os.chdir(wrkDir + '/eob-tni/')
     n3_inob([
         'he_no1',
@@ -263,7 +263,7 @@ def span_initial_basis(
             indep=+1)
     os.system(BINBDGpath + 'DROBER.exe')
     if os.path.isdir(wrkDir + '/elu/') == False:
-        subprocess.check_call(['mkdir', wrkDir + '/elu/'])
+        subprocess.check_call(['mkdir -p', wrkDir + '/elu/'])
     os.chdir(wrkDir + '/elu/')
     n3_inlu(8,
             fn='INLUCN',
@@ -290,7 +290,7 @@ def span_initial_basis(
             indep=+1)
     os.system(BINBDGpath + 'LUDW_CN.exe')
     if os.path.isdir(wrkDir + '/elu-tni/') == False:
-        subprocess.check_call(['mkdir', wrkDir + '/elu-tni/'])
+        subprocess.check_call(['mkdir -p', wrkDir + '/elu-tni/'])
     os.chdir(wrkDir + '/elu-tni/')
     n3_inlu(8,
             fn='INLU',

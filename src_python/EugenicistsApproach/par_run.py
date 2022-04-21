@@ -2,11 +2,11 @@ import subprocess
 import numpy as np
 from bridgeA3 import *
 
-anzStrBas = 3
+anzStrBas = 21
 StrBas = np.arange(1, 1 + anzStrBas)
 
 if os.path.isdir(bkpdir) == False:
-    subprocess.check_call(['mkdir', bkpdir])
+    subprocess.check_call(['mkdir -p', bkpdir])
 
 for StreubasNR in StrBas:
 

@@ -35,4 +35,4 @@ date
 EOF
 
 sbatch .sbatch_script.${job_name}.$$
-#rm .sbatch_script.${job_name}.$$
+rm .sbatch_script.${job_name}.$$

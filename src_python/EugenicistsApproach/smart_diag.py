@@ -29,7 +29,7 @@ def blunt_ev(cfgs,
         base_path = os.getcwd()
         tmp_path = base_path + '/' + wrkdir
         if os.path.isdir(tmp_path) == False:
-            os.mkdir(tmp_path)
+            subprocess.check_call(['mkdir -p', tmp_path])
         os.chdir(tmp_path)
 
     #print('diaging in ', os.getcwd())

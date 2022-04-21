@@ -10,8 +10,8 @@ from itertools import permutations, product
 from PSI_parallel_M import span_initial_basis
 
 if os.path.isdir(litpath3He) == False:
-    subprocess.check_call(['mkdir', litpath3He])
-    subprocess.check_call(['mkdir', respath])
+    subprocess.check_call(['mkdir -p', litpath3He])
+    subprocess.check_call(['mkdir -p', respath])
 
 with open(respath + 'dtype.dat', 'w') as outf:
     outf.write(dt)
@@ -35,8 +35,8 @@ if 1 in StreuBases:
     if os.path.isdir(helionpath) != False:
         print('<ECCE> removing the existing helion folder\n%s.' % helionpath)
         os.system('rm -rf ' + helionpath)
-    subprocess.check_call(['mkdir', helionpath])
-    subprocess.check_call(['mkdir', helionpath + 'basis_struct/'])
+    subprocess.check_call([' -p', helionpath])
+    subprocess.check_call(['mkdir -p', helionpath + 'basis_struct/'])
 
 finalStatePaths = [litpath3He[:-1] + '-%d/' % nB for nB in StreuBases]
 for finalStatePath in finalStatePaths:
@@ -44,8 +44,8 @@ for finalStatePath in finalStatePaths:
         print('<ECCE> removing the existing final-state folder\n%s' %
               finalStatePath)
         os.system('rm -rf ' + finalStatePath)
-    subprocess.check_call(['mkdir', finalStatePath])
-    subprocess.check_call(['mkdir', finalStatePath + 'basis_struct/'])
+    subprocess.check_call(['mkdir -p', finalStatePath])
+    subprocess.check_call(['mkdir -p', finalStatePath + 'basis_struct/'])
 
 # > optimize the various basis types, e.g., in case of the npp system:
 # > helion ground state, final J=1/2- and J=3/2- states
@@ -99,12 +99,12 @@ for bastype in bastypes:
 
     # get the initial, random basis seed to yield thresholds close to the reuslts in a complete basis
     chThreshold = -6.5 if bastype == boundstatekanal else -1.5
-    chThreshold = 10.1
-    CgfCycles = 1
-    # nRaces := |i|
-    nRaces = 1 if bastype == boundstatekanal else 1
 
-    cradleCapacity = 34
+    CgfCycles = 3
+    # nRaces := |i|
+    nRaces = 4 if bastype == boundstatekanal else 8
+
+    cradleCapacity = 42
 
     # > nState > produce/optimize/grow multiple bases with pseudo-random initial seeds
     for nB in range(anzStreuBases):
@@ -129,7 +129,7 @@ for bastype in bastypes:
                                              0.006, 7.25, 0.004, 6.5, 0.005,
                                              5.25, 0.001, 4.5
                                          ],
-                                         ini_dims=[4, 4, 4, 4],
+                                         ini_dims=[8, 8, 8, 8],
                                          coefstr=costr,
                                          anzOp=zop)
 
