@@ -148,7 +148,7 @@ for nB in range(anzStreuBases):
 
                     if os.path.isdir(wrkDir + 'tmp_%d' % lit_zerl) == False:
                         subprocess.check_call(
-                            ['mkdir', wrkDir + 'tmp_%d' % lit_zerl])
+                            ['mkdir', '-p', wrkDir + 'tmp_%d' % lit_zerl])
                     os.chdir(wrkDir + 'tmp_%d' % lit_zerl)
 
                     for file in os.listdir(os.getcwd()):

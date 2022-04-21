@@ -6,7 +6,7 @@ anzStrBas = 21
 StrBas = np.arange(1, 1 + anzStrBas)
 
 if os.path.isdir(bkpdir) == False:
-    subprocess.check_call(['mkdir -p', bkpdir])
+    subprocess.check_call(['mkdir', '-p', bkpdir])
 
 for StreubasNR in StrBas:
 

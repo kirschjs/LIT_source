@@ -29,7 +29,7 @@ def blunt_ev(cfgs,
         base_path = os.getcwd()
         tmp_path = base_path + '/' + wrkdir
         if os.path.isdir(tmp_path) == False:
-            subprocess.check_call(['mkdir -p', tmp_path])
+            subprocess.check_call(['mkdir', '-p', tmp_path])
         os.chdir(tmp_path)
 
     #print('diaging in ', os.getcwd())
@@ -94,9 +94,6 @@ def blunt_ev(cfgs,
                            text=True)
         else:
             subprocess.run([bin_path + 'DR2END_NORMAL.exe'])
-
-    #subprocess.call('rm -rf DMOUT.* ', shell=True)
-    #subprocess.call('rm -rf DRDMOUT.* ', shell=True)
 
     NormHam = np.core.records.fromfile('MATOUTB', formats='f8', offset=4)
 
