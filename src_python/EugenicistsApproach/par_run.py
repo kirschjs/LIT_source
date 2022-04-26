@@ -3,7 +3,8 @@ import numpy as np
 from bridgeA3 import *
 
 anzStrBas = 21
-StrBas = np.arange(1, 1 + anzStrBas)
+firstBas = 1
+StrBas = np.arange(firstBas, firstBas + anzStrBas)
 
 if os.path.isdir(bkpdir) == False:
     subprocess.check_call(['mkdir', '-p', bkpdir])

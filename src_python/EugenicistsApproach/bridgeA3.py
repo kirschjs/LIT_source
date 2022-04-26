@@ -65,7 +65,7 @@ if os.path.isfile(MPIRUN) == False:
 bkpdir = os.getenv("HOME") + '/compton_tmp' if os.path.isdir(
     '/scratch') == False else '/scratch/compton_tmp'
 
-pathbase = '/tmp'
+pathbase = os.getenv("HOME") + '/tmp'
 suffi = '/mul_helion/'
 litpath3He = pathbase + suffi
 respath = litpath3He + 'results/'

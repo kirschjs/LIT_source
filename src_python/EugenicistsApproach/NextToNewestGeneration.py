@@ -98,13 +98,13 @@ for bastype in bastypes:
     muta_initial = 0.5
 
     # get the initial, random basis seed to yield thresholds close to the reuslts in a complete basis
-    chThreshold = -6.5 if bastype == boundstatekanal else -1.5
+    chThreshold = -4.5 if bastype == boundstatekanal else -1.5
 
     CgfCycles = 3
     # nRaces := |i|
     nRaces = 4 if bastype == boundstatekanal else 8
 
-    cradleCapacity = 42
+    cradleCapacity = 24
 
     # > nState > produce/optimize/grow multiple bases with pseudo-random initial seeds
     for nB in range(anzStreuBases):
