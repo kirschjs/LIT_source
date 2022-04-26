@@ -15,6 +15,12 @@ from three_particle_functions import *
 from smart_diag import *
 
 
+def du(path):
+    """disk usage in human readable format (e.g. '2,1GB')"""
+    return subprocess.check_output(['du', '-s',
+                                    path]).split()[0].decode('utf-8')
+
+
 def cartesian_coord(*arrays):
     grid = np.meshgrid(*arrays)
     coord_list = [entry.ravel() for entry in grid]
@@ -69,6 +75,8 @@ pathbase = os.getenv("HOME") + '/tmp'
 suffi = '/mul_helion/'
 litpath3He = pathbase + suffi
 respath = litpath3He + 'results/'
+
+homeQuota = 1000000
 
 helionpath = litpath3He + 'he3/'
 

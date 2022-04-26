@@ -347,6 +347,7 @@ def span_initial_basis(
             '%d' % anzproc, BINBDGpath + 'V18_PAR/mpi_quaf_v7'
         ])
         subprocess.run([BINBDGpath + 'V18_PAR/sammel'])
+        subprocess.call('rm -rf DMOUT.*', shell=True)
     else:
         subprocess.run([BINBDGpath + 'QUAFL_M.exe'])
     if tnni == 11:
@@ -363,6 +364,7 @@ def span_initial_basis(
                 '%d' % anzproc, BINBDGpath + 'UIX_PAR/mpi_drqua_v7'
             ])
             subprocess.run([BINBDGpath + 'UIX_PAR/SAMMEL-uix'])
+            subprocess.call('rm -rf DRDMOUT.*', shell=True)
             subprocess.run([BINBDGpath + 'TDR2END_NORMAL.exe'])
             subprocess.call('cp OUTPUT out_normal', shell=True)
         else:

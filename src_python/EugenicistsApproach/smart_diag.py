@@ -58,6 +58,7 @@ def blunt_ev(cfgs,
             '%d' % anzcores, bin_path + 'V18_PAR/mpi_quaf_v7'
         ])
         subprocess.run([bin_path + 'V18_PAR/sammel'])
+        subprocess.call('rm -rf DMOUT.*', shell=True)
     else:
         subprocess.run([bin_path + 'QUAFL_M.exe'])
 
@@ -81,6 +82,7 @@ def blunt_ev(cfgs,
                 '%d' % anzcores, bin_path + 'UIX_PAR/mpi_drqua_v7'
             ])
             subprocess.run([bin_path + 'UIX_PAR/SAMMEL-uix'])
+            subprocess.call('rm -rf DRDMOUT.*', shell=True)
             subprocess.run([bin_path + 'TDR2END_NORMAL.exe'],
                            capture_output=True,
                            text=True)

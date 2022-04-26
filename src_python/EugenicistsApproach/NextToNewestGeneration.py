@@ -98,7 +98,7 @@ for bastype in bastypes:
     muta_initial = 0.5
 
     # get the initial, random basis seed to yield thresholds close to the reuslts in a complete basis
-    chThreshold = -4.5 if bastype == boundstatekanal else -1.5
+    chThreshold = -4.5 if bastype == boundstatekanal else -1.2
 
     CgfCycles = 3
     # nRaces := |i|
@@ -120,14 +120,21 @@ for bastype in bastypes:
 
         gsEnergy = 42.0
 
-        while gsEnergy >= chThreshold:
+        while ((gsEnergy >= chThreshold) || (gsEnergy < -10)):
 
             t0 = time.perf_counter()
 
+            wrkVol = du(pathbase)
+            while int(wrkVol) > homeQuota:
+                print('wrkDir holds %d bytes. Waiting for 60s to shrink.' %
+                      int(wrkVol))
+                time.sleep(60)
+                wrkVol = du(pathbase)
+
             seedMat = span_initial_basis(basisType=bastype,
                                          ini_grid_bounds=[
-                                             0.006, 7.25, 0.004, 6.5, 0.005,
-                                             5.25, 0.001, 4.5
+                                             0.006, 6.25, 0.001, 6.5, 0.006,
+                                             5.25, 0.0001, 4.5
                                          ],
                                          ini_dims=[8, 8, 8, 8],
                                          coefstr=costr,
@@ -173,15 +180,11 @@ for bastype in bastypes:
                 '\n> basType %s > basSet %d/%d: seed basis: E0 = %f   cond=|Emin|/|Emax| = %e'
                 % (bastype, nB + 1, anzStreuBases, gsEnergy, basCond))
 
-            if gsEnergy >= chThreshold:
+            if ((gsEnergy >= chThreshold) || (gsEnergy < -10)):
                 print(
                     'ECCE! seed does not expand states with E<%f => new sowing attempt.'
                     % chThreshold)
 
-                subprocess.call('rm -rf DMOUT.* && rm -rf DRDMOUT.*',
-                                shell=True)
-                subprocess.call('rm -rf TQUAOUT.* && rm -rf TDQUAOUT.*',
-                                shell=True)
                 continue
 
             cfgs = [
@@ -355,14 +358,17 @@ for bastype in bastypes:
                 f"Seed basis generation stabilized in {np.abs(t0 - t1):0.4f} seconds."
             )
 
-            subprocess.call('rm -rf DMOUT.* && rm -rf DRDMOUT.*', shell=True)
-            subprocess.call('rm -rf TQUAOUT.* && rm -rf TDQUAOUT.*',
-                            shell=True)
-
             initialCiv[3] = rectify_basis(cand_ladder[-1][4])
             # > nState > nBasis > end of stabilization
 
             initialCiv = essentialize_basis(initialCiv, MaxBVsPERcfg=bvma)
+
+            wrkVol = du(pathbase)
+            while int(wrkVol) > homeQuota:
+                print('wrkDir holds %d bytes. Waiting for 60s to shrink.' %
+                      int(wrkVol))
+                time.sleep(60)
+                wrkVol = du(pathbase)
 
             ma = blunt_ev(initialCiv[0],
                           initialCiv[1],
@@ -556,6 +562,15 @@ for bastype in bastypes:
                     #print('\nAis:\n', Ais)
                     Ais = essentialize_basis(Ais, MaxBVsPERcfg=bvma)
                     #print('\nAis (strat):\n', Ais)
+
+                    wrkVol = du(pathbase)
+                    while int(wrkVol) > homeQuota:
+                        print(
+                            'wrkDir holds %d bytes. Waiting for 60s to shrink.'
+                            % int(wrkVol))
+                        time.sleep(60)
+                        wrkVol = du(pathbase)
+
                     ma = blunt_ev(Ais[0],
                                   Ais[1],
                                   Ais[2],
@@ -632,11 +647,6 @@ for bastype in bastypes:
                         for proc in jobs:
                             proc.join()
 
-                    subprocess.call('rm -rf DMOUT.* && rm -rf DRDMOUT.*',
-                                    shell=True)
-                    subprocess.call('rm -rf TQUAOUT.* && rm -rf TDQUAOUT.*',
-                                    shell=True)
-
                     cand_ladder = [x.recv() for x in cand_list]
 
                     # ranking following condition-number (0) or quality (1)  or E(GS) (2)
@@ -678,6 +688,14 @@ for bastype in bastypes:
             # after having evolved each configuration, stabilize the basis
             # and remove its least siginificant vectors before repeating
             # the optimization of the individual configurations
+
+            wrkVol = du(pathbase)
+            while int(wrkVol) > homeQuota:
+                print('wrkDir holds %d bytes. Waiting for 60s to shrink.' %
+                      int(wrkVol))
+                time.sleep(60)
+                wrkVol = du(pathbase)
+
             ma = blunt_ev(initialCiv[0],
                           initialCiv[1],
                           initialCiv[2],
@@ -791,14 +809,18 @@ for bastype in bastypes:
                     print('removing 1/%d basis-vector blocks.' % len(D0),
                           end='\n')
 
-            subprocess.call('rm -rf DMOUT.* && rm -rf DRDMOUT.*', shell=True)
-            subprocess.call('rm -rf TQUAOUT.* && rm -rf TDQUAOUT.*',
-                            shell=True)
             initialCiv[3] = rectify_basis(cand_ladder[-1][4])
             # > nState > nBasis > end of stabilization
             initialCivL = essentialize_basis(initialCiv, MaxBVsPERcfg=bvma)
 
             initialCiv = condense_basis(initialCivL, MaxBVsPERcfg=bvma)
+
+        wrkVol = du(pathbase)
+        while int(wrkVol) > homeQuota:
+            print('wrkDir holds %d bytes. Waiting for 60s to shrink.' %
+                  int(wrkVol))
+            time.sleep(60)
+            wrkVol = du(pathbase)
 
         ma = blunt_ev(initialCiv[0],
                       initialCiv[1],
@@ -844,8 +866,6 @@ for bastype in bastypes:
         subprocess.call('rm -rf ./inen_*', shell=True)
         subprocess.call('rm -rf ./endout_*', shell=True)
         subprocess.call('rm -rf ./MATOUTB_*', shell=True)
-        subprocess.call('rm -rf DMOUT.* && rm -rf DRDMOUT.*', shell=True)
-        subprocess.call('rm -rf TQUAOUT.* && rm -rf TDQUAOUT.*', shell=True)
 
         fullBasfile, actBasfile = write_basis_on_tape(initialCiv,
                                                       Jay,
