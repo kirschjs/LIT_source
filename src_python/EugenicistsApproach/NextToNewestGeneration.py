@@ -20,6 +20,9 @@ os.chdir(litpath3He)
 
 dbg = False
 
+# call with  1 : boundsate
+#           a b: streubases from a to b
+#           a a: a single basis is optimized
 arglist = sys.argv
 
 if arglist[1:] != []:
@@ -27,9 +30,9 @@ if arglist[1:] != []:
     anzStreuBases = len(StreuBases)
 else:
     anzStreuBases = 1
-    StreuBases = np.arange(1, anzStreuBases + 1)
+    StreuBases = np.arange(2, anzStreuBases + 2)
 
-bastypes = [boundstatekanal] + streukas if StreuBases[0] == 1 else streukas
+bastypes = [boundstatekanal] if StreuBases[0] == 1 else streukas
 
 if 1 in StreuBases:
     if os.path.isdir(helionpath) != False:
