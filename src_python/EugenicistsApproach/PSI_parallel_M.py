@@ -365,6 +365,7 @@ def span_initial_basis(
                                tni=1,
                                einzel_path=wrkDir + '/')
         if parall == -1:
+            wrkVol = du(pathbase)
             while int(wrkVol) > homeQuota:
                 print('wrkDir holds %d bytes. Waiting for 60s to shrink.' %
                       int(wrkVol))

@@ -53,6 +53,7 @@ def blunt_ev(cfgs,
     n3_inen_bdg(basis, jay, costring, fn='INEN', pari=0, nzop=nzopt, tni=tnnii)
 
     if parall == -1:
+        wrkVol = du(pathbase)
         while int(wrkVol) > homeQuota:
             print('wrkDir holds %d bytes. Waiting for 60s to shrink.' %
                   int(wrkVol))
@@ -82,6 +83,7 @@ def blunt_ev(cfgs,
                                einzel_path=einzel_file_path)
 
         if parall == -1:
+            wrkVol = du(pathbase)
             while int(wrkVol) > homeQuota:
                 print('wrkDir holds %d bytes. Waiting for 60s to shrink.' %
                       int(wrkVol))

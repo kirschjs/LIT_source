@@ -36,7 +36,7 @@ else:
     StreuBases = np.arange(1, anzStreuBases + 1)
     bastypes = [boundstatekanal] + streukas
 
-if 1 in StreuBases:
+if 0 in StreuBases:
     if os.path.isdir(helionpath) != False:
         print('<ECCE> removing the existing helion folder\n%s.' % helionpath)
         os.system('rm -rf ' + helionpath)
