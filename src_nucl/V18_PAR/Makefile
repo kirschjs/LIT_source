@@ -1,7 +1,7 @@
 CC          = mpicc
 F77         = mpif77
 
-FOPTS  =       -Ofast -ffpe-summary=none -mcmodel=medium #-fallow-argument-mismatch
+FOPTS  =       -Ofast -ffpe-summary=none -mcmodel=medium -fallow-argument-mismatch
 
 #COPTS       = -O2 -Wall -ggdb3
 #COPTS       = -O2
@@ -46,4 +46,4 @@ sammel: sammel.o
 clean:
 	$(RM) *.o *.exe pvm_tniq *~
 
-all: mpi_quaf_v6 mpi_quaf_v7 sammel clean
+all: mpi_quaf_v7 sammel clean
