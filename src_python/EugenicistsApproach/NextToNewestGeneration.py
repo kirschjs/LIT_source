@@ -97,6 +97,9 @@ for bastype in bastypes:
     maxOnTrail = 10**2
     muta_initial = 0.5
 
+    BDGdeu = 2.224
+    BDG3h = 8.482
+    BDG3he = 7.72
     # get the initial, random basis seed to yield thresholds close to the reuslts in a complete basis
     chThreshold = -4.5 if bastype == boundstatekanal else -1.2
 
@@ -104,7 +107,7 @@ for bastype in bastypes:
     # nRaces := |i|
     nRaces = 4 if bastype == boundstatekanal else 8
 
-    cradleCapacity = 24
+    cradleCapacity = 84
 
     # > nState > produce/optimize/grow multiple bases with pseudo-random initial seeds
     for nB in range(anzStreuBases):
@@ -120,7 +123,7 @@ for bastype in bastypes:
 
         gsEnergy = 42.0
 
-        while ((gsEnergy >= chThreshold) || (gsEnergy < -10)):
+        while ((gsEnergy >= chThreshold) | (gsEnergy < -1.2 * BDG3he)):
 
             t0 = time.perf_counter()
 
@@ -180,7 +183,7 @@ for bastype in bastypes:
                 '\n> basType %s > basSet %d/%d: seed basis: E0 = %f   cond=|Emin|/|Emax| = %e'
                 % (bastype, nB + 1, anzStreuBases, gsEnergy, basCond))
 
-            if ((gsEnergy >= chThreshold) || (gsEnergy < -10)):
+            if ((gsEnergy >= chThreshold) | (gsEnergy < -1.2 * BDG3he)):
                 print(
                     'ECCE! seed does not expand states with E<%f => new sowing attempt.'
                     % chThreshold)

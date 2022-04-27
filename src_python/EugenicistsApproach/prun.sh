@@ -1,6 +1,9 @@
 #!/bin/bash
 #
 
+# (node-specific) constraint options from /etc/slurm/slurm.conf:
+# ib,avx,avx512,lnvo6g
+
 working_dir=${PWD}
 job_name=$1
 
@@ -14,9 +17,10 @@ cat > .sbatch_script.${job_name}.$$ << EOF
 #SBATCH --job-name=${job_name}
 #SBATCH --output=${output_dir}/${job_name}.sc
 #SBATCH --error=${output_dir}/${job_name}.sc
-#SBATCH --partition=core
-#SBATCH --constraint="avx"
+#SBATCH --constraint="ib"
 #SBATCH --ntasks=1
+#SBATCH --exclusive
+#SBATCH --partition=core
 
 cd ${working_dir}
 
@@ -35,4 +39,4 @@ date
 EOF
 
 sbatch .sbatch_script.${job_name}.$$
-rm .sbatch_script.${job_name}.$$
+#rm .sbatch_script.${job_name}.$$

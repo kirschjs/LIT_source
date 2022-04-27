@@ -2,7 +2,7 @@ import subprocess
 import numpy as np
 from bridgeA3 import *
 
-anzStrBas = 21
+anzStrBas = 11
 firstBas = 1
 StrBas = np.arange(firstBas, firstBas + anzStrBas)
 
@@ -12,6 +12,7 @@ if os.path.isdir(bkpdir) == False:
 for StreubasNR in StrBas:
 
     subprocess.call('./prun.sh %d' % StreubasNR, shell=True)
+    time.sleep(5)
 #    subprocess.call('python3 NextToNewestGeneration.py %d %d' %
 #                    (StreubasNR, StreubasNR),
 #                    shell=True)

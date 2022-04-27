@@ -17,8 +17,12 @@ from smart_diag import *
 
 def du(path):
     """disk usage in human readable format (e.g. '2,1GB')"""
-    return subprocess.check_output(['du', '-s',
-                                    path]).split()[0].decode('utf-8')
+    tmp = subprocess.check_output(
+        'du -s %s 2>&1 | grep -v "Permission denied"' % path,
+        shell=True  #'2>&1' | grep -v "Permission denied"
+    ).split()[0].decode('utf-8')
+
+    return tmp
 
 
 def cartesian_coord(*arrays):
@@ -71,7 +75,7 @@ if os.path.isfile(MPIRUN) == False:
 bkpdir = os.getenv("HOME") + '/compton_tmp' if os.path.isdir(
     '/scratch') == False else '/scratch/compton_tmp'
 
-pathbase = os.getenv("HOME") + '/tmp'
+pathbase = '/tmp'
 suffi = '/mul_helion/'
 litpath3He = pathbase + suffi
 respath = litpath3He + 'results/'
