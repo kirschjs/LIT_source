@@ -53,6 +53,11 @@ def blunt_ev(cfgs,
     n3_inen_bdg(basis, jay, costring, fn='INEN', pari=0, nzop=nzopt, tni=tnnii)
 
     if parall == -1:
+        while int(wrkVol) > homeQuota:
+            print('wrkDir holds %d bytes. Waiting for 60s to shrink.' %
+                  int(wrkVol))
+            time.sleep(60)
+            wrkVol = du(pathbase)
         subprocess.run([
             mpipath, '-np',
             '%d' % anzcores, bin_path + 'V18_PAR/mpi_quaf_v7'
@@ -77,6 +82,11 @@ def blunt_ev(cfgs,
                                einzel_path=einzel_file_path)
 
         if parall == -1:
+            while int(wrkVol) > homeQuota:
+                print('wrkDir holds %d bytes. Waiting for 60s to shrink.' %
+                      int(wrkVol))
+                time.sleep(60)
+                wrkVol = du(pathbase)
             subprocess.run([
                 mpipath, '-np',
                 '%d' % anzcores, bin_path + 'UIX_PAR/mpi_drqua_v7'

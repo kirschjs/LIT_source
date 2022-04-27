@@ -26,13 +26,15 @@ dbg = False
 arglist = sys.argv
 
 if arglist[1:] != []:
+    # for par_run.py operation
     StreuBases = np.arange(int(arglist[1]), int(arglist[2]) + 1)
     anzStreuBases = len(StreuBases)
+    bastypes = [boundstatekanal] if StreuBases[0] == 0 else streukas
 else:
+    # for manual operation
     anzStreuBases = 1
-    StreuBases = np.arange(2, anzStreuBases + 2)
-
-bastypes = [boundstatekanal] if StreuBases[0] == 1 else streukas
+    StreuBases = np.arange(1, anzStreuBases + 1)
+    bastypes = [boundstatekanal] + streukas
 
 if 1 in StreuBases:
     if os.path.isdir(helionpath) != False:
