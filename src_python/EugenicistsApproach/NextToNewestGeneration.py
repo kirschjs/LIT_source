@@ -20,37 +20,41 @@ os.chdir(litpath3He)
 
 dbg = False
 
-# call with  1 : boundsate
-#           a b: streubases from a to b
-#           a a: a single basis is optimized
+# call with arg1<0 : boundsate
+#           a b    : streubases from a to b
+#           a a    : a single basis is optimized
 arglist = sys.argv
 
 if arglist[1:] != []:
     # for par_run.py operation
     StreuBases = np.arange(int(arglist[1]), int(arglist[2]) + 1)
     anzStreuBases = len(StreuBases)
-    bastypes = [boundstatekanal] if StreuBases[0] == 0 else streukas
+    bastypes = [boundstatekanal] if int(arglist[1]) < 0 else streukas
 else:
     # for manual operation
     anzStreuBases = 1
     StreuBases = np.arange(1, anzStreuBases + 1)
     bastypes = [boundstatekanal] + streukas
 
-if 0 in StreuBases:
+if boundstatekanal in bastypes:
     if os.path.isdir(helionpath) != False:
         print('<ECCE> removing the existing helion folder\n%s.' % helionpath)
         os.system('rm -rf ' + helionpath)
     subprocess.check_call(['mkdir', '-p', helionpath])
     subprocess.check_call(['mkdir', '-p', helionpath + 'basis_struct/'])
 
-finalStatePaths = [litpath3He[:-1] + '-%d/' % nB for nB in StreuBases]
-for finalStatePath in finalStatePaths:
-    if os.path.isdir(finalStatePath) == True:
-        print('<ECCE> removing the existing final-state folder\n%s' %
-              finalStatePath)
-        os.system('rm -rf ' + finalStatePath)
-    subprocess.check_call(['mkdir', '-p', finalStatePath])
-    subprocess.check_call(['mkdir', '-p', finalStatePath + 'basis_struct/'])
+for streuka in streukas:
+    if streuka in bastypes:
+        finalStatePaths = [litpath3He[:-1] + '-%d/' % nB for nB in StreuBases]
+        for finalStatePath in finalStatePaths:
+            if os.path.isdir(finalStatePath) == True:
+                print('<ECCE> removing the existing final-state folder\n%s' %
+                      finalStatePath)
+                os.system('rm -rf ' + finalStatePath)
+            subprocess.check_call(['mkdir', '-p', finalStatePath])
+            subprocess.check_call(
+                ['mkdir', '-p', finalStatePath + 'basis_struct/'])
+        break
 
 # > optimize the various basis types, e.g., in case of the npp system:
 # > helion ground state, final J=1/2- and J=3/2- states
@@ -107,12 +111,13 @@ for bastype in bastypes:
     BDG3he = 7.72
     # get the initial, random basis seed to yield thresholds close to the reuslts in a complete basis
     chThreshold = -4.5 if bastype == boundstatekanal else -1.2
+    chThreshold = 10
 
-    CgfCycles = 3
+    CgfCycles = 1
     # nRaces := |i|
-    nRaces = 4 if bastype == boundstatekanal else 8
+    nRaces = 2 if bastype == boundstatekanal else 2
 
-    cradleCapacity = 84
+    cradleCapacity = 8
 
     # > nState > produce/optimize/grow multiple bases with pseudo-random initial seeds
     for nB in range(anzStreuBases):
@@ -144,7 +149,7 @@ for bastype in bastypes:
                                              0.006, 6.25, 0.001, 6.5, 0.006,
                                              5.25, 0.0001, 4.5
                                          ],
-                                         ini_dims=[8, 8, 8, 8],
+                                         ini_dims=[3, 4, 4, 3],
                                          coefstr=costr,
                                          anzOp=zop)
 

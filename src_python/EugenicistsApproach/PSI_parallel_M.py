@@ -2,6 +2,7 @@ import operator
 
 from bridgeA3 import *
 from parameters_and_constants import *
+import bridgeA3
 
 
 def span_initial_basis(
@@ -342,12 +343,12 @@ def span_initial_basis(
     n3_inen_bdg(sbas, Jstreu, coefstr, fn='INEN', pari=0, nzop=anzOp, tni=tnni)
 
     if parall == -1:
-        wrkVol = du(pathbase)
-        while int(wrkVol) > homeQuota:
+        wrkVol = bridgeA3.du(bridgeA3.pathbase)
+        while int(wrkVol) > bridgeA3.homeQuota:
             print('wrkDir holds %d bytes. Waiting for 60s to shrink.' %
                   int(wrkVol))
             time.sleep(60)
-            wrkVol = du(pathbase)
+            wrkVol = bridgeA3.du(bridgeA3.pathbase)
         subprocess.run([
             MPIRUN, '-np',
             '%d' % anzproc, BINBDGpath + 'V18_PAR/mpi_quaf_v7'
@@ -365,12 +366,12 @@ def span_initial_basis(
                                tni=1,
                                einzel_path=wrkDir + '/')
         if parall == -1:
-            wrkVol = du(pathbase)
-            while int(wrkVol) > homeQuota:
+            wrkVol = bridgeA3.du(bridgeA3.pathbase)
+            while int(wrkVol) > bridgeA3.homeQuota:
                 print('wrkDir holds %d bytes. Waiting for 60s to shrink.' %
                       int(wrkVol))
                 time.sleep(60)
-                wrkVol = du(pathbase)
+                wrkVol = bridgeA3.du(bridgeA3.pathbase)
             subprocess.run([
                 MPIRUN, '-np',
                 '%d' % anzproc, BINBDGpath + 'UIX_PAR/mpi_drqua_v7'

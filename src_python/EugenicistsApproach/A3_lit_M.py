@@ -26,10 +26,13 @@ respath = bkpdir + suffi + 'results/'
 helionpath = bkpdir + suffi + 'he3/'
 
 arglist = sys.argv
+
 if arglist[1:] != []:
+    # with arguments: calculate overlap for bases arg1 - arg2
     StreuBases = np.arange(int(arglist[1]), int(arglist[2]) + 1)
     anzStreuBases = len(StreuBases)
 else:
+    # w/o  arguments: calc. overlap for the range of bases found canonically in /home/kirscher/compton_tmp/mul_helion/results
     anzStreuBases = len(
         [f for f in glob.glob(respath + 'mat_%s_BasNR-*' % streukas[0])])
     StreuBases = np.arange(1, anzStreuBases + 1)
