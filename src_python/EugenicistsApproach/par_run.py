@@ -2,8 +2,8 @@ import subprocess
 import numpy as np
 from bridgeA3 import *
 
-anzStrBas = 11
-firstBas = 1
+anzStrBas = 1
+firstBas = -1
 StrBas = np.arange(firstBas, firstBas + anzStrBas)
 
 if os.path.isdir(bkpdir) == False:
