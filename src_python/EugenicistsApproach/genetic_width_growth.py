@@ -378,7 +378,7 @@ def essentialize_basis(basis, MaxBVsPERcfg=4):
     #         ]
 
     bvIndices = [bv[0] for bv in basis[3]]
-    dim = len(np.reshape(np.array(basis[1]).flatten(), (1, -1))[0])
+    dim = len(np.reshape(np.array(sum(basis[1], [])), (1, -1))[0])
     ws2remove = [bv for bv in range(1, dim + 1) if bv not in bvIndices]
 
     # remove all bv width sets which are not included in basis

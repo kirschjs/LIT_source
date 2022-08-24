@@ -32,9 +32,9 @@ if arglist[1:] != []:
     bastypes = [boundstatekanal] if int(arglist[1]) < 0 else streukas
 else:
     # for manual operation
-    anzStreuBases = 1
+    anzStreuBases = 6
     StreuBases = np.arange(1, anzStreuBases + 1)
-    bastypes = [boundstatekanal] + streukas
+    bastypes = streukas  # [boundstatekanal] +
 
 if boundstatekanal in bastypes:
     if os.path.isdir(helionpath) != False:
@@ -99,7 +99,7 @@ for bastype in bastypes:
                 'Ground-state energy'][pwpurge]
 
     # evolution criteria
-    minCond = 10**-6
+    minCond = 10**-10
     denseEVinterval = [-10., 150.0]
     removalGainFactor = 1.5
     maxOnPurge = 43
@@ -114,7 +114,7 @@ for bastype in bastypes:
 
     CgfCycles = 2
     # nRaces := |i|
-    nRaces = 4 if bastype == boundstatekanal else 8
+    nRaces = 2 if bastype == boundstatekanal else 2
 
     cradleCapacity = 28
 
@@ -143,10 +143,12 @@ for bastype in bastypes:
                 time.sleep(60)
                 wrkVol = du(pathbase)
 
+            # ini_dims = [BS(int),BS(rel),SCATT(int),SCATT(rel)]
+            # ini_grid_bnds = [bs_int_low,bs_int_up,bs_rel_low,bs_rel_up,SC_int_low,SC_int_up,SC_rel_low,SC_rel_up]
             seedMat = span_initial_basis(basisType=bastype,
                                          ini_grid_bounds=[
-                                             0.006, 6.25, 0.001, 6.5, 0.006,
-                                             5.25, 0.0001, 4.5
+                                             0.006, 9.25, 0.0001, 5.5, 0.006,
+                                             3.25, 0.0001, 4.5
                                          ],
                                          ini_dims=[6, 6, 9, 9],
                                          coefstr=costr,

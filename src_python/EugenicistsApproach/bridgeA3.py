@@ -55,7 +55,7 @@ cal = [
 ]
 
 DC = True if time.tzname[0] == 'EST' else False
-MaxProc = int(len(os.sched_getaffinity(0)) / 2)
+MaxProc = int(len(os.sched_getaffinity(0)) / 1)
 
 orig_dir = os.getcwd()
 
@@ -129,7 +129,7 @@ channels = {
     ]
 }
 
-streukas = ['0.5^-', '1.5^-']
+streukas = ['0.5^-']  #, '1.5^-']
 
 #                  realistic    L>0 (only)         deuteron
 boundstatekanal = 'npp0.5^+'
