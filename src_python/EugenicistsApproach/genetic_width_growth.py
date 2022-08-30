@@ -5,7 +5,7 @@ def loveliness(groundstateEnergy, conditionNumber, HeigenvaluesbelowX,
                minimalConditionnumber):
 
     pulchritude = HeigenvaluesbelowX**2 * np.abs(
-        groundstateEnergy)**6 / np.abs(np.log(conditionNumber))**2
+        groundstateEnergy)**6 / np.abs(np.log(conditionNumber))**0
 
     return pulchritude
 

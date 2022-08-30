@@ -225,110 +225,117 @@ def span_initial_basis(
         f.seek(NEWLINE_SIZE_IN_BYTES, 2)
         f.truncate()
     f.close()
+
     if os.path.isdir(wrkDir + '/eob/') == False:
         subprocess.check_call(['mkdir', '-p', wrkDir + '/eob/'])
-    os.chdir(wrkDir + '/eob/')
-    n3_inob([
-        'he_no1',
-        'he_no1y',
-        'he_no2',
-        'he_no2y',
-        'he_no3',
-        'he_no3y',
-        'he_no5',
-        'he_no5y',
-        'he_no6',
-        'he_no6y',
-    ],
-            8,
-            fn='INOB',
-            indep=+1)
-    os.system(BINBDGpath + 'KOBER.exe')
+        os.chdir(wrkDir + '/eob/')
+        n3_inob([
+            'he_no1',
+            'he_no1y',
+            'he_no2',
+            'he_no2y',
+            'he_no3',
+            'he_no3y',
+            'he_no5',
+            'he_no5y',
+            'he_no6',
+            'he_no6y',
+        ],
+                8,
+                fn='INOB',
+                indep=+1)
+        os.system(BINBDGpath + 'KOBER.exe')
+
     if os.path.isdir(wrkDir + '/eob-tni/') == False:
         subprocess.check_call(['mkdir', '-p', wrkDir + '/eob-tni/'])
-    os.chdir(wrkDir + '/eob-tni/')
-    n3_inob([
-        'he_no1',
-        'he_no1y',
-        'he_no2',
-        'he_no2y',
-        'he_no3',
-        'he_no3y',
-        'he_no5',
-        'he_no5y',
-        'he_no6',
-        'he_no6y',
-    ],
-            15,
-            fn='INOB',
-            indep=+1)
-    os.system(BINBDGpath + 'DROBER.exe')
+        os.chdir(wrkDir + '/eob-tni/')
+        n3_inob([
+            'he_no1',
+            'he_no1y',
+            'he_no2',
+            'he_no2y',
+            'he_no3',
+            'he_no3y',
+            'he_no5',
+            'he_no5y',
+            'he_no6',
+            'he_no6y',
+        ],
+                15,
+                fn='INOB',
+                indep=+1)
+        os.system(BINBDGpath + 'DROBER.exe')
+
     if os.path.isdir(wrkDir + '/elu/') == False:
         subprocess.check_call(['mkdir', '-p', wrkDir + '/elu/'])
-    os.chdir(wrkDir + '/elu/')
-    n3_inlu(8,
-            fn='INLUCN',
-            fr=[
-                '000',
-                '202',
-                '022',
-                '110',
-                '101',
-                '011',
-                '111',
-                '112',
-                '211',
-                '212',
-                '213',
-                '123',
-                '121',
-                '122',
-                '212',
-                '222',
-                '221',
-                '220',
-            ],
-            indep=+1)
-    os.system(BINBDGpath + 'LUDW_CN.exe')
+        os.chdir(wrkDir + '/elu/')
+        n3_inlu(8,
+                fn='INLUCN',
+                fr=[
+                    '000',
+                    '202',
+                    '022',
+                    '110',
+                    '101',
+                    '011',
+                    '111',
+                    '112',
+                    '211',
+                    '212',
+                    '213',
+                    '123',
+                    '121',
+                    '122',
+                    '212',
+                    '222',
+                    '221',
+                    '220',
+                ],
+                indep=+1)
+        os.system(BINBDGpath + 'LUDW_CN.exe')
+
     if os.path.isdir(wrkDir + '/elu-tni/') == False:
         subprocess.check_call(['mkdir', '-p', wrkDir + '/elu-tni/'])
-    os.chdir(wrkDir + '/elu-tni/')
-    n3_inlu(8,
-            fn='INLU',
-            fr=[
-                '000',
-                '202',
-                '022',
-                '110',
-                '101',
-                '011',
-                '111',
-                '112',
-                '211',
-                '212',
-                '213',
-                '123',
-                '121',
-                '122',
-                '212',
-                '222',
-                '221',
-                '220',
-            ],
-            indep=+1)
-    os.system(BINBDGpath + 'DRLUD.exe')
+        os.chdir(wrkDir + '/elu-tni/')
+        n3_inlu(8,
+                fn='INLU',
+                fr=[
+                    '000',
+                    '202',
+                    '022',
+                    '110',
+                    '101',
+                    '011',
+                    '111',
+                    '112',
+                    '211',
+                    '212',
+                    '213',
+                    '123',
+                    '121',
+                    '122',
+                    '212',
+                    '222',
+                    '221',
+                    '220',
+                ],
+                indep=+1)
+        os.system(BINBDGpath + 'DRLUD.exe')
 
     os.chdir(wrkDir)
 
-    n3_inlu(8, fn='INLU', fr=lfrags2, indep=parall)
-    os.system(BINBDGpath + 'DRLUD.exe')
-    n3_inlu(8, fn='INLUCN', fr=lfrags2, indep=parall)
-    os.system(BINBDGpath + 'LUDW_CN.exe')
-    n3_inob(sfrags2, 8, fn='INOB', indep=parall)
-    os.system(BINBDGpath + 'KOBER.exe')
-    n3_inob(sfrags2, 15, fn='INOB', indep=parall)
-    os.system(BINBDGpath + 'DROBER.exe')
+    if os.path.isfile('LUCOUT') == False:
+        n3_inlu(8, fn='INLU', fr=lfrags2, indep=parall)
+        os.system(BINBDGpath + 'DRLUD.exe')
+        n3_inlu(8, fn='INLUCN', fr=lfrags2, indep=parall)
+        os.system(BINBDGpath + 'LUDW_CN.exe')
+        n3_inob(sfrags2, 8, fn='INOB', indep=parall)
+        os.system(BINBDGpath + 'KOBER.exe')
+        n3_inob(sfrags2, 15, fn='INOB', indep=parall)
+        os.system(BINBDGpath + 'DROBER.exe')
+
     he3inquaBS(intwi=widi, relwi=widr, potf='./%s' % nnStr)
+
     parallel_mod_of_3inqua(lfrags2,
                            sfrags2,
                            infile='INQUA_M',
@@ -391,15 +398,6 @@ def span_initial_basis(
             subprocess.run([BINBDGpath + 'DR2END_NORMAL.exe'])
     suche_fehler()
 
-    ew_threshold = 10**(-8)
-
     matout = np.core.records.fromfile('MATOUTB', formats='f8', offset=4)
 
     return matout
-
-
-#    goodEVs = smart_ev(matout, ew_threshold)
-#    print('the good, big, and the smallest: ', np.real(goodEVs[:4]), ' ... ',
-#          np.real(goodEVs[-3:]))
-#    print('#E < 0                         : ',
-#          len([dg for dg in np.real(goodEVs) if float(dg) <= 0.0]))

@@ -55,7 +55,7 @@ cal = [
 ]
 
 DC = True if time.tzname[0] == 'EST' else False
-MaxProc = int(len(os.sched_getaffinity(0)) / 1)
+MaxProc = 13  # int(len(os.sched_getaffinity(0)) / 1)
 
 orig_dir = os.getcwd()
 
@@ -91,45 +91,45 @@ BINLITpath = orig_dir + '/../../src_elma_pol/'
 tnni = 11
 parall = -1
 
-nnStr = 'AV18'  #'BONN'  #AV4.14'
+nnStr = 'AV18'  #'nn_pot'  #pot_nn_06'  #'BONN'  #AV4.14'
 potnn = orig_dir + '/../../data/%s' % nnStr
-nnnStr = 'urbana9_AK_neu'
+nnnStr = 'urbana9_AK_neu'  #'nnn_pot'  #'pot_nnn_06'  #
 potnnn = orig_dir + '/../../data/%s' % nnnStr
 
 # convention: bound-state-expanding BVs: (1-8), i.e., 8 states per rw set => nzf0*8
 channels = {
     # helion
     'npp0.5^+': [
-        ['000', ['he_no1', 'he_no6']],  # 1,2
-        ['022', ['he_no2']],  # 3
-        ['202', ['he_no2']],  # 4
-        ['111', ['he_no3', 'he_no5']],  # 5,6
-        ['112', ['he_no5']],  # 7
-        ['220', ['he_no1', 'he_no6']],  # 8,9
-        ['221', ['he_no1', 'he_no2', 'he_no6']],  # 10,11,12
-        ['222', ['he_no2']],  # 13
+        ['000', ['he_no1', 'he_no6', 'he_no1', 'he_no6']],  # 1,2
+        ['022', ['he_no2', 'he_no2']],  # 3
+        ['202', ['he_no2', 'he_no2']],  # 4
+        #['111', ['he_no3', 'he_no5']],  # 5,6
+        #['112', ['he_no5']],  # 7
+        #['220', ['he_no1', 'he_no6']],  # 8,9
+        #['221', ['he_no1', 'he_no2', 'he_no6']],  # 10,11,12
+        #['222', ['he_no2']],  # 13
     ],
     #          [l1l2L,[compatible (iso)spin configurations]]
     '0.5^-': [
-        ['011', ['he_no1', 'he_no6']],
-        ['101', ['he_no3']],
+        ['011', ['he_no1', 'he_no6', 'he_no1', 'he_no6']],
+        #['101', ['he_no3']],
         ['211', ['he_no2', 'he_no1', 'he_no6']],
         ['212', ['he_no2']],
-        ['121', ['he_no3', 'he_no5']],
-        ['122', ['he_no5']],
+        #['121', ['he_no3', 'he_no5']],
+        #['122', ['he_no5']],
     ],
     '1.5^-': [
         ['011', ['he_no1', 'he_no2', 'he_no6']],
-        ['101', ['he_no3']],
+        #['101', ['he_no3']],
         ['211', ['he_no1', 'he_no2', 'he_no6']],
         ['212', ['he_no2']],
-        ['121', ['he_no3', 'he_no5']],
-        ['122', ['he_no3', 'he_no5']],
-        ['213', ['he_no2']],
+        #['121', ['he_no3', 'he_no5']],
+        #['122', ['he_no3', 'he_no5']],
+        #['213', ['he_no2']],
     ]
 }
 
-streukas = ['0.5^-']  #, '1.5^-']
+streukas = ['0.5^-', '1.5^-']
 
 #                  realistic    L>0 (only)         deuteron
 boundstatekanal = 'npp0.5^+'

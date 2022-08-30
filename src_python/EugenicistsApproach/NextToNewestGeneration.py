@@ -32,9 +32,9 @@ if arglist[1:] != []:
     bastypes = [boundstatekanal] if int(arglist[1]) < 0 else streukas
 else:
     # for manual operation
-    anzStreuBases = 6
+    anzStreuBases = 2
     StreuBases = np.arange(1, anzStreuBases + 1)
-    bastypes = streukas  # [boundstatekanal] +
+    bastypes = [boundstatekanal] + streukas
 
 if boundstatekanal in bastypes:
     if os.path.isdir(helionpath) != False:
@@ -68,10 +68,13 @@ for bastype in bastypes:
     costr = ''
     zop = 31 if tnni == 11 else 14
     for nn in range(1, zop):
-        if bastype == boundstatekanal:
-            cf = 1.0 if (1 <= nn <= 28) else 0.0
-        else:
-            cf = 1.0 if (1 <= nn <= 28) else 0.0
+        #if bastype == boundstatekanal:
+        #    cf = 1.0 if (1 <= nn <= 28) else 0.0
+        #else:
+        #    cf = 1.0 if (1 <= nn <= 28) else 0.0
+        cf = 1.0 if (nn != 8) else 1.
+        # for contact interaction
+        #cf = 1.0 if ((nn == 14) | (nn == 2) | (nn == 1)) else 0.
         costr += '%12.7f' % cf if (nn % 7 != 0) else '%12.7f\n' % cf
 
     # numerical stability
@@ -104,19 +107,19 @@ for bastype in bastypes:
     removalGainFactor = 1.5
     maxOnPurge = 43
     maxOnTrail = 10**2
-    muta_initial = 0.5
+    muta_initial = 0.05
 
     BDGdeu = 2.224
     BDG3h = 8.482
     BDG3he = 7.72
     # get the initial, random basis seed to yield thresholds close to the reuslts in a complete basis
-    chThreshold = -4.5 if bastype == boundstatekanal else -1.2
+    chThreshold = -3.01 if bastype == boundstatekanal else -0.51
 
     CgfCycles = 2
     # nRaces := |i|
     nRaces = 2 if bastype == boundstatekanal else 2
 
-    cradleCapacity = 28
+    cradleCapacity = 20
 
     # > nState > produce/optimize/grow multiple bases with pseudo-random initial seeds
     for nB in range(anzStreuBases):
@@ -147,8 +150,8 @@ for bastype in bastypes:
             # ini_grid_bnds = [bs_int_low,bs_int_up,bs_rel_low,bs_rel_up,SC_int_low,SC_int_up,SC_rel_low,SC_rel_up]
             seedMat = span_initial_basis(basisType=bastype,
                                          ini_grid_bounds=[
-                                             0.006, 9.25, 0.0001, 5.5, 0.006,
-                                             3.25, 0.0001, 4.5
+                                             0.0006, 8.25, 0.0001, 7.5, 0.006,
+                                             6.25, 0.0001, 8.5
                                          ],
                                          ini_dims=[6, 6, 9, 9],
                                          coefstr=costr,
@@ -502,9 +505,13 @@ for bastype in bastypes:
                                              fatherI,
                                              mutation_rate=muta_initial))
 
-                            for nrw in range(len(parentRWs[iws[0]])):
+                            for nrw in range(
+                                    np.min([len(pa) for pa in parentRWs])):
+                                #for nrw in range(len(parentRWs[iws[0]])):
                                 motherR = parentRWs[iws[0]][nrw]
                                 if iws[1] >= 0:
+                                    #print(iws[1], nrw, '\n', ret, unis, '\n',
+                                    #      initialCiv[0])
                                     fatherR = parentRWs[iws[1]][nrw]
                                 else:
                                     fatherR = motherR * np.random.random()
