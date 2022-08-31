@@ -324,15 +324,14 @@ def span_initial_basis(
 
     os.chdir(wrkDir)
 
-    if os.path.isfile('LUCOUT') == False:
-        n3_inlu(8, fn='INLU', fr=lfrags2, indep=parall)
-        os.system(BINBDGpath + 'DRLUD.exe')
-        n3_inlu(8, fn='INLUCN', fr=lfrags2, indep=parall)
-        os.system(BINBDGpath + 'LUDW_CN.exe')
-        n3_inob(sfrags2, 8, fn='INOB', indep=parall)
-        os.system(BINBDGpath + 'KOBER.exe')
-        n3_inob(sfrags2, 15, fn='INOB', indep=parall)
-        os.system(BINBDGpath + 'DROBER.exe')
+    n3_inlu(8, fn='INLU', fr=lfrags2, indep=parall)
+    os.system(BINBDGpath + 'DRLUD.exe')
+    n3_inlu(8, fn='INLUCN', fr=lfrags2, indep=parall)
+    os.system(BINBDGpath + 'LUDW_CN.exe')
+    n3_inob(sfrags2, 8, fn='INOB', indep=parall)
+    os.system(BINBDGpath + 'KOBER.exe')
+    n3_inob(sfrags2, 15, fn='INOB', indep=parall)
+    os.system(BINBDGpath + 'DROBER.exe')
 
     he3inquaBS(intwi=widi, relwi=widr, potf='./%s' % nnStr)
 

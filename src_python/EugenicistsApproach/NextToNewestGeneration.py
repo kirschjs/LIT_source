@@ -56,6 +56,9 @@ for streuka in streukas:
                 ['mkdir', '-p', finalStatePath + 'basis_struct/'])
         break
 
+# ini_dims = [BS(int),BS(rel),SCATT(int),SCATT(rel)]
+init_dims = [6, 8, 6, 8]
+
 # > optimize the various basis types, e.g., in case of the npp system:
 # > helion ground state, final J=1/2- and J=3/2- states
 for bastype in bastypes:
@@ -113,7 +116,7 @@ for bastype in bastypes:
     BDG3h = 8.482
     BDG3he = 7.72
     # get the initial, random basis seed to yield thresholds close to the reuslts in a complete basis
-    chThreshold = -3.01 if bastype == boundstatekanal else -0.51
+    chThreshold = -2.51 if bastype == boundstatekanal else -0.1
 
     CgfCycles = 2
     # nRaces := |i|
@@ -146,14 +149,13 @@ for bastype in bastypes:
                 time.sleep(60)
                 wrkVol = du(pathbase)
 
-            # ini_dims = [BS(int),BS(rel),SCATT(int),SCATT(rel)]
             # ini_grid_bnds = [bs_int_low,bs_int_up,bs_rel_low,bs_rel_up,SC_int_low,SC_int_up,SC_rel_low,SC_rel_up]
             seedMat = span_initial_basis(basisType=bastype,
                                          ini_grid_bounds=[
                                              0.0006, 8.25, 0.0001, 7.5, 0.006,
                                              6.25, 0.0001, 8.5
                                          ],
-                                         ini_dims=[6, 6, 9, 9],
+                                         ini_dims=init_dims,
                                          coefstr=costr,
                                          anzOp=zop)
 
@@ -279,17 +281,18 @@ for bastype in bastypes:
 
                 for bvTrail in D0:
 
-                    bvID = [
-                        int(bvTrail[0]),
-                        int(''.join(map(str, bvTrail[1])))
-                    ]
-                    cpy = copy.deepcopy(D0)
-                    cpy.remove(bvTrail)
+                    if len(bvTrail[1]) > 1:
+                        bvID = [
+                            int(bvTrail[0]),
+                            int(''.join(map(str, bvTrail[1])))
+                        ]
+                        cpy = copy.deepcopy(D0)
+                        cpy.remove(bvTrail)
 
-                    ParaSets.append([
-                        cpy, Jay, costr, zop, 10, bvID, BINBDGpath, minCond,
-                        denseEVinterval
-                    ])
+                        ParaSets.append([
+                            cpy, Jay, costr, zop, 10, bvID, BINBDGpath,
+                            minCond, denseEVinterval
+                        ])
 
                 tst = np.random.choice(np.arange(len(ParaSets)),
                                        size=min(maxOnPurge, len(ParaSets)),
@@ -359,11 +362,16 @@ for bastype in bastypes:
                 # 1) increases the cond. number significantly, or,
                 # 2) in case of a prohibitively unstable reference, any removal which
                 #    stabilizes the set above a preset threshold (minCond) is acceptable
+
                 if ((removalGainFactor * np.abs(reff[pwpurge]) < np.abs(
                         cand_ladder[-1][pwpurge])) |
                     ((np.abs(cand_ladder[-1][pwpurge]) < minCond) &
                      (reff[0] < minCond))):
                     goPurge = True
+                    if np.min([len(bv[1]) for bv in cand_ladder[-1][4]]) < 1:
+                        print('%$**&!@#:  ',
+                              [len(bv[1]) for bv in cand_ladder[-1][4]])
+                        #exit()
                     D0 = rectify_basis(cand_ladder[-1][4])
                     print(
                         '                   removal of 1/%d basis-vector blocks is advantageous.'
@@ -694,7 +702,6 @@ for bastype in bastypes:
 
                         initialCiv = condense_basis(initialCivL,
                                                     MaxBVsPERcfg=bvma)
-
                         #print('\n\niniciV+optChild (strat):\n\n', initialCiv)
                     else:
                         Ais[3] = parBVs
@@ -753,16 +760,18 @@ for bastype in bastypes:
                     denseEVinterval
                 ])
                 for bvTrail in D0:
-                    bvID = [
-                        int(bvTrail[0]),
-                        int(''.join(map(str, bvTrail[1])))
-                    ]
-                    cpy = copy.deepcopy(D0)
-                    cpy.remove(bvTrail)
-                    ParaSets.append([
-                        cpy, Jay, costr, zop, 10, bvID, BINBDGpath, minCond,
-                        denseEVinterval
-                    ])
+
+                    if len(bvTrail[1]) > 1:
+                        bvID = [
+                            int(bvTrail[0]),
+                            int(''.join(map(str, bvTrail[1])))
+                        ]
+                        cpy = copy.deepcopy(D0)
+                        cpy.remove(bvTrail)
+                        ParaSets.append([
+                            cpy, Jay, costr, zop, 10, bvID, BINBDGpath,
+                            minCond, denseEVinterval
+                        ])
 
                 tst = np.random.choice(np.arange(len(ParaSets)),
                                        size=min(maxOnPurge, len(ParaSets)),
@@ -826,6 +835,11 @@ for bastype in bastypes:
                     ((np.abs(cand_ladder[-1][pwSig]) < minCond) &
                      (reff[0] < minCond))):
                     goPurge = True
+
+                    if np.min([len(bv[1]) for bv in cand_ladder[-1][4]]) < 1:
+                        print('%$**&!@#:  ',
+                              [len(bv[1]) for bv in cand_ladder[-1][4]])
+                        #exit()
                     D0 = rectify_basis(cand_ladder[-1][4])
                     print('removing 1/%d basis-vector blocks.' % len(D0),
                           end='\n')

@@ -253,7 +253,7 @@ def write_basis_on_tape(basis, jay, btype, baspath=''):
     f.close()
 
     finalstate_indices = []
-    print(basis[3])
+
     bv = 0
     for ncfg in range(len(basis[0])):
         for nbv in range(len(basis[1][ncfg])):
