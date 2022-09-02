@@ -32,7 +32,7 @@ if arglist[1:] != []:
     bastypes = [boundstatekanal] if int(arglist[1]) < 0 else streukas
 else:
     # for manual operation
-    anzStreuBases = 2
+    anzStreuBases = 12
     StreuBases = np.arange(1, anzStreuBases + 1)
     bastypes = [boundstatekanal] + streukas
 
@@ -87,7 +87,7 @@ for bastype in bastypes:
 
     # rating criterion in order to stratify the initial seed basis
     # default and reasonable for an unstable, random seed =0 (C-nbr)
-    pwpurge = 0
+    pwpurge = 1
 
     # rating criterion in order to stratify the *stabilized* initial seed basis
     # ensuing the one-time optimization of each of its configurations
@@ -116,13 +116,13 @@ for bastype in bastypes:
     BDG3h = 8.482
     BDG3he = 7.72
     # get the initial, random basis seed to yield thresholds close to the reuslts in a complete basis
-    chThreshold = -2.51 if bastype == boundstatekanal else -0.1
+    chThreshold = -2.51 if bastype == boundstatekanal else -0.3
 
     CgfCycles = 2
     # nRaces := |i|
     nRaces = 2 if bastype == boundstatekanal else 2
 
-    cradleCapacity = 20
+    cradleCapacity = 5
 
     # > nState > produce/optimize/grow multiple bases with pseudo-random initial seeds
     for nB in range(anzStreuBases):
@@ -142,14 +142,20 @@ for bastype in bastypes:
 
             t0 = time.perf_counter()
 
-            wrkVol = du(pathbase)
-            while int(wrkVol) > homeQuota:
-                print('wrkDir holds %d bytes. Waiting for 60s to shrink.' %
-                      int(wrkVol))
-                time.sleep(60)
+            try:
                 wrkVol = du(pathbase)
+                while int(wrkVol) > homeQuota:
+                    print('wrkDir holds %d bytes. Waiting for 60s to shrink.' %
+                          int(wrkVol))
+                    time.sleep(60)
+                    wrkVol = du(pathbase)
+            except:
+                print(
+                    '(ecce) disk-usage-assessment failure. I will continue, aware of the increased crash risk!'
+                )
 
             # ini_grid_bnds = [bs_int_low,bs_int_up,bs_rel_low,bs_rel_up,SC_int_low,SC_int_up,SC_rel_low,SC_rel_up]
+
             seedMat = span_initial_basis(basisType=bastype,
                                          ini_grid_bounds=[
                                              0.0006, 8.25, 0.0001, 7.5, 0.006,
@@ -388,12 +394,17 @@ for bastype in bastypes:
 
             initialCiv = essentialize_basis(initialCiv, MaxBVsPERcfg=bvma)
 
-            wrkVol = du(pathbase)
-            while int(wrkVol) > homeQuota:
-                print('wrkDir holds %d bytes. Waiting for 60s to shrink.' %
-                      int(wrkVol))
-                time.sleep(60)
+            try:
                 wrkVol = du(pathbase)
+                while int(wrkVol) > homeQuota:
+                    print('wrkDir holds %d bytes. Waiting for 60s to shrink.' %
+                          int(wrkVol))
+                    time.sleep(60)
+                    wrkVol = du(pathbase)
+            except:
+                print(
+                    '(ecce) disk-usage-assessment failure. I will continue, aware of the increased crash risk!'
+                )
 
             ma = blunt_ev(initialCiv[0],
                           initialCiv[1],
@@ -592,13 +603,18 @@ for bastype in bastypes:
                     Ais = essentialize_basis(Ais, MaxBVsPERcfg=bvma)
                     #print('\nAis (strat):\n', Ais)
 
-                    wrkVol = du(pathbase)
-                    while int(wrkVol) > homeQuota:
-                        print(
-                            'wrkDir holds %d bytes. Waiting for 60s to shrink.'
-                            % int(wrkVol))
-                        time.sleep(60)
+                    try:
                         wrkVol = du(pathbase)
+                        while int(wrkVol) > homeQuota:
+                            print(
+                                'wrkDir holds %d bytes. Waiting for 60s to shrink.'
+                                % int(wrkVol))
+                            time.sleep(60)
+                            wrkVol = du(pathbase)
+                    except:
+                        print(
+                            '(ecce) disk-usage-assessment failure. I will continue, aware of the increased crash risk!'
+                        )
 
                     ma = blunt_ev(Ais[0],
                                   Ais[1],
@@ -717,12 +733,17 @@ for bastype in bastypes:
             # and remove its least siginificant vectors before repeating
             # the optimization of the individual configurations
 
-            wrkVol = du(pathbase)
-            while int(wrkVol) > homeQuota:
-                print('wrkDir holds %d bytes. Waiting for 60s to shrink.' %
-                      int(wrkVol))
-                time.sleep(60)
+            try:
                 wrkVol = du(pathbase)
+                while int(wrkVol) > homeQuota:
+                    print('wrkDir holds %d bytes. Waiting for 60s to shrink.' %
+                          int(wrkVol))
+                    time.sleep(60)
+                    wrkVol = du(pathbase)
+            except:
+                print(
+                    '(ecce) disk-usage-assessment failure. I will continue, aware of the increased crash risk!'
+                )
 
             ma = blunt_ev(initialCiv[0],
                           initialCiv[1],
@@ -850,12 +871,17 @@ for bastype in bastypes:
 
             initialCiv = condense_basis(initialCivL, MaxBVsPERcfg=bvma)
 
-        wrkVol = du(pathbase)
-        while int(wrkVol) > homeQuota:
-            print('wrkDir holds %d bytes. Waiting for 60s to shrink.' %
-                  int(wrkVol))
-            time.sleep(60)
+        try:
             wrkVol = du(pathbase)
+            while int(wrkVol) > homeQuota:
+                print('wrkDir holds %d bytes. Waiting for 60s to shrink.' %
+                      int(wrkVol))
+                time.sleep(60)
+                wrkVol = du(pathbase)
+        except:
+            print(
+                '(ecce) disk-usage-assessment failure. I will continue, aware of the increased crash risk!'
+            )
 
         ma = blunt_ev(initialCiv[0],
                       initialCiv[1],

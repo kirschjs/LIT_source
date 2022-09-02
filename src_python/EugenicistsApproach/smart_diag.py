@@ -54,12 +54,17 @@ def blunt_ev(cfgs,
     n3_inen_bdg(basis, jay, costring, fn='INEN', pari=0, nzop=nzopt, tni=tnnii)
 
     if parall == -1:
-        wrkVol = bridgeA3.du(bridgeA3.pathbase)
-        while int(wrkVol) > bridgeA3.homeQuota:
-            print('wrkDir holds %d bytes. Waiting for 60s to shrink.' %
-                  int(wrkVol))
-            time.sleep(60)
+        try:
             wrkVol = bridgeA3.du(bridgeA3.pathbase)
+            while int(wrkVol) > bridgeA3.homeQuota:
+                print('wrkDir holds %d bytes. Waiting for 60s to shrink.' %
+                      int(wrkVol))
+                time.sleep(60)
+                wrkVol = bridgeA3.du(bridgeA3.pathbase)
+        except:
+            print(
+                '(ecce) disk-usage-assessment failure. I will continue, aware of the increased crash risk!'
+            )
 
         subprocess.run([
             mpipath, '-np',
@@ -85,12 +90,17 @@ def blunt_ev(cfgs,
                                einzel_path=einzel_file_path)
 
         if parall == -1:
-            wrkVol = bridgeA3.du(bridgeA3.pathbase)
-            while int(wrkVol) > bridgeA3.homeQuota:
-                print('wrkDir holds %d bytes. Waiting for 60s to shrink.' %
-                      int(wrkVol))
-                time.sleep(60)
+            try:
                 wrkVol = bridgeA3.du(bridgeA3.pathbase)
+                while int(wrkVol) > bridgeA3.homeQuota:
+                    print('wrkDir holds %d bytes. Waiting for 60s to shrink.' %
+                          int(wrkVol))
+                    time.sleep(60)
+                    wrkVol = bridgeA3.du(bridgeA3.pathbase)
+            except:
+                print(
+                    '(ecce) disk-usage-assessment failure. I will continue, aware of the increased crash risk!'
+                )
             subprocess.run([
                 mpipath, '-np',
                 '%d' % anzcores, bin_path + 'UIX_PAR/mpi_drqua_v7'

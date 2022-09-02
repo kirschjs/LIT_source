@@ -349,12 +349,17 @@ def span_initial_basis(
     n3_inen_bdg(sbas, Jstreu, coefstr, fn='INEN', pari=0, nzop=anzOp, tni=tnni)
 
     if parall == -1:
-        wrkVol = bridgeA3.du(bridgeA3.pathbase)
-        while int(wrkVol) > bridgeA3.homeQuota:
-            print('wrkDir holds %d bytes. Waiting for 60s to shrink.' %
-                  int(wrkVol))
-            time.sleep(60)
+        try:
             wrkVol = bridgeA3.du(bridgeA3.pathbase)
+            while int(wrkVol) > bridgeA3.homeQuota:
+                print('wrkDir holds %d bytes. Waiting for 60s to shrink.' %
+                      int(wrkVol))
+                time.sleep(60)
+                wrkVol = bridgeA3.du(bridgeA3.pathbase)
+        except:
+            print(
+                '(ecce) disk-usage-assessment failure. I will continue, aware of the increased crash risk!'
+            )
         subprocess.run([
             MPIRUN, '-np',
             '%d' % anzproc, BINBDGpath + 'V18_PAR/mpi_quaf_v7'
@@ -372,12 +377,17 @@ def span_initial_basis(
                                tni=1,
                                einzel_path=wrkDir + '/')
         if parall == -1:
-            wrkVol = bridgeA3.du(bridgeA3.pathbase)
-            while int(wrkVol) > bridgeA3.homeQuota:
-                print('wrkDir holds %d bytes. Waiting for 60s to shrink.' %
-                      int(wrkVol))
-                time.sleep(60)
+            try:
                 wrkVol = bridgeA3.du(bridgeA3.pathbase)
+                while int(wrkVol) > bridgeA3.homeQuota:
+                    print('wrkDir holds %d bytes. Waiting for 60s to shrink.' %
+                          int(wrkVol))
+                    time.sleep(60)
+                    wrkVol = bridgeA3.du(bridgeA3.pathbase)
+            except:
+                print(
+                    '(ecce) disk-usage-assessment failure. I will continue, aware of the increased crash risk!'
+                )
             subprocess.run([
                 MPIRUN, '-np',
                 '%d' % anzproc, BINBDGpath + 'UIX_PAR/mpi_drqua_v7'
