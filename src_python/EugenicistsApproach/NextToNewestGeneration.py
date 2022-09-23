@@ -32,7 +32,7 @@ if arglist[1:] != []:
     bastypes = [boundstatekanal] if int(arglist[1]) < 0 else streukas
 else:
     # for manual operation
-    anzStreuBases = 12
+    anzStreuBases = 3
     StreuBases = np.arange(1, anzStreuBases + 1)
     bastypes = [boundstatekanal] + streukas
 
@@ -105,22 +105,22 @@ for bastype in bastypes:
                 'Ground-state energy'][pwpurge]
 
     # evolution criteria
-    minCond = 10**-10
+    minCond = 10**-12
     denseEVinterval = [-10., 150.0]
     removalGainFactor = 1.5
     maxOnPurge = 43
-    maxOnTrail = 10**2
+    maxOnTrail = 20**1
     muta_initial = 0.05
 
     BDGdeu = 2.224
     BDG3h = 8.482
     BDG3he = 7.72
     # get the initial, random basis seed to yield thresholds close to the reuslts in a complete basis
-    chThreshold = -2.51 if bastype == boundstatekanal else -0.3
+    chThreshold = -3.51 if bastype == boundstatekanal else -0.4
 
     CgfCycles = 2
     # nRaces := |i|
-    nRaces = 2 if bastype == boundstatekanal else 2
+    nRaces = 2 if bastype == boundstatekanal else 4
 
     cradleCapacity = 5
 
@@ -603,6 +603,8 @@ for bastype in bastypes:
                     Ais = essentialize_basis(Ais, MaxBVsPERcfg=bvma)
                     #print('\nAis (strat):\n', Ais)
 
+                    subprocess.call('rm -rf TQUAOUT.*', shell=True)
+                    subprocess.call('rm -rf TDQUAOUT.*', shell=True)
                     try:
                         wrkVol = du(pathbase)
                         while int(wrkVol) > homeQuota:
@@ -927,6 +929,9 @@ for bastype in bastypes:
         subprocess.call('rm -rf ./inen_*', shell=True)
         subprocess.call('rm -rf ./endout_*', shell=True)
         subprocess.call('rm -rf ./MATOUTB_*', shell=True)
+
+        subprocess.call('rm -rf TQUAOUT.*', shell=True)
+        subprocess.call('rm -rf TDQUAOUT.*', shell=True)
 
         fullBasfile, actBasfile = write_basis_on_tape(initialCiv,
                                                       Jay,
