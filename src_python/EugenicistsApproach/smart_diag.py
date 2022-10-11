@@ -21,8 +21,7 @@ def blunt_ev(cfgs,
              tnnii=10,
              jay=0.5,
              anzcores=6,
-             wrkdir='',
-             dia=True):
+             wrkdir=''):
 
     #assert basisDim(basis) == len(sum(sum(relws, []), []))
 
@@ -67,7 +66,7 @@ def blunt_ev(cfgs,
             )
 
         subprocess.run([
-            mpipath, '-np',
+            mpipath, '--oversubscribe', '-np',
             '%d' % anzcores, bin_path + 'V18_PAR/mpi_quaf_v7'
         ])
         subprocess.run([bin_path + 'V18_PAR/sammel'])
@@ -102,7 +101,7 @@ def blunt_ev(cfgs,
                     '(ecce) disk-usage-assessment failure. I will continue, aware of the increased crash risk!'
                 )
             subprocess.run([
-                mpipath, '-np',
+                mpipath, '--oversubscribe', '-np',
                 '%d' % anzcores, bin_path + 'UIX_PAR/mpi_drqua_v7'
             ])
             subprocess.run([bin_path + 'UIX_PAR/SAMMEL-uix'])
@@ -122,38 +121,6 @@ def blunt_ev(cfgs,
             subprocess.run([bin_path + 'DR2END_NORMAL.exe'])
 
     NormHam = np.core.records.fromfile('MATOUTB', formats='f8', offset=4)
-
-    if dia:
-
-        dim = int(np.sqrt(len(NormHam) * 0.5))
-
-        # read Norm and Hamilton matrices
-        normat = np.reshape(
-            np.array(NormHam[:dim**2]).astype(float), (dim, dim))
-        hammat = np.reshape(
-            np.array(NormHam[dim**2:]).astype(float), (dim, dim))
-
-        # diagonalize normalized norm (using "eigh(ermitian)" to speed-up the computation)
-        ew, ev = eigh(normat)
-        #ew, ev = LA.eigh(normat)
-        idx = ew.argsort()[::-1]
-        ew = [eww for eww in ew[idx]]
-        print('lowest eigen values (N): ', ew[-4:])
-
-        # diagonalize the projected Hamiltonian (using "eigh(ermitian)" to speed-up the computation)
-        #ewGood, evGood = LA.eigh(hammat, normat)
-        try:
-            ewGood, evGood = eigh(hammat, normat)
-            idx = ewGood.argsort()[::-1]
-            ewGood = [eww for eww in ewGood[idx]]
-            evGood = evGood[:, idx]
-
-            # return the ordered eigenvalues
-            print('lowest eigen values (H): ', ewGood[-4:])
-        except:
-            print(
-                'failed to solve generalized eigenvalue problem (norm ev\'s < 0 ?)'
-            )
 
     if wrkdir != '':
         os.chdir(base_path)
@@ -181,6 +148,8 @@ def smart_ev(matout, threshold=10**-7):
     idx = ew.argsort()[::-1]
     ew = [eww for eww in ew[idx]]
 
+    normCond = np.abs(ew[-1] / ew[0])
+
     # project onto subspace with ev > threshold
     ew = [eww for eww in ew if np.real(eww) > threshold]
     dimRed = len(ew)
@@ -198,9 +167,9 @@ def smart_ev(matout, threshold=10**-7):
     ewGood = [eww for eww in ewGood[idx]]
     evGood = evGood[:, idx]
 
-    print('(stable) Eigenbasisdim = %d(%d)' % (dimRed, dim))
-    # return the ordered eigenvalues
-    return ewGood
+    #print('(stable) Eigenbasisdim = %d(%d)' % (dimRed, dim))
+    #return the ordered eigenvalues
+    return ewGood, normCond
 
 
 def NormHamDiag(matout, threshold=10**(-7)):
@@ -283,52 +252,62 @@ def endmat(para, send_end):
 
     try:
         NormHam = np.core.records.fromfile(maoutf, formats='f8', offset=4)
-        dim = int(np.sqrt(len(NormHam) * 0.5))
+        smartEV, basCond = smart_ev(NormHam, threshold=10**-7)
 
-        # read Norm and Hamilton matrices
-        normat = np.reshape(
-            np.array(NormHam[:dim**2]).astype(float), (dim, dim))
-        hammat = np.reshape(
-            np.array(NormHam[dim**2:]).astype(float), (dim, dim))
-        # diagonalize normalized norm (using "eigh(ermitian)" to speed-up the computation)
-        ewN, evN = eigh(normat)
-        idx = ewN.argsort()[::-1]
-        ewN = [eww for eww in ewN[idx]]
-        evN = evN[:, idx]
+        anzSigEV = len(
+            [bvv for bvv in smartEV if para[8][0] < bvv < para[8][1]])
+        gsEnergy = smartEV[-1]
+        minCond = para[7]
+        attractiveness = loveliness(gsEnergy, basCond, anzSigEV, minCond)
 
-        #    print('lowest eigen values (N): ', ewN[-4:])
-
-        try:
-            ewH, evH = eigh(hammat, normat)
-            idx = ewH.argsort()[::-1]
-            ewH = [eww for eww in ewH[idx]]
-            evH = evH[:, idx]
-
-        except:
-            print(
-                'failed to solve generalized eigenvalue problem (norm ev\'s < 0 ?)'
-            )
-            attractiveness = 0.
-            basCond = 0.
-            gsEnergy = 0.
-            ewH = []
-
-        if ewH != []:
-
-            anzSigEV = len(
-                [bvv for bvv in ewH if para[8][0] < bvv < para[8][1]])
-
-            gsEnergy = ewH[-1]
-
-            basCond = np.min(np.abs(ewN)) / np.max(np.abs(ewN))
-
-            minCond = para[7]
-
-            attractiveness = loveliness(gsEnergy, basCond, anzSigEV, minCond)
+        #        dim = int(np.sqrt(len(NormHam) * 0.5))
+        #
+        #        # read Norm and Hamilton matrices
+        #        normat = np.reshape(
+        #            np.array(NormHam[:dim**2]).astype(float), (dim, dim))
+        #        hammat = np.reshape(
+        #            np.array(NormHam[dim**2:]).astype(float), (dim, dim))
+        #        # diagonalize normalized norm (using "eigh(ermitian)" to speed-up the computation)
+        #        ewN, evN = eigh(normat)
+        #        idx = ewN.argsort()[::-1]
+        #        ewN = [eww for eww in ewN[idx]]
+        #        evN = evN[:, idx]
+        #
+        #        #    print('lowest eigen values (N): ', ewN[-4:])
+        #
+        #        try:
+        #            ewH, evH = eigh(hammat, normat)
+        #            idx = ewH.argsort()[::-1]
+        #            ewH = [eww for eww in ewH[idx]]
+        #            evH = evH[:, idx]
+        #
+        #        except:
+        #            print(
+        #                'failed to solve generalized eigenvalue problem (norm ev\'s < 0 ?)'
+        #            )
+        #            attractiveness = 0.
+        #            basCond = 0.
+        #            gsEnergy = 0.
+        #            ewH = []
+        #
+        #        if ewH != []:
+        #
+        #            anzSigEV = len(
+        #                [bvv for bvv in ewH if para[8][0] < bvv < para[8][1]])
+        #
+        #            gsEnergy = ewH[-1]
+        #
+        #            basCond = np.min(np.abs(ewN)) / np.max(np.abs(ewN))
+        #
+        #            minCond = para[7]
+        #
+        #            attractiveness = loveliness(gsEnergy, basCond, anzSigEV, minCond)
 
         os.system('rm -rf ./%s' % inenf)
         os.system('rm -rf ./%s' % outf)
         os.system('rm -rf ./%s' % maoutf)
+
+        #print('can props:  ', basCond, attractiveness, gsEnergy)
 
         send_end.send([basCond, attractiveness, gsEnergy, para[5], para[0]])
 
@@ -340,4 +319,4 @@ def endmat(para, send_end):
 
         print(para[5], child_id)
         print(maoutf)
-        send_end.send([0.0, 0.0, -42.7331, para[5], para[0]])
+        send_end.send([0.0, 0.0, 42.7331, para[5], para[0]])

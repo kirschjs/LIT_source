@@ -1,6 +1,6 @@
 import subprocess
 import multiprocessing
-import os, fnmatch, copy, struct, time, sys
+import os, fnmatch, copy, struct, time, sys, shutil
 import numpy as np
 import sympy as sy
 # CG(j1, m1, j2, m2, j3, m3)
@@ -23,6 +23,12 @@ def du(path):
     ).split()[0].decode('utf-8')
 
     return tmp
+
+
+def du2(path):
+    """ space in bytes, i.e. 400000000000 = 400GB"""
+    total, used, free = shutil.disk_usage(path)
+    return total, used, free
 
 
 def cartesian_coord(*arrays):
@@ -55,7 +61,7 @@ cal = [
 ]
 
 DC = True if time.tzname[0] == 'EST' else False
-MaxProc = 13  # int(len(os.sched_getaffinity(0)) / 1)
+MaxProc = int(len(os.sched_getaffinity(0)) / 1)
 
 orig_dir = os.getcwd()
 
@@ -65,6 +71,8 @@ if MPIRUN == '':
     MPIRUN = '/usr/lib64/mpich/bin/mpirun'
     print('<which mpirun> did not return a path.\n Checking default: %s' %
           MPIRUN)
+
+#MPIRUN += ' --oversubscribe'
 
 if os.path.isfile(MPIRUN) == False:
     print(
@@ -80,7 +88,8 @@ suffi = '/mul_helion/'
 litpath3He = pathbase + suffi
 respath = litpath3He + 'results/'
 
-homeQuota = 1000000
+totSpace, usedSpace, freeSpace = du2(pathbase)  # + '/')
+homeQuota = int(0.1 * totSpace)
 
 helionpath = litpath3He + 'he3/'
 

@@ -34,14 +34,14 @@ def span_initial_basis(
     he_iw = he_rw = he_frgs = ob_stru = lu_stru = sbas = []
 
     # minimal distance allowed for between width parameters
-    mindist_int = 0.001
+    mindisti = 0.3
 
     # lower bound for width parameters '=' IR cutoff (broadest state)
     rWmin = 0.0001
 
     # orbital-angular-momentum dependent upper bound '=' UV cutoff (narrowest state)
-    iLcutoff = [12., 4., 3.]
-    rLcutoff = [12., 4., 3.]
+    iLcutoff = [22., 7., 6.]
+    rLcutoff = [22., 7., 6.]
     if basisType == boundstatekanal:
         nwint = ini_dims[0]
         nwrel = ini_dims[1]
@@ -89,7 +89,7 @@ def span_initial_basis(
         lit_w[frg] = lit_w_tmp
 
         lit_w[frg] = [
-            ww for ww in sparse(lit_w[frg], mindist=mindist_int)
+            ww for ww in sparse(lit_w[frg], mindist=mindisti)
             if rWmin < ww < iLcutoff[int(
                 np.max([float(lfrags[frg][0]),
                         float(lfrags[frg][1])]))]
@@ -140,7 +140,7 @@ def span_initial_basis(
     widr = []
     for n in range(len(lit_w)):
         tmp = np.sort(lit_w[n])[::-1]
-        #tmp = sparse(tmp, mindist_int)
+        #tmp = sparse(tmp, mindisti)
         zer_per_ws = int(np.ceil(len(tmp) / bvma))
         bins = [0 for nmmm in range(zer_per_ws + 1)]
         bins[0] = 0
@@ -361,7 +361,7 @@ def span_initial_basis(
                 '(ecce) disk-usage-assessment failure. I will continue, aware of the increased crash risk!'
             )
         subprocess.run([
-            MPIRUN, '-np',
+            MPIRUN, '--oversubscribe', '-np',
             '%d' % anzproc, BINBDGpath + 'V18_PAR/mpi_quaf_v7'
         ])
         subprocess.run([BINBDGpath + 'V18_PAR/sammel'])
@@ -389,7 +389,7 @@ def span_initial_basis(
                     '(ecce) disk-usage-assessment failure. I will continue, aware of the increased crash risk!'
                 )
             subprocess.run([
-                MPIRUN, '-np',
+                MPIRUN, '--oversubscribe', '-np',
                 '%d' % anzproc, BINBDGpath + 'UIX_PAR/mpi_drqua_v7'
             ])
             subprocess.run([BINBDGpath + 'UIX_PAR/SAMMEL-uix'])
@@ -407,6 +407,7 @@ def span_initial_basis(
             subprocess.run([BINBDGpath + 'DR2END_NORMAL.exe'])
     suche_fehler()
 
+    subprocess.call('cp INEN inen_seed', shell=True)
     matout = np.core.records.fromfile('MATOUTB', formats='f8', offset=4)
 
     return matout
