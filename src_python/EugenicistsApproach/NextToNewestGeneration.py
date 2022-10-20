@@ -61,7 +61,7 @@ for streuka in streukas:
         break
 
 # ini_dims = [BS(int),BS(rel),SCATT(int),SCATT(rel)]
-init_dims = [8, 24, 12, 24]
+init_dims = [12, 24, 12, 24]
 
 # > optimize the various basis types, e.g., in case of the npp system:
 # > helion ground state, final J=1/2- and J=3/2- states
@@ -118,7 +118,7 @@ for bastype in bastypes:
     BDG3h = 8.482
     BDG3he = 7.72
     # get the initial, random basis seed to yield thresholds close to the reuslts in a complete basis
-    chThreshold = -5.51 if bastype == boundstatekanal else +0.2
+    chThreshold = -5.51 if bastype == boundstatekanal else -1.4
 
     CgfCycles = 1
     # nRaces := |i|
@@ -163,8 +163,8 @@ for bastype in bastypes:
 
             seedMat = span_initial_basis(basisType=bastype,
                                          ini_grid_bounds=[
-                                             0.2, 12.25, 0.001, 13.5, 0.006,
-                                             6.25, 0.0001, 8.5
+                                             0.2, 12.25, 0.001, 13.5, 0.06,
+                                             9.25, 0.0001, 8.5
                                          ],
                                          ini_dims=init_dims,
                                          coefstr=costr,
@@ -633,7 +633,7 @@ for bastype in bastypes:
                                   tnnii=tnni,
                                   jay=Jay)
 
-                    smartEV, parCond = smart_ev(seedMat, threshold=10**-7)
+                    smartEV, parCond = smart_ev(ma, threshold=10**-7)
                     anzSigEV = len([
                         bvv for bvv in smartEV
                         if denseEVinterval[0] < bvv < denseEVinterval[1]
@@ -899,13 +899,17 @@ for bastype in bastypes:
                       tnnii=tnni,
                       jay=Jay)
 
-        ewN, ewH = NormHamDiag(ma)
-
-        optLove, optCond = basQ(ewN, ewH, minCond, denseEVinterval)
+        smartEV, optCond = smart_ev(ma, threshold=10**-7)
+        anzSigEV = len([
+            bvv for bvv in smartEV
+            if denseEVinterval[0] < bvv < denseEVinterval[1]
+        ])
+        gsEnergy = smartEV[-1]
+        optLove = loveliness(gsEnergy, parCond, anzSigEV, minCond)
 
         print(
             '\n> basType %s > basSet %d/%d: optimized basis: C-nbr = %4.4e E0 = %4.4e fitness = %4.4e\n\n'
-            % (bastype, nB + 1, anzStreuBases, optCond, ewH[-1], optLove))
+            % (bastype, nB + 1, anzStreuBases, optCond, gsEnergy, optLove))
 
         # Output on tape; further processing via A3...py
         suf = 'ref' if bastype == boundstatekanal else 'fin'
