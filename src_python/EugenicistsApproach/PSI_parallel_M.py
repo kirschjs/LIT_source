@@ -34,7 +34,7 @@ def span_initial_basis(
     he_iw = he_rw = he_frgs = ob_stru = lu_stru = sbas = []
 
     # minimal distance allowed for between width parameters
-    mindisti = 0.3
+    mindisti = 0.2
 
     # lower bound for width parameters '=' IR cutoff (broadest state)
     rWmin = 0.0001
@@ -83,8 +83,10 @@ def span_initial_basis(
                          dtype=None))
 
         if nw[frg] != 1:
-            lit_w_tmp = np.sort([wd * np.random.random()
-                                 for wd in lit_w_tmp])[::-1]
+            lit_w_tmp = np.sort([
+                wd * 1.  #np.random.random()
+                for wd in lit_w_tmp
+            ])[::-1]
 
         lit_w[frg] = lit_w_tmp
 
@@ -117,8 +119,10 @@ def span_initial_basis(
         lit_w_tmp = offset * lit_w_tmp
 
         if nwr != 1:
-            lit_w_tmp = np.sort([wd * np.random.random()
-                                 for wd in lit_w_tmp])[::-1]
+            lit_w_tmp = np.sort([
+                wd * 1.  #np.random.random()
+                for wd in lit_w_tmp
+            ])[::-1]
 
         lit_rw_tmp = [
             ww for ww in np.abs(

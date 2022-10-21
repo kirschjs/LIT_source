@@ -154,7 +154,7 @@ phot_e_d = 1.0  #  delta E
 # basis ------------------------------------------------------------------
 
 # maximal number of basis vectors per calculation block (numerical parameter)
-bvma = 12
+bvma = 16
 
 # maximal number of radial Gauss widths for the expansion of the coordinate
 # between the two fragments which are associated with a basis vector (numerical

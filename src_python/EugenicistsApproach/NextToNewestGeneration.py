@@ -36,9 +36,9 @@ if arglist[1:] != []:
     bastypes = [boundstatekanal] if int(arglist[1]) < 0 else streukas
 else:
     # for manual operation
-    anzStreuBases = 4
+    anzStreuBases = 14
     StreuBases = np.arange(1, anzStreuBases + 1)
-    bastypes = [boundstatekanal] + streukas
+    bastypes = [boundstatekanal] + streukas  #
 
 if boundstatekanal in bastypes:
     if os.path.isdir(helionpath) != False:
@@ -60,12 +60,17 @@ for streuka in streukas:
                 ['mkdir', '-p', finalStatePath + 'basis_struct/'])
         break
 
-# ini_dims = [BS(int),BS(rel),SCATT(int),SCATT(rel)]
-init_dims = [12, 24, 12, 24]
-
 # > optimize the various basis types, e.g., in case of the npp system:
 # > helion ground state, final J=1/2- and J=3/2- states
 for bastype in bastypes:
+
+    # ini_dims = [BS(int),BS(rel),SCATT(int),SCATT(rel)]
+    init_dims = [8, 20, 8, 24]
+
+    # lower and upper bounds for the grids from which the initial seed state is taken
+    # 1-4: initial state, 1-2(jacobi1), 3-4(jacobi2)
+    # 5-8: final   states,5-6(jacobi1), 7-8(jacobi2)
+    ini_grid_bnds = [0.2, 19.25, 0.001, 18.5, 0.01, 19.25, 0.001, 18.5]
 
     Jay = float(bastype.split('^')[0][-3:])
     Jaystring = '%s' % str(Jay)[:3]
@@ -118,13 +123,13 @@ for bastype in bastypes:
     BDG3h = 8.482
     BDG3he = 7.72
     # get the initial, random basis seed to yield thresholds close to the reuslts in a complete basis
-    chThreshold = -5.51 if bastype == boundstatekanal else -1.4
+    chThreshold = -6.51 if bastype == boundstatekanal else -1.6
 
-    CgfCycles = 1
+    CgfCycles = 2
     # nRaces := |i|
-    nRaces = 1 if bastype == boundstatekanal else 2
+    nRaces = 1 if bastype == boundstatekanal else 3
 
-    cradleCapacity = 7
+    cradleCapacity = 6
 
     # > nState > produce/optimize/grow multiple bases with pseudo-random initial seeds
     for nB in range(anzStreuBases):
@@ -162,10 +167,7 @@ for bastype in bastypes:
             # ini_grid_bnds = [bs_int_low,bs_int_up,bs_rel_low,bs_rel_up,SC_int_low,SC_int_up,SC_rel_low,SC_rel_up]
 
             seedMat = span_initial_basis(basisType=bastype,
-                                         ini_grid_bounds=[
-                                             0.2, 12.25, 0.001, 13.5, 0.06,
-                                             9.25, 0.0001, 8.5
-                                         ],
+                                         ini_grid_bounds=ini_grid_bnds,
                                          ini_dims=init_dims,
                                          coefstr=costr,
                                          anzOp=zop)
@@ -175,7 +177,7 @@ for bastype in bastypes:
                 f"%d-Seed basis generation in {np.abs(t0 - t1):0.4f} seconds."
                 % seed_attempts)
 
-            smartEV, basCond = smart_ev(seedMat, threshold=10**-7)
+            smartEV, basCond = smart_ev(seedMat, threshold=10**-9)
             # > nState > nBasis > stabilize the seed basis
             goPurge = True if (basCond < minCond) else False
 
@@ -246,7 +248,7 @@ for bastype in bastypes:
 
             #print('\n\nSeed Basis (naive):\n\n', initialCiv)
 
-            initialCiv = condense_basis(initialCiv, MaxBVsPERcfg=10)
+            initialCiv = condense_basis(initialCiv, MaxBVsPERcfg=bvma)
 
             #print('\n\nSeed Basis (condensed):\n\n', initialCiv, '\n\n')
 
@@ -422,7 +424,7 @@ for bastype in bastypes:
                           tnnii=tnni,
                           jay=Jay)
 
-            smartEV, parCond = smart_ev(ma, threshold=10**-7)
+            smartEV, parCond = smart_ev(ma, threshold=10**-9)
 
             gsEnergy = smartEV[-1]
 
@@ -633,7 +635,7 @@ for bastype in bastypes:
                                   tnnii=tnni,
                                   jay=Jay)
 
-                    smartEV, parCond = smart_ev(ma, threshold=10**-7)
+                    smartEV, parCond = smart_ev(ma, threshold=10**-9)
                     anzSigEV = len([
                         bvv for bvv in smartEV
                         if denseEVinterval[0] < bvv < denseEVinterval[1]
@@ -899,7 +901,7 @@ for bastype in bastypes:
                       tnnii=tnni,
                       jay=Jay)
 
-        smartEV, optCond = smart_ev(ma, threshold=10**-7)
+        smartEV, optCond = smart_ev(ma, threshold=10**-9)
         anzSigEV = len([
             bvv for bvv in smartEV
             if denseEVinterval[0] < bvv < denseEVinterval[1]
